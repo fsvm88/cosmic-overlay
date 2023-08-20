@@ -26,6 +26,7 @@ fi
 LICENSE="0BSD Apache-2.0 Apache-2.0-with-LLVM-exceptions Artistic-2 BSD BSD-2 Boost-1.0 CC0-1.0 GPL-3 GPL-3+ ISC MIT MPL-2.0 OFL-1.1 Unicode-DFS-2016 Unlicense ZLIB"
 SLOT="0"
 KEYWORDS="~amd64"
+IUSE="max-opt"
 
 DEPEND=""
 RDEPEND="${DEPEND}"
@@ -35,6 +36,9 @@ virtual/libudev
 virtual/pkgconfig
 >=virtual/rust-1.71.0
 "
+
+REQUIRED_USE="debug? ( !max-opt )
+max-opt? ( !debug )"
 
 # rust does not use *FLAGS from make.conf, silence portage warning
 # update with proper path to binaries this crate installs, omit leading /
@@ -49,10 +53,36 @@ src_unpack() {
         fi
 }
 
+src_prepare() {
+        default
+        if use max-opt ; then
+                {
+                        cat <<'EOF'
+[profile.release-maximum-optimization]
+inherits = "release"
+debug = "line-tables-only"
+debug-assertions = false
+codegen-units = 1
+incremental = false
+lto = "thin"
+opt-level = 3
+overflow-checks = false
+panic = "unwind"
+EOF
+                } >> Cargo.toml
+        fi
+}
+
+src_configure() {
+        profile_name="release"
+        use debug && profile_name="debug"
+        use max-opt && profile_name="release-maximum-optimization"
+}
+
 src_compile() {
-        make || die
+        cargo build --profile "${profile_name}" || die
 }
 
 src_install() {
-        make install prefix=/usr DESTDIR="${D}" || die
+        make install prefix=/usr DESTDIR="${D}" TARGET="${profile_name}" || die
 }

@@ -27,6 +27,7 @@ fi
 LICENSE="0BSD Apache-2.0 Apache-2.0-with-LLVM-exceptions Artistic-2 BSD BSD-2 Boost-1.0 CC0-1.0 GPL-3 GPL-3+ ISC MIT MPL-2.0 OFL-1.1 Unicode-DFS-2016 Unlicense ZLIB"
 SLOT="0"
 KEYWORDS="~amd64"
+IUSE="max-opt"
 
 DEPEND=""
 RDEPEND="${DEPEND}"
@@ -39,6 +40,9 @@ virtual/pkgconfig
 >=virtual/rust-1.71.0
 x11-libs/libxkbcommon
 "
+
+REQUIRED_USE="debug? ( !max-opt )
+max-opt? ( !debug )"
 
 # rust does not use *FLAGS from make.conf, silence portage warning
 # update with proper path to binaries this crate installs, omit leading /
@@ -53,10 +57,46 @@ src_unpack() {
         fi
 }
 
+src_prepare() {
+        default
+        if use max-opt ; then
+                {
+                        cat <<'EOF'
+[profile.release-maximum-optimization]
+inherits = "release"
+debug = "line-tables-only"
+debug-assertions = false
+codegen-units = 1
+incremental = false
+lto = "thin"
+opt-level = 3
+overflow-checks = false
+panic = "unwind"
+EOF
+                } >> Cargo.toml
+        fi
+        # Allow configurable profile name for output folder for _install_bin (debug, release-maximum-optimization)
+        # This will need to be passed later
+        sed -i 's,^bin-src.*,bin-src \:= "target" / profile_name / name,' justfile
+        # This is required to allow the change above to take place
+        sed -i '1i profile_name := "release"' justfile
+}
+
 src_compile() {
-        just build-release || die
+        if use max-opt ; then
+                cargo build --profile release-maximum-optimization || die
+        else
+                if use debug; then
+                        just build-debug || die
+                else
+                        just build-release || die
+                fi
+        fi
 }
 
 src_install() {
-        just --set rootdir "${D}" install || die
+        profile_name="release"
+        use debug && profile_name="debug"
+        use max-opt && profile_name="release-maximum-optimization"
+        just --set rootdir "${D}" --set profile_name "${profile_name}" install || die
 }
