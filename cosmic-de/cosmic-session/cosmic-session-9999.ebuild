@@ -38,7 +38,7 @@ cosmic-de/cosmic-osd
 cosmic-de/cosmic-panel
 cosmic-de/cosmic-settings
 cosmic-de/cosmic-settings-daemon
-cosmic-de/cosmic-workspaces
+cosmic-de/cosmic-workspaces-epoch
 cosmic-de/xdg-desktop-portal-cosmic
 "
 RDEPEND="${DEPEND}"
