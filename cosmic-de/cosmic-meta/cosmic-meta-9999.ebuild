@@ -16,6 +16,7 @@ IUSE=""
 
 RDEPEND="
 =cosmic-de/cosmic-applets-9999
+=cosmic-de/cosmic-applibrary-9999
 =cosmic-de/cosmic-bg-9999
 =cosmic-de/cosmic-comp-9999
 =cosmic-de/cosmic-icons-9999
