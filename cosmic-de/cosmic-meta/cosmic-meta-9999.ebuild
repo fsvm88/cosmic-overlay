@@ -29,5 +29,6 @@ RDEPEND="
 =cosmic-de/cosmic-settings-daemon-9999
 =cosmic-de/cosmic-text-editor-9999
 =cosmic-de/cosmic-workspaces-epoch-9999
+=cosmic-de/pop-theme-meta-9999
 =cosmic-de/xdg-desktop-portal-cosmic-9999
 "

@@ -96,4 +96,6 @@ src_compile() {
 
 src_install() {
         make install DESTDIR="${D}" TARGET="${profile_name}" || die
+		insinto /etc/cosmic-comp
+		newins config.ron config.ron
 }

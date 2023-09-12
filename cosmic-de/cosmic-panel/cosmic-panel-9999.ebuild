@@ -92,6 +92,8 @@ src_compile() {
 }
 
 src_install() {
+		insinto /etc/cosmic-panel
+		newins cosmic-panel-config/config.ron config.ron
         profile_name="release"
         use debug && profile_name="debug"
         use max-opt && profile_name="release-maximum-optimization"
