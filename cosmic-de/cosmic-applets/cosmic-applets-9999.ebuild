@@ -83,11 +83,6 @@ panic = "unwind"
 EOF
                 } >> Cargo.toml
         fi
-        # Allow configurable profile name for output folder for _install_bin (debug, release-maximum-optimization)
-        # This will need to be passed later
-        sed -i 's:target/release/:target/{{profile_name}}/:' justfile
-        # This is required to allow the change above to take place
-        sed -i '1i profile_name := "release"' justfile
 }
 
 src_compile() {
@@ -106,5 +101,5 @@ src_install() {
         profile_name="release"
         use debug && profile_name="debug"
         use max-opt && profile_name="release-maximum-optimization"
-        just --set rootdir "${D}" --set profile_name "${profile_name}" install || die
+        just --set rootdir "${D}" --set target "${profile_name}" install || die
 }
