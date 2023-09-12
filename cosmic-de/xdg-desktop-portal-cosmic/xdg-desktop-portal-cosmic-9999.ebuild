@@ -48,7 +48,8 @@ src_unpack() {
 }
 
 src_install() {
-	dobin target/release/xdg-desktop-portal-cosmic
+	exeinto /usr/libexec
+	doexe target/release/xdg-desktop-portal-cosmic
 
 	insinto /usr/share/dbus-1/services
 	doins data/org.freedesktop.impl.portal.desktop.cosmic.service
