@@ -33,7 +33,7 @@ RDEPEND="${DEPEND}"
 BDEPEND="
 dev-libs/appstream
 dev-util/intltool
-sys-devel/just
+dev-build/just
 virtual/pkgconfig
 >=virtual/rust-1.71.0
 x11-libs/libxkbcommon"

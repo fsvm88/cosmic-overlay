@@ -34,7 +34,7 @@ RDEPEND="${DEPEND}"
 BDEPEND="dev-libs/expat
 media-libs/fontconfig
 media-libs/freetype
-sys-devel/just
+dev-build/just
 sys-devel/lld
 virtual/pkgconfig
 >=virtual/rust-1.71.0

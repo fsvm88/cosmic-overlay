@@ -30,7 +30,7 @@ IUSE="max-opt"
 
 DEPEND=""
 RDEPEND="${DEPEND}"
-BDEPEND="sys-devel/make
+BDEPEND="dev-build/make
 virtual/pkgconfig
 virtual/libudev
 >=virtual/rust-1.71.0

@@ -36,13 +36,13 @@ media-libs/mesa"
 RDEPEND="${DEPEND}"
 BDEPEND="dev-libs/libinput
 dev-libs/wayland
-dev-util/cmake
+dev-build/cmake
 media-libs/fontconfig
 media-libs/libglvnd
 media-libs/mesa
 sys-apps/systemd
 sys-auth/seatd
-sys-devel/make
+dev-build/make
 virtual/libudev
 >=virtual/rust-1.71.0
 x11-libs/libxcb

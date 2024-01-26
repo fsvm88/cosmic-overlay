@@ -21,7 +21,7 @@ IUSE=""
 #RDEPEND=""
 #DEPEND="${RDEPEND}"
 BDEPEND="
-dev-util/meson
-dev-util/ninja
+dev-build/meson
+dev-build/ninja
 "
 

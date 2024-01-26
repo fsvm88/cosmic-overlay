@@ -31,7 +31,7 @@ IUSE="max-opt"
 DEPEND=""
 RDEPEND="${DEPEND}"
 BDEPEND="
-sys-devel/make
+dev-build/make
 virtual/libudev
 virtual/pkgconfig
 >=virtual/rust-1.71.0
@@ -58,6 +58,7 @@ src_prepare() {
         if use max-opt ; then
                 {
                         cat <<'EOF'
+
 [profile.release-maximum-optimization]
 inherits = "release"
 debug = "line-tables-only"

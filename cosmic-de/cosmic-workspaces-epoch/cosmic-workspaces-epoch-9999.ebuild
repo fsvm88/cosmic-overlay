@@ -33,7 +33,7 @@ RDEPEND="${DEPEND}"
 BDEPEND="
 media-libs/libglvnd
 media-libs/mesa
-sys-devel/make
+dev-build/make
 virtual/libudev
 >=virtual/rust-1.71.0
 x11-libs/libxkbcommon

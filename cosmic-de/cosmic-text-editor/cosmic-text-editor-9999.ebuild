@@ -86,30 +86,34 @@ src_compile() {
 }
 
 src_install() {
-	debug-print-function ${FUNCNAME} "$@"
-
-	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
-		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
-
-	set -- cargo install --path ./ \
-		--root "${ED}/usr" \
-		${GIT_CRATES[@]:+--frozen} \
-		--profile "${profile_name}" \
-		${ECARGO_ARGS[@]} "$@"
-	einfo "${@}"
-	"${@}" || die "cargo install failed"
-
-	rm -f "${ED}/usr/.crates.toml" || die
-	rm -f "${ED}/usr/.crates2.json" || die
-
-	# it turned out to be non-standard dir, so get rid of it future EAPI
-	# and only run for EAPI=7
-	# https://bugs.gentoo.org/715890
-	case ${EAPI:-0} in
-		7)
-		if [ -d "${S}/man" ]; then
-			doman "${S}/man" || return 0
-		fi
-		;;
-	esac
+	cargo_src_install --profile "${profile_name}"
 }
+
+#src_install() {
+#	debug-print-function ${FUNCNAME} "$@"
+#
+#	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
+#		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
+#
+#	set -- cargo install --path ./ \
+#		--root "${ED}/usr" \
+#		${GIT_CRATES[@]:+--frozen} \
+#		--profile "${profile_name}" \
+#		${ECARGO_ARGS[@]} "$@"
+#	einfo "${@}"
+#	"${@}" || die "cargo install failed"
+#
+#	rm -f "${ED}/usr/.crates.toml" || die
+#	rm -f "${ED}/usr/.crates2.json" || die
+#
+#	# it turned out to be non-standard dir, so get rid of it future EAPI
+#	# and only run for EAPI=7
+#	# https://bugs.gentoo.org/715890
+#	case ${EAPI:-0} in
+#		7)
+#		if [ -d "${S}/man" ]; then
+#			doman "${S}/man" || return 0
+#		fi
+#		;;
+#	esac
+#}

@@ -42,7 +42,7 @@ cosmic-de/cosmic-workspaces-epoch
 cosmic-de/xdg-desktop-portal-cosmic
 "
 RDEPEND="${DEPEND}"
-BDEPEND="sys-devel/just
+BDEPEND="dev-build/just
 >=virtual/rust-1.71.0"
 
 REQUIRED_USE="debug? ( !max-opt )

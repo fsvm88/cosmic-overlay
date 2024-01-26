@@ -39,10 +39,10 @@ DEPEND=""
 RDEPEND="${DEPEND}"
 BDEPEND="
 	>=dev-libs/expat-2.5.0
-	>=dev-util/cmake-3.26.5-r1
+	>=dev-build/cmake-3.26.5-r1
 	>=media-libs/fontconfig-2.14.2-r2
 	>=media-libs/freetype-2.13.0
-	>=sys-devel/just-1.14.0
+	>=dev-build/just-1.14.0
 	>=virtual/pkgconfig-2-r1
 	>=virtual/rust-1.71.0
 "

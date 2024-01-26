@@ -31,7 +31,7 @@ IUSE="max-opt"
 DEPEND=""
 RDEPEND="${DEPEND}"
 BDEPEND="dev-libs/wayland
-sys-devel/just
+dev-build/just
 virtual/pkgconfig
 >=virtual/rust-1.71.0
 x11-libs/libxkbcommon"

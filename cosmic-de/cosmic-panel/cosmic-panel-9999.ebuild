@@ -33,7 +33,7 @@ DEPEND=""
 RDEPEND="${DEPEND}"
 BDEPEND="dev-libs/wayland
 dev-util/desktop-file-utils
-sys-devel/just
+dev-build/just
 virtual/pkgconfig
 >=virtual/rust-1.71.0
 x11-libs/libxkbcommon"
@@ -59,6 +59,7 @@ src_prepare() {
         if use max-opt ; then
                 {
                         cat <<'EOF'
+
 [profile.release-maximum-optimization]
 inherits = "release"
 debug = "line-tables-only"

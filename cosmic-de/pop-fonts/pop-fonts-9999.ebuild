@@ -19,4 +19,4 @@ IUSE=""
 
 #RDEPEND=""
 #DEPEND="${RDEPEND}"
-BDEPEND="sys-devel/make"
+BDEPEND="dev-build/make"
