@@ -1,0 +1,11 @@
+BDEPEND=dev-build/make >=dev-vcs/git-1.8.2.1[curl]
+DEFINED_PHASES=unpack
+DESCRIPTION=PopOS fonts for COSMIC DE
+EAPI=8
+HOMEPAGE=https://github.com/pop-os/fonts
+INHERIT=git-r3
+KEYWORDS=~amd64
+PROPERTIES=live
+SLOT=0
+_eclasses_=git-r3	86fa1f157b70b9d2ff340c4633b1cf4b
+_md5_=95e6b078d834ce8e9d210a8f29102dd0
