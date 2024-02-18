@@ -7,14 +7,14 @@ EAPI=8
 
 inherit cargo
 
-DESCRIPTION="text editor from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-text-editor"
+DESCRIPTION="app store from COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-store"
 
-if [ ${PV} == "9999" ] ; then
-    inherit git-r3
-    EGIT_REPO_URI="${HOMEPAGE}"
+if [ "${PV}" == "9999" ] ; then
+	inherit git-r3
+	EGIT_REPO_URI="${HOMEPAGE}"
 else
-    SRC_URI="https://github.com/${PN}/${PN}/archive/refs/tags/v${MY_PV}.tar.gz -> ${P}.tar.gz
+	SRC_URI="https://github.com/${PN}/${PN}/archive/refs/tags/v${MY_PV}.tar.gz -> ${P}.tar.gz
 			$(cargo_crate_uris)"
 fi
 
@@ -25,9 +25,9 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE="max-opt"
 
-DEPEND=""
+DEPEND=">=sys-apps/flatpak-1.14.4-r3"
 RDEPEND="${DEPEND}"
-BDEPEND=">=virtual/rust-1.71.0"
+BDEPEND=">=virtual/rust-1.75.0"
 
 REQUIRED_USE="debug? ( !max-opt )
 max-opt? ( !debug )"
@@ -46,10 +46,11 @@ src_unpack() {
 }
 
 src_prepare() {
-        default
-        if use max-opt ; then
-                {
-                        cat <<'EOF'
+	default
+	if use max-opt ; then
+		{
+		cat <<'EOF'
+
 [profile.release-maximum-optimization]
 inherits = "release"
 debug = "line-tables-only"
@@ -61,18 +62,24 @@ opt-level = 3
 overflow-checks = false
 panic = "unwind"
 EOF
-                } >> Cargo.toml
-        fi
+		} >> Cargo.toml
+	fi
+	# Allow configurable profile name for output folder for _install_bin (debug, release-maximum-optimization)
+	# This will need to be passed later
+	sed -i 's,^bin-src.*,bin-src \:= "target" / profile_name / name,' justfile
+	# This is required to allow the change above to take place
+	sed -i '1i profile_name := "release"' justfile
 }
 
 src_configure() {
-        profile_name="release"
-        use debug && profile_name="debug"
-        use max-opt && profile_name="release-maximum-optimization"
+	profile_name="release"
+	use debug && profile_name="debug"
+	use max-opt && profile_name="release-maximum-optimization"
 }
 
+# need to override these, because they ship with '--release', which conflicts with '--profile ...'
 src_compile() {
-	debug-print-function ${FUNCNAME} "$@"
+	debug-print-function "${FUNCNAME}" "$@"
 
 	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
 		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
@@ -80,13 +87,27 @@ src_compile() {
 	filter-lto
 	tc-export AR CC CXX PKG_CONFIG
 
-	set -- cargo build --profile "${profile_name}" ${ECARGO_ARGS[@]} "$@"
+	set -- cargo build --profile "${profile_name}" "${ECARGO_ARGS[@]}" "$@"
 	einfo "${@}"
 	"${@}" || die "cargo build failed"
 }
 
+src_test() {
+	debug-print-function "${FUNCNAME}" "$@"
+
+	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
+		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
+
+	set -- cargo test --profile "${profile_name}" "${ECARGO_ARGS[@]}" "$@"
+	einfo "${@}"
+	"${@}" || die "cargo test failed"
+}
+
 src_install() {
-	cargo_src_install --profile "${profile_name}"
+	profile_name="release"
+	use debug && profile_name="debug"
+	use max-opt && profile_name="release-maximum-optimization"
+	just --set rootdir "${D}" --set profile_name "${profile_name}" install || die
 }
 
 #src_install() {

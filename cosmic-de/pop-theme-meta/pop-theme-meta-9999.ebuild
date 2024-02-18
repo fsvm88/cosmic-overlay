@@ -10,7 +10,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE=""
 RDEPEND="
-cosmic-de/pop-fonts
-cosmic-de/pop-gtk-theme
-cosmic-de/pop-icon-theme
+=cosmic-de/pop-fonts-${PV}
+=cosmic-de/pop-gtk-theme-${PV}
+=cosmic-de/pop-icon-theme-${PV}
 "

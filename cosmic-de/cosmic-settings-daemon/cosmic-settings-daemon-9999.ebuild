@@ -11,7 +11,7 @@ inherit cargo
 DESCRIPTION="settings daemon for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings-daemon"
 
-if [ ${PV} == "9999" ] ; then
+if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 else
@@ -34,7 +34,7 @@ BDEPEND="
 dev-build/make
 virtual/libudev
 virtual/pkgconfig
->=virtual/rust-1.71.0
+>=virtual/rust-1.75.0
 "
 
 REQUIRED_USE="debug? ( !max-opt )
@@ -45,19 +45,19 @@ max-opt? ( !debug )"
 QA_FLAGS_IGNORED="usr/bin/${PN}"
 
 src_unpack() {
-        if [[ "${PV}" == *9999* ]]; then
-                git-r3_src_unpack
-                cargo_live_src_unpack
-        else
-                cargo_src_unpack
-        fi
+	if [[ "${PV}" == *9999* ]]; then
+		git-r3_src_unpack
+		cargo_live_src_unpack
+	else
+		cargo_src_unpack
+	fi
 }
 
 src_prepare() {
-        default
-        if use max-opt ; then
-                {
-                        cat <<'EOF'
+	default
+	if use max-opt ; then
+		{
+		cat <<'EOF'
 
 [profile.release-maximum-optimization]
 inherits = "release"
@@ -70,20 +70,20 @@ opt-level = 3
 overflow-checks = false
 panic = "unwind"
 EOF
-                } >> Cargo.toml
-        fi
+		} >> Cargo.toml
+	fi
 }
 
 src_configure() {
-        profile_name="release"
-        use debug && profile_name="debug"
-        use max-opt && profile_name="release-maximum-optimization"
+	profile_name="release"
+	use debug && profile_name="debug"
+	use max-opt && profile_name="release-maximum-optimization"
 }
 
 src_compile() {
-        cargo build --profile "${profile_name}" || die
+	cargo build --profile "${profile_name}" || die
 }
 
 src_install() {
-        make install prefix=/usr DESTDIR="${D}" TARGET="${profile_name}" || die
+	make install prefix=/usr DESTDIR="${D}" TARGET="${profile_name}" || die
 }

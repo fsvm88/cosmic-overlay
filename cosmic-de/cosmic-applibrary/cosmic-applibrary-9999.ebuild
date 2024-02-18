@@ -11,7 +11,7 @@ inherit cargo
 DESCRIPTION="app library for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-applibrary"
 
-if [ ${PV} == "9999" ] ; then
+if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 else
@@ -28,13 +28,16 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE="max-opt"
 
+# As per https://raw.githubusercontent.com/pop-os/cosmic-applibrary/master/debian/control
 DEPEND=""
 RDEPEND="${DEPEND}"
 BDEPEND="
 dev-build/just
+dev-libs/wayland
 virtual/pkgconfig
->=virtual/rust-1.71.0
-x11-libs/libxkbcommon"
+>=virtual/rust-1.75.0
+x11-libs/libxkbcommon
+"
 
 REQUIRED_USE="debug? ( !max-opt )
 max-opt? ( !debug )"
@@ -45,19 +48,20 @@ QA_FLAGS_IGNORED="usr/bin/cosmic-app-library
 "
 
 src_unpack() {
-        if [[ "${PV}" == *9999* ]]; then
-                git-r3_src_unpack
-                cargo_live_src_unpack
-        else
-                cargo_src_unpack
-        fi
+	if [[ "${PV}" == *9999* ]]; then
+		git-r3_src_unpack
+		cargo_live_src_unpack
+	else
+		cargo_src_unpack
+	fi
 }
 
 src_prepare() {
-        default
-        if use max-opt ; then
-                {
-                        cat <<'EOF'
+	default
+	if use max-opt ; then
+		{
+		cat <<'EOF'
+
 [profile.release-maximum-optimization]
 inherits = "release"
 debug = "line-tables-only"
@@ -69,30 +73,30 @@ opt-level = 3
 overflow-checks = false
 panic = "unwind"
 EOF
-                } >> Cargo.toml
-        fi
-        # Allow configurable profile name for output folder for _install_bin (debug, release-maximum-optimization)
-        # This will need to be passed later
-        sed -i 's,^bin-src.*,bin-src \:= "target" / profile_name / name,' justfile
-        # This is required to allow the change above to take place
-        sed -i '1i profile_name := "release"' justfile
+		} >> Cargo.toml
+	fi
+	# Allow configurable profile name for output folder for _install_bin (debug, release-maximum-optimization)
+	# This will need to be passed later
+	sed -i 's,^bin-src.*,bin-src \:= "target" / profile_name / name,' justfile
+	# This is required to allow the change above to take place
+	sed -i '1i profile_name := "release"' justfile
 }
 
 src_compile() {
-        if use max-opt ; then
-                cargo build --profile release-maximum-optimization || die
-        else
-                if use debug; then
-                        just build-debug || die
-                else
-                        just build-release || die
-                fi
-        fi
+	if use max-opt ; then
+		cargo build --profile release-maximum-optimization || die
+	else
+		if use debug; then
+			just build-debug || die
+		else
+			just build-release || die
+		fi
+	fi
 }
 
 src_install() {
-        profile_name="release"
-        use debug && profile_name="debug"
-        use max-opt && profile_name="release-maximum-optimization"
-        just --set rootdir "${D}" --set profile_name "${profile_name}" install || die
+	profile_name="release"
+	use debug && profile_name="debug"
+	use max-opt && profile_name="release-maximum-optimization"
+	just --set rootdir "${D}" --set profile_name "${profile_name}" install || die
 }

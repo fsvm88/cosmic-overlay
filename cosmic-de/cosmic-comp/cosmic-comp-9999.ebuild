@@ -13,7 +13,7 @@ DESCRIPTION="compositor for COSMIC DE"
 # does not provide this value so instead repository is used
 HOMEPAGE="https://github.com/pop-os/cosmic-comp"
 
-if [ ${PV} == "9999" ] ; then
+if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 else
@@ -30,23 +30,27 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE="max-opt"
 
-DEPEND="dev-libs/wayland
-media-libs/libglvnd
-media-libs/mesa"
-RDEPEND="${DEPEND}"
-BDEPEND="dev-libs/libinput
+DEPEND="
 dev-libs/wayland
+media-libs/libglvnd
+media-libs/mesa
+"
+RDEPEND="${DEPEND}"
+BDEPEND="
 dev-build/cmake
+dev-build/make
+dev-libs/libinput
+dev-libs/wayland
 media-libs/fontconfig
 media-libs/libglvnd
 media-libs/mesa
 sys-apps/systemd
 sys-auth/seatd
-dev-build/make
 virtual/libudev
->=virtual/rust-1.71.0
-x11-libs/libxcb
-x11-libs/libxkbcommon"
+>=virtual/rust-1.75.0
+11-libs/libxcb
+x11-libs/libxkbcommon
+"
 
 REQUIRED_USE="debug? ( !max-opt )
 max-opt? ( !debug )"
@@ -56,19 +60,20 @@ max-opt? ( !debug )"
 QA_FLAGS_IGNORED="usr/bin/${PN}"
 
 src_unpack() {
-        if [[ "${PV}" == *9999* ]]; then
-                git-r3_src_unpack
-                cargo_live_src_unpack
-        else
-                cargo_src_unpack
-        fi
+	if [[ "${PV}" == *9999* ]]; then
+		git-r3_src_unpack
+		cargo_live_src_unpack
+	else
+		cargo_src_unpack
+	fi
 }
 
 src_prepare() {
-        default
-        if use max-opt ; then
-                {
-                        cat <<'EOF'
+	default
+	if use max-opt ; then
+		{
+		cat <<'EOF'
+
 [profile.release-maximum-optimization]
 inherits = "release"
 debug = "line-tables-only"
@@ -80,22 +85,22 @@ opt-level = 3
 overflow-checks = false
 panic = "unwind"
 EOF
-                } >> Cargo.toml
-        fi
+		} >> Cargo.toml
+	fi
 }
 
 src_configure() {
-        profile_name="release"
-        use debug && profile_name="debug"
-        use max-opt && profile_name="release-maximum-optimization"
+	profile_name="release"
+	use debug && profile_name="debug"
+	use max-opt && profile_name="release-maximum-optimization"
 }
 
 src_compile() {
-        cargo build --profile "${profile_name}" || die
+	cargo build --profile "${profile_name}" || die
 }
 
 src_install() {
-        make install DESTDIR="${D}" TARGET="${profile_name}" || die
-		insinto /etc/cosmic-comp
-		newins config.ron config.ron
+	make install DESTDIR="${D}" TARGET="${profile_name}" || die
+	insinto /etc/cosmic-comp
+	newins config.ron config.ron
 }

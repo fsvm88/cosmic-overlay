@@ -13,7 +13,7 @@ inherit cargo
 DESCRIPTION="A platform toolkit based on iced for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/libcosmic"
 
-if [ ${PV} == "9999" ] ; then
+if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 else
@@ -38,13 +38,13 @@ REQUIRED_USE="
 DEPEND=""
 RDEPEND="${DEPEND}"
 BDEPEND="
-	>=dev-libs/expat-2.5.0
-	>=dev-build/cmake-3.26.5-r1
-	>=media-libs/fontconfig-2.14.2-r2
-	>=media-libs/freetype-2.13.0
-	>=dev-build/just-1.14.0
-	>=virtual/pkgconfig-2-r1
-	>=virtual/rust-1.71.0
+>=dev-libs/expat-2.5.0
+>=dev-build/cmake-3.26.5-r1
+>=media-libs/fontconfig-2.14.2-r2
+>=media-libs/freetype-2.13.0
+>=dev-build/just-1.14.0
+>=virtual/pkgconfig-2-r1
+>=virtual/rust-1.75.0
 "
 
 # rust does not use *FLAGS from make.conf, silence portage warning
@@ -83,7 +83,7 @@ src_compile() {
 	filter-lto
 	tc-export AR CC CXX PKG_CONFIG
 
-	set -- cargo rustc $(usex debug "" --release) --crate-type dylib ${ECARGO_ARGS[@]} -- -C prefer-dynamic=on
+	set -- cargo rustc $(usex debug "" --release) --crate-type dylib "${ECARGO_ARGS[@]}" -- -C prefer-dynamic=on
 	einfo "${@}"
 	"${@}" || die "cargo build failed"
 }

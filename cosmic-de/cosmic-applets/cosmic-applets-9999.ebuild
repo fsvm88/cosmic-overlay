@@ -11,14 +11,14 @@ inherit cargo
 DESCRIPTION="applets for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-applets"
 
-if [ ${PV} == "9999" ] ; then
+if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
 				$(cargo_crate_uris)
-"
+	"
 fi
 
 # License set may be more restrictive as OR is not respected
@@ -28,15 +28,22 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE="max-opt"
 
-DEPEND="cosmic-de/cosmic-icons"
+# As per https://raw.githubusercontent.com/pop-os/cosmic-applets/master/debian/control
+DEPEND="
+cosmic-de/cosmic-icons
+"
 RDEPEND="${DEPEND}"
-BDEPEND="sys-apps/dbus
+BDEPEND="
+dev-build/just
+dev-libs/wayland
 media-libs/libglvnd
 media-libs/libpulse
-dev-build/just
+sys-apps/dbus
 virtual/pkgconfig
->=virtual/rust-1.71.0
-x11-libs/libxkbcommon"
+>=virtual/rust-1.75.0
+virtual/libudev
+x11-libs/libxkbcommon
+"
 
 REQUIRED_USE="debug? ( !max-opt )
 max-opt? ( !debug )"
@@ -57,19 +64,20 @@ usr/bin/cosmic-panel-button
 "
 
 src_unpack() {
-        if [[ "${PV}" == *9999* ]]; then
-                git-r3_src_unpack
-                cargo_live_src_unpack
-        else
-                cargo_src_unpack
-        fi
+	if [[ "${PV}" == *9999* ]]; then
+		git-r3_src_unpack
+		cargo_live_src_unpack
+	else
+		cargo_src_unpack
+	fi
 }
 
 src_prepare() {
-        default
-        if use max-opt ; then
-                {
-                        cat <<'EOF'
+	default
+	if use max-opt ; then
+		{
+		cat <<'EOF'
+
 [profile.release-maximum-optimization]
 inherits = "release"
 debug = "line-tables-only"
@@ -81,25 +89,25 @@ opt-level = 3
 overflow-checks = false
 panic = "unwind"
 EOF
-                } >> Cargo.toml
-        fi
+		} >> Cargo.toml
+	fi
 }
 
 src_compile() {
-        if use max-opt ; then
-                cargo build --profile release-maximum-optimization || die
-        else
-                if use debug; then
-                        just build-debug || die
-                else
-                        just build-release || die
-                fi
-        fi
+	if use max-opt ; then
+		cargo build --profile release-maximum-optimization || die
+	else
+		if use debug; then
+			just build-debug || die
+		else
+			just build-release || die
+		fi
+	fi
 }
 
 src_install() {
-        profile_name="release"
-        use debug && profile_name="debug"
-        use max-opt && profile_name="release-maximum-optimization"
-        just --set rootdir "${D}" --set target "${profile_name}" install || die
+	profile_name="release"
+	use debug && profile_name="debug"
+	use max-opt && profile_name="release-maximum-optimization"
+	just --set rootdir "${D}" --set target "${profile_name}" install || die
 }

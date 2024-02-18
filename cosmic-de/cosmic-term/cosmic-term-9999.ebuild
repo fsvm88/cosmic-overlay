@@ -5,20 +5,17 @@
 
 EAPI=8
 
-CARGO_OPTIONAL=1
 inherit cargo
 
-DESCRIPTION="launcher for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-launcher"
+DESCRIPTION="terminal emulator (built using alacritty_terminal) from COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-term"
 
 if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 else
-	# TODO this is not really working atm
-	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
-				$(cargo_crate_uris)
-"
+	SRC_URI="https://github.com/${PN}/${PN}/archive/refs/tags/v${MY_PV}.tar.gz -> ${P}.tar.gz
+			$(cargo_crate_uris)"
 fi
 
 # License set may be more restrictive as OR is not respected
@@ -30,11 +27,7 @@ IUSE="max-opt"
 
 DEPEND=""
 RDEPEND="${DEPEND}"
-BDEPEND="dev-util/intltool
-dev-build/just
-virtual/pkgconfig
->=virtual/rust-1.75.0
-x11-libs/libxkbcommon"
+BDEPEND=">=virtual/rust-1.75.0"
 
 REQUIRED_USE="debug? ( !max-opt )
 max-opt? ( !debug )"
@@ -78,16 +71,36 @@ EOF
 	sed -i '1i profile_name := "release"' justfile
 }
 
+src_configure() {
+	profile_name="release"
+	use debug && profile_name="debug"
+	use max-opt && profile_name="release-maximum-optimization"
+}
+
+# need to override these, because they ship with '--release', which conflicts with '--profile ...'
 src_compile() {
-	if use max-opt ; then
-		cargo build --profile release-maximum-optimization || die
-	else
-		if use debug; then
-			just build-debug || die
-		else
-			just build-release || die
-		fi
-	fi
+	debug-print-function "${FUNCNAME}" "$@"
+
+	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
+		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
+
+	filter-lto
+	tc-export AR CC CXX PKG_CONFIG
+
+	set -- cargo build --profile "${profile_name}" "${ECARGO_ARGS[@]}" "$@"
+	einfo "${@}"
+	"${@}" || die "cargo build failed"
+}
+
+src_test() {
+	debug-print-function "${FUNCNAME}" "$@"
+
+	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
+		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
+
+	set -- cargo test --profile "${profile_name}" "${ECARGO_ARGS[@]}" "$@"
+	einfo "${@}"
+	"${@}" || die "cargo test failed"
 }
 
 src_install() {
@@ -96,3 +109,32 @@ src_install() {
 	use max-opt && profile_name="release-maximum-optimization"
 	just --set rootdir "${D}" --set profile_name "${profile_name}" install || die
 }
+
+#src_install() {
+#	debug-print-function ${FUNCNAME} "$@"
+#
+#	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
+#		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
+#
+#	set -- cargo install --path ./ \
+#		--root "${ED}/usr" \
+#		${GIT_CRATES[@]:+--frozen} \
+#		--profile "${profile_name}" \
+#		${ECARGO_ARGS[@]} "$@"
+#	einfo "${@}"
+#	"${@}" || die "cargo install failed"
+#
+#	rm -f "${ED}/usr/.crates.toml" || die
+#	rm -f "${ED}/usr/.crates2.json" || die
+#
+#	# it turned out to be non-standard dir, so get rid of it future EAPI
+#	# and only run for EAPI=7
+#	# https://bugs.gentoo.org/715890
+#	case ${EAPI:-0} in
+#		7)
+#		if [ -d "${S}/man" ]; then
+#			doman "${S}/man" || return 0
+#		fi
+#		;;
+#	esac
+#}

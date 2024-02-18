@@ -14,7 +14,7 @@ DESCRIPTION="A cross-platform GUI library inspired by Elm"
 HOMEPAGE="https://github.com/pop-os/iced"
 MY_PV="v${PV}"
 
-if [ ${PV} == "9999" ] ; then
+if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 else
@@ -41,7 +41,7 @@ REQUIRED_USE="
 
 DEPEND=""
 RDEPEND="${DEPEND}"
-BDEPEND=">=virtual/rust-1.71.0"
+BDEPEND=">=virtual/rust-1.75.0"
 
 # rust does not use *FLAGS from make.conf, silence portage warning
 # update with proper path to binaries this crate installs, omit leading /
@@ -94,18 +94,18 @@ src_compile() {
 	filter-lto
 	tc-export AR CC CXX PKG_CONFIG
 
-	set -- cargo rustc $(usex debug "" "--profile release-opt") --crate-type dylib ${ECARGO_ARGS[@]} -- -C prefer-dynamic=on
+	set -- cargo rustc $(usex debug "" "--profile release-opt") --crate-type dylib "${ECARGO_ARGS[@]}" -- -C prefer-dynamic=on
 	einfo "${@}"
 	"${@}" || die "cargo build failed"
 }
 
 cargo_src_test() {
-	debug-print-function ${FUNCNAME} "$@"
+	debug-print-function "${FUNCNAME}" "$@"
 
 	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
 		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
 
-	set -- cargo test --lib $(usex debug "" "--profile release-opt") ${ECARGO_ARGS[@]} "$@"
+	set -- cargo test --lib $(usex debug "" "--profile release-opt") "${ECARGO_ARGS[@]}" "$@"
 	einfo "${@}"
 	"${@}" || die "cargo test failed"
 }

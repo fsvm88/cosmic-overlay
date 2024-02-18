@@ -8,7 +8,7 @@ EAPI=8
 DESCRIPTION="icon set COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-icons"
 
-if [ ${PV} == "9999" ] ; then
+if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 else
@@ -27,22 +27,22 @@ KEYWORDS="~amd64"
 DEPEND=""
 RDEPEND="${DEPEND}"
 BDEPEND="dev-build/just
->=virtual/rust-1.71.0"
+>=virtual/rust-1.75.0"
 
 # rust does not use *FLAGS from make.conf, silence portage warning
 # update with proper path to binaries this crate installs, omit leading /
 QA_FLAGS_IGNORED="usr/bin/${PN}"
 
 src_unpack() {
-        if [[ "${PV}" == *9999* ]]; then
-                git-r3_src_unpack
-        else
-                if [[ -n ${A} ]]; then
-                        unpack ${A}
-                fi
-        fi
+	if [[ "${PV}" == *9999* ]]; then
+		git-r3_src_unpack
+	else
+		if [[ -n ${A} ]]; then
+			unpack "${A}"
+		fi
+	fi
 }
 
 src_install() {
-        just --set rootdir "${D}" install-freedesktop install-extra || die
+	just --set rootdir "${D}" install-freedesktop install-extra || die
 }

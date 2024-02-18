@@ -10,11 +10,11 @@ inherit cargo
 DESCRIPTION="xdg-desktop-portal-cosmic"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic.git"
 
-if [ ${PV} == "9999" ] ; then
-    inherit git-r3
-    EGIT_REPO_URI="${HOMEPAGE}"
+if [ "${PV}" == "9999" ] ; then
+	inherit git-r3
+	EGIT_REPO_URI="${HOMEPAGE}"
 else
-    SRC_URI="https://github.com/${PN}/${PN}/archive/refs/tags/v${MY_PV}.tar.gz -> ${P}.tar.gz
+	SRC_URI="https://github.com/${PN}/${PN}/archive/refs/tags/v${MY_PV}.tar.gz -> ${P}.tar.gz
 				$(cargo_crate_uris)"
 fi
 

@@ -35,7 +35,7 @@ media-libs/libglvnd
 media-libs/mesa
 dev-build/make
 virtual/libudev
->=virtual/rust-1.71.0
+>=virtual/rust-1.75.0
 x11-libs/libxkbcommon
 "
 
@@ -47,25 +47,26 @@ max-opt? ( !debug )"
 QA_FLAGS_IGNORED="usr/bin/cosmic-workspaces"
 
 src_unpack() {
-        if [[ "${PV}" == *9999* ]]; then
-                git-r3_src_unpack
-                # TODO remove this when project gets updated enough to not depend
-                # on two different versions of client-toolkit through deps
-                pushd "${S}"
-                cargo update
-                popd
-                # TODO END REMOVE
-                cargo_live_src_unpack
-        else
-                cargo_src_unpack
-        fi
+	if [[ "${PV}" == *9999* ]]; then
+		git-r3_src_unpack
+		# TODO remove this when project gets updated enough to not depend
+		# on two different versions of client-toolkit through deps
+		pushd "${S}"
+		cargo update
+		popd
+		# TODO END REMOVE
+		cargo_live_src_unpack
+	else
+		cargo_src_unpack
+	fi
 }
 
 src_prepare() {
-        default
-        if use max-opt ; then
-                {
-                        cat <<'EOF'
+	default
+	if use max-opt ; then
+		{
+		cat <<'EOF'
+
 [profile.release-maximum-optimization]
 inherits = "release"
 debug = "line-tables-only"
@@ -77,20 +78,20 @@ opt-level = 3
 overflow-checks = false
 panic = "unwind"
 EOF
-                } >> Cargo.toml
-        fi
+		} >> Cargo.toml
+	fi
 }
 
 src_configure() {
-        profile_name="release"
-        use debug && profile_name="debug"
-        use max-opt && profile_name="release-maximum-optimization"
+	profile_name="release"
+	use debug && profile_name="debug"
+	use max-opt && profile_name="release-maximum-optimization"
 }
 
 src_compile() {
-        cargo build --profile "${profile_name}" || die
+	cargo build --profile "${profile_name}" || die
 }
 
 src_install() {
-        make install prefix=/usr DESTDIR="${D}" TARGET="${profile_name}" || die
+	make install prefix=/usr DESTDIR="${D}" TARGET="${profile_name}" || die
 }

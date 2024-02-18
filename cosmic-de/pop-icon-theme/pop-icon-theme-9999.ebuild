@@ -12,7 +12,7 @@ LICENSE=""
 SLOT="0"
 KEYWORDS="~amd64"
 
-if [ ${PV} == "9999" ] ; then
+if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 fi
@@ -24,4 +24,3 @@ BDEPEND="
 dev-build/meson
 dev-build/ninja
 "
-

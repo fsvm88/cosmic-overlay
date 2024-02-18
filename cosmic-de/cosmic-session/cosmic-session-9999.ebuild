@@ -12,7 +12,7 @@ inherit cargo
 DESCRIPTION="sessions manager for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-session"
 
-if [ ${PV} == "9999" ] ; then
+if [ "${PV}" == "9999" ] ; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 else
@@ -43,7 +43,7 @@ cosmic-de/xdg-desktop-portal-cosmic
 "
 RDEPEND="${DEPEND}"
 BDEPEND="dev-build/just
->=virtual/rust-1.71.0"
+>=virtual/rust-1.75.0"
 
 REQUIRED_USE="debug? ( !max-opt )
 max-opt? ( !debug )"
@@ -53,19 +53,20 @@ max-opt? ( !debug )"
 QA_FLAGS_IGNORED="usr/bin/${PN}"
 
 src_unpack() {
-        if [[ "${PV}" == *9999* ]]; then
-                git-r3_src_unpack
-                cargo_live_src_unpack
-        else
-                cargo_src_unpack
-        fi
+	if [[ "${PV}" == *9999* ]]; then
+		git-r3_src_unpack
+		cargo_live_src_unpack
+	else
+		cargo_src_unpack
+	fi
 }
 
 src_prepare() {
-        default
-        if use max-opt ; then
-                {
-                        cat <<'EOF'
+	default
+	if use max-opt ; then
+		{
+		cat <<'EOF'
+
 [profile.release-maximum-optimization]
 inherits = "release"
 debug = "line-tables-only"
@@ -77,19 +78,19 @@ opt-level = 3
 overflow-checks = false
 panic = "unwind"
 EOF
-                } >> Cargo.toml
-        fi
-        # Allow configurable profile name for output folder for _install_bin (debug, release-maximum-optimization)
-        # This will need to be passed later
-        sed -i 's,^bin-src.*,bin-src \:= "target" / profile_name / name,' justfile
-        # This is required to allow the change above to take place
-        sed -i '1i profile_name := "release"' justfile
+		} >> Cargo.toml
+	fi
+	# Allow configurable profile name for output folder for _install_bin (debug, release-maximum-optimization)
+	# This will need to be passed later
+	sed -i 's,^bin-src.*,bin-src \:= "target" / profile_name / name,' justfile
+	# This is required to allow the change above to take place
+	sed -i '1i profile_name := "release"' justfile
 }
 
 src_compile() {
-        just || die
+	just || die
 }
 
 src_install() {
-        just --set rootdir "${D}" install || die
+	just --set rootdir "${D}" install || die
 }
