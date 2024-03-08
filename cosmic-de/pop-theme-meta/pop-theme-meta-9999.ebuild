@@ -1,11 +1,11 @@
-# Copyright 1999-2023 Gentoo Authors
-# Distributed under the terms of the GNU General Public License v2
+# Copyright 2024 Fabio Scaccabarozzi
+# Distributed under the terms of the GNU General Public License v3
 
 EAPI=8
 DESCRIPTION="Meta package for PopOS theme packages"
 HOMEPAGE="https://github.com/pop-os/theme"
 
-LICENSE=""
+LICENSE="CC-BY-SA-4.0 OFL-1.1"
 SLOT="0"
 KEYWORDS="~amd64"
 IUSE=""

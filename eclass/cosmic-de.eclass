@@ -1,5 +1,6 @@
-# Copyright 1999-2024 Gentoo Authors
-# Distributed under the terms of the GNU General Public License v2
+# shellcheck shell=bash
+# Copyright 2024 Fabio Scaccabarozzi
+# Distributed under the terms of the MIT License
 
 # @ECLASS: cosmic-de.eclass
 # @MAINTAINER:
@@ -14,8 +15,14 @@ case ${EAPI} in
 	*) die "${ECLASS}: EAPI ${EAPI:-0} not supported" ;;
 esac
 
+# Not every package needs these, but 9 out of 10 do. Just factor these out.
+DEPEND="
+dev-libs/wayland
+x11-libs/libxkbcommon
+"
 BDEPEND="
 >=virtual/rust-1.75.0
+virtual/pkgconfig
 "
 
 CARGO_OPTIONAL=1
@@ -65,6 +72,16 @@ panic = "unwind"
 EOF
 		} >> Cargo.toml
 	fi
+
+	if [ -f justfile ]; then
+		# Allow configurable profile name for output folder for _install_bin (debug, release-maximum-optimization)
+		# This will need to be passed later
+		sed -i 's,^bin-src.*,bin-src \:= "target" / profile_name / name,' justfile
+		# This is required to allow the change above to take place
+		if ! grep -q '^target' justfile; then
+			sed -i '1i profile_name := "release"' justfile
+		fi
+	fi
 }
 
 # @FUNCTION: cosmic-de_src_configure
@@ -74,6 +91,7 @@ cosmic-de_src_configure() {
 	profile_name="release"
 	use debug && profile_name="debug"
 	use max-opt && profile_name="release-maximum-optimization"
+	cargo_src_configure "$@"
 }
 
 # @FUNCTION: cosmic-de_src_compile
@@ -107,24 +125,4 @@ cosmic-de_src_test() {
 	"${@}" || die "cargo test failed"
 }
 
-# @FUNCTION: cosmic-de_src_install
-# @DESCRIPTION:
-# Installs the package with the selected profile_name
-cosmic-de_src_install() {
-	debug-print-function "${FUNCNAME}" "$@"
-
-	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
-		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
-
-	if [ -f justfile ]; then
-		set -- just --set rootdir "${D}" --set target "${profile_name}" install
-		einfo "${@}"
-		"${@}" || die "failed installing via just"
-	fi
-
-	rm -f "${ED}/usr/.crates.toml" || die
-    rm -f "${ED}/usr/.crates2.json" || die
-}
-
-
-EXPORT_FUNCTIONS src_unpack src_prepare src_configure src_compile src_install src_test
+EXPORT_FUNCTIONS src_unpack src_prepare src_configure src_compile src_test
