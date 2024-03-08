@@ -1,16 +1,16 @@
-BDEPEND=dev-build/cmake dev-build/make dev-libs/libinput dev-libs/wayland media-libs/fontconfig media-libs/libglvnd media-libs/mesa sys-apps/systemd sys-auth/seatd virtual/libudev >=virtual/rust-1.75.0 11-libs/libxcb x11-libs/libxkbcommon >=dev-vcs/git-1.8.2.1[curl]
-DEFINED_PHASES=compile configure install prepare unpack
-DEPEND=dev-libs/wayland media-libs/libglvnd media-libs/mesa
+BDEPEND=dev-build/cmake >=dev-vcs/git-1.8.2.1[curl] >=virtual/rust-1.75.0 virtual/pkgconfig
+DEFINED_PHASES=compile configure install prepare test unpack
+DEPEND=dev-libs/libinput media-libs/fontconfig media-libs/libglvnd media-libs/mesa sys-apps/systemd sys-auth/seatd virtual/libudev x11-libs/libxcb dev-libs/wayland x11-libs/libxkbcommon
 DESCRIPTION=compositor for COSMIC DE
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/cosmic-comp
-INHERIT=cargo git-r3
-IUSE=max-opt debug
+INHERIT=cosmic-de
+IUSE=debug debug max-opt
 KEYWORDS=~amd64
-LICENSE=0BSD Apache-2.0 Apache-2.0-with-LLVM-exceptions Artistic-2 BSD BSD-2 Boost-1.0 CC0-1.0 GPL-3 GPL-3+ ISC MIT MPL-2.0 OFL-1.1 Unicode-DFS-2016 Unlicense ZLIB
+LICENSE=GPL-3
 PROPERTIES=live
-RDEPEND=dev-libs/wayland media-libs/libglvnd media-libs/mesa
+RDEPEND=dev-libs/wayland media-libs/mesa
 REQUIRED_USE=debug? ( !max-opt ) max-opt? ( !debug )
 SLOT=0
-_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	flag-o-matic	24c947ff5f858625cf0b33c15eed4425	git-r3	86fa1f157b70b9d2ff340c4633b1cf4b	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
-_md5_=a54b1b7626d8783eff152b5e3573475e
+_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	fe5c22819d529bdc4e45ee85542950dd	flag-o-matic	24c947ff5f858625cf0b33c15eed4425	git-r3	86fa1f157b70b9d2ff340c4633b1cf4b	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
+_md5_=e9c3b687c7f35db3d845e93d90dc868f

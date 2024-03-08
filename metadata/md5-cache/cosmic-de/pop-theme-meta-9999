@@ -3,6 +3,7 @@ DESCRIPTION=Meta package for PopOS theme packages
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/theme
 KEYWORDS=~amd64
+LICENSE=CC-BY-SA-4.0 OFL-1.1
 RDEPEND==cosmic-de/pop-fonts-9999 =cosmic-de/pop-gtk-theme-9999 =cosmic-de/pop-icon-theme-9999
 SLOT=0
-_md5_=1387e8d4e7d9c8cf75f1596caac3a195
+_md5_=bac5d58a26bc1845c2a9d9e4cdf5271d

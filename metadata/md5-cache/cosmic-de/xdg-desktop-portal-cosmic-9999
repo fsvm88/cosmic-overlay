@@ -1,15 +1,15 @@
-BDEPEND=virtual/rust >=virtual/rust-1.53 >=dev-vcs/git-1.8.2.1[curl]
-DEFINED_PHASES=compile configure install test unpack
-DEPEND=media-libs/libglvnd media-video/pipewire sys-devel/clang x11-libs/libxkbcommon virtual/pkgconfig
+BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/rust-1.75.0 virtual/pkgconfig
+DEFINED_PHASES=compile configure install prepare test unpack
+DEPEND=media-libs/libglvnd media-libs/mesa media-video/pipewire sys-devel/clang dev-libs/wayland x11-libs/libxkbcommon
 DESCRIPTION=xdg-desktop-portal-cosmic
 EAPI=8
-HOMEPAGE=https://github.com/pop-os/xdg-desktop-portal-cosmic.git
-INHERIT=cargo git-r3
-IUSE=debug
+HOMEPAGE=https://github.com/pop-os/xdg-desktop-portal-cosmic
+INHERIT=cosmic-de
+IUSE=debug debug max-opt
 KEYWORDS=~amd64
-LICENSE=0BSD Apache-2.0 Apache-2.0-with-LLVM-exceptions BSD GPL-3 GPL-3+ ISC MIT Unicode-DFS-2016 Unlicense ZLIB
+LICENSE=GPL-3
 PROPERTIES=live
-RDEPEND=media-libs/libglvnd media-video/pipewire sys-devel/clang x11-libs/libxkbcommon virtual/pkgconfig
+REQUIRED_USE=debug? ( !max-opt ) max-opt? ( !debug )
 SLOT=0
-_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	flag-o-matic	24c947ff5f858625cf0b33c15eed4425	git-r3	86fa1f157b70b9d2ff340c4633b1cf4b	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
-_md5_=4e34a1fc45ef04ee9de56605ab512ef7
+_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	fe5c22819d529bdc4e45ee85542950dd	flag-o-matic	24c947ff5f858625cf0b33c15eed4425	git-r3	86fa1f157b70b9d2ff340c4633b1cf4b	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
+_md5_=45e92a0233bdeedb75b8616c09c07ab1

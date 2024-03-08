@@ -1,11 +1,13 @@
-BDEPEND=dev-build/meson dev-build/ninja dev-lang/sassc dev-libs/glib >=dev-build/meson-1.2.1 app-alternatives/ninja dev-build/meson-format-array >=dev-vcs/git-1.8.2.1[curl]
+BDEPEND=dev-build/meson dev-lang/sassc >=dev-build/meson-1.2.1 app-alternatives/ninja dev-build/meson-format-array >=dev-vcs/git-1.8.2.1[curl]
 DEFINED_PHASES=compile configure install test unpack
+DEPEND=dev-libs/glib
 DESCRIPTION=PopOS GTK theme for COSMIC DE
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/gtk-theme
 INHERIT=meson git-r3
 KEYWORDS=~amd64
+LICENSE=CC-BY-SA-4.0
 PROPERTIES=live
 SLOT=0
-_eclasses_=git-r3	86fa1f157b70b9d2ff340c4633b1cf4b	meson	e322276188f86eacb29ae081ba5485c8	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	ninja-utils	2df4e452cea39a9ec8fb543ce059f8d6	python-utils-r1	042f4cc53680245bf99a84669b94155a	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
-_md5_=a26ca62e2b914dd680f5b891279266ab
+_eclasses_=flag-o-matic	24c947ff5f858625cf0b33c15eed4425	git-r3	86fa1f157b70b9d2ff340c4633b1cf4b	meson	bd1d5eaa305de6645e939caa7a352e3c	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	ninja-utils	2df4e452cea39a9ec8fb543ce059f8d6	python-utils-r1	8904b60325f22500b0c3ad4b68a42448	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
+_md5_=b53af3b1a70efd00e3aa8167f2a9c87c
