@@ -34,6 +34,7 @@ ${BDEPEND}
 "
 RDEPEND="
 ${RDEPEND}
+acct-user/cosmic-greeter
 cosmic-de/cosmic-comp
 gui-libs/greetd"
 
