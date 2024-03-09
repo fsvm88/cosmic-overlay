@@ -28,10 +28,14 @@ KEYWORDS="~amd64"
 # As per https://raw.githubusercontent.com/pop-os/cosmic-settings-daemon/master/debian/control
 DEPEND="
 ${DEPEND}
+app-misc/geoclue
 virtual/libudev
 "
 BDEPEND="${BDEPEND}"
-RDEPEND="${RDEPEND}"
+RDEPEND="
+${RDEPEND}
+app-misc/geoclue
+"
 
 src_install() {
 	dobin "target/$profile_name/$PN"
