@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="file manager from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -34,11 +34,9 @@ x11-misc/xdg-utils
 src_install() {
 	dobin "target/$profile_name/$PN"
 
-	insinto /usr/share/applications
-	doins res/com.system76.CosmicFiles.desktop
+	domenu res/com.system76.CosmicFiles.desktop
 
-	insinto /usr/share/metainfo
-	doins res/com.system76.CosmicFiles.metainfo.xml
+	cosmic-de_install_metainfo res/com.system76.CosmicFiles.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*

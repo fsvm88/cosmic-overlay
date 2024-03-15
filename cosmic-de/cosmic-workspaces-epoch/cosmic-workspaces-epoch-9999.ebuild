@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="workspaces support for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -40,8 +40,7 @@ src_install() {
 	# one of the few components with custom binary name, no $PN
 	dobin "target/$profile_name/cosmic-workspaces"
 
-	insinto /usr/share/applications
-	doins data/com.system76.CosmicWorkspaces.desktop
+	domenu data/com.system76.CosmicWorkspaces.desktop
 
 	insinto /usr/share/icons/hicolor/scalable/apps
 	doins data/com.system76.CosmicWorkspaces.svg

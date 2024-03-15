@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="utility for capturing screenshots via XDG Desktop Portal from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -31,6 +31,5 @@ RDEPEND="${RDEPEND}"
 src_install() {
 	dobin "target/$profile_name/$PN"
 
-	insinto /usr/share/applications
-	doins resources/com.system76.CosmicScreenshot.desktop
+	domenu resources/com.system76.CosmicScreenshot.desktop
 }

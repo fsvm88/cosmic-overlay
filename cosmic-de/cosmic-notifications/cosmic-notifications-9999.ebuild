@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="layer shell notifications daemon for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -36,11 +36,9 @@ RDEPEND="${RDEPEND}"
 src_install() {
 	dobin "target/$profile_name/$PN"
 
-	insinto /usr/share/applications
-	doins data/com.system76.CosmicNotifications.desktop
+	domenu data/com.system76.CosmicNotifications.desktop
 
-	insinto /usr/share/metainfo
-	doins data/com.system76.CosmicNotifications.metainfo.xml
+	cosmic-de_install_metainfo data/com.system76.CosmicNotifications.metainfo.xml
 
 	insinto /usr/share/icons/hicolor/scalable/apps
 	doins data/icons/com.system76.CosmicNotifications.svg

@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="text editor from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -31,11 +31,9 @@ RDEPEND="${RDEPEND}"
 src_install() {
 	dobin "target/$profile_name/$PN"
 
-	insinto /usr/share/applications
-	doins res/com.system76.CosmicEdit.desktop
+	domenu res/com.system76.CosmicEdit.desktop
 
-	insinto /usr/share/metainfo
-	doins res/com.system76.CosmicEdit.metainfo.xml
+	cosmic-de_install_metainfo res/com.system76.CosmicEdit.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*

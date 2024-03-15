@@ -126,3 +126,14 @@ cosmic-de_src_test() {
 }
 
 EXPORT_FUNCTIONS src_unpack src_prepare src_configure src_compile src_test
+
+# @FUNCTION: cosmic-de_install_metainfo
+# @DESCRIPTION:
+# Install a metainfo filter
+cosmic-de_install_metainfo() {
+	(
+		# Wrap the env to avoid messing with insinto
+		insinto /usr/share/metainfo
+		doins "$1"
+	)
+}

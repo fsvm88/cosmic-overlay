@@ -6,7 +6,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de systemd
 
 DESCRIPTION="sessions manager for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -54,8 +54,7 @@ src_install() {
 
 	dobin data/start-cosmic
 
-	insinto /usr/lib/systemd/user
-	doins data/cosmic-session.target
+	systemd_douserunit data/cosmic-session.target
 
 	insinto /usr/share/wayland-sessions
 	doins data/cosmic.desktop

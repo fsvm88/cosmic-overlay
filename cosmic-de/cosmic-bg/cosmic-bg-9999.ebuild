@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="display background service for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -33,11 +33,9 @@ RDEPEND="${RDEPEND}"
 src_install() {
 	dobin "target/$profile_name/$PN"
 	
-	insinto /usr/share/applications
-	doins data/com.system76.CosmicBackground.desktop
+	domenu data/com.system76.CosmicBackground.desktop
 
-	insinto /usr/share/metainfo
-	doins data/com.system76.CosmicBackground.metainfo.xml
+	cosmic-de_install_metainfo data/com.system76.CosmicBackground.metainfo.xml
 
 	insinto /usr/share/cosmic/com.system76.CosmicBackground/v1
 	doins data/v1/*

@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="app store from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -34,6 +34,5 @@ RDEPEND="${RDEPEND}"
 src_install() {
 	dobin "target/$profile_name/$PN"
 
-	insinto /usr/share/applications
-	doins res/com.system76.CosmicStore.desktop
+	domenu res/com.system76.CosmicStore.desktop
 }

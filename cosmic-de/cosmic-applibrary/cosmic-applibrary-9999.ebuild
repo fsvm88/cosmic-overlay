@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="app library for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -34,11 +34,9 @@ src_install() {
 	# One of the few where $PN does not apply (would be cosmic-applibrary)
 	dobin "target/$profile_name/cosmic-app-library"
 	
-	insinto /usr/share/applications
-	doins data/com.system76.CosmicAppLibrary.desktop
+	domenu data/com.system76.CosmicAppLibrary.desktop
 
-	insinto /usr/share/metainfo
-	doins data/com.system76.CosmicAppLibrary.metainfo.xml
+	cosmic-de_install_metainfo data/com.system76.CosmicAppLibrary.metainfo.xml
 
 	insinto /usr/share/icons/hicolor/scalable/apps
 	doins data/icons/com.system76.CosmicAppLibrary.svg

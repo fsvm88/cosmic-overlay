@@ -6,7 +6,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -44,8 +44,7 @@ cosmic-de/cosmic-randr
 src_install() {
 	dobin "target/$profile_name/$PN"
 
-	insinto /usr/share/applications
-	doins resources/com.system76.CosmicSettings.desktop
+	domenu resources/com.system76.CosmicSettings.desktop
 
 	insinto /usr/share/cosmic
 	doins -r resources/default_schema/*
