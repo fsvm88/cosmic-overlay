@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de desktop
 
 DESCRIPTION="applets for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -37,23 +37,60 @@ BDEPEND="${BDEPEND}"
 RDEPEND="${RDEPEND}
 cosmic-de/cosmic-icons"
 
-src_install() {
-	find . -maxdepth 1 -name "cosmic-*" -type d | while read -r x; do
-		# We don't need to exeinto/insinto for this first call,
-		# because `find . | while` runs the second part in a subshell
-		# due to the pipe
-		local binfile="target/$profile_name/$x"
-		[ -f "$binfile" ] && dobin "$binfile"
+install_icons() {
+	insinto /usr/share/icons/hicolor
+	doins -r "$1"/data/icons/*
+}
 
-		local datadir="$x/data"
-		[ ! -d "$datadir" ] && continue
-		
-		insinto /usr/share/applications
-		ls "$datadir"/*.desktop &> /dev/null &&
-			doins "$datadir"/*.desktop
-		
-		insinto /usr/share/icons/hicolor
-		[ -d "$datadir"/icons ] &&
-			doins -r "$datadir"/icons/*
-	done
+install_applet() {
+	# Symlink to the multicall binary
+	dosym -r "/usr/bin/${PN}" "/usr/bin/$1"
+
+	# Insert icons
+	install_icons "$1"
+
+	# Insert desktop file
+	domenu "${1}/data/${2}.desktop"
+}
+
+install_button() {
+	# Insert icons
+	install_icons "$1"
+
+	# Insert desktop file
+	domenu "${1}/data/${2}.desktop"
+}
+
+src_install() {
+	# This git project now creates one multicall binary
+	dobin "target/$profile_name/${PN}"
+	# This ebuild also provides this
+	dobin "target/$profile_name/cosmic-panel-button"
+
+	# Install applets:
+	# - s-link to multicall binary
+	# - icons
+	# - desktop file
+	install_applet "cosmic-app-list" "com.system76.CosmicAppList"
+	install_applet "cosmic-applet-audio" "com.system76.CosmicAppletAudio"
+	install_applet "cosmic-applet-battery" "com.system76.CosmicAppletBattery"
+	install_applet "cosmic-applet-bluetooth" "com.system76.CosmicAppletBluetooth"
+	install_applet "cosmic-applet-minimize" "com.system76.CosmicAppletMinimize"
+	install_applet "cosmic-applet-network" "com.system76.CosmicAppletNetwork"
+	install_applet "cosmic-applet-notifications" "com.system76.CosmicAppletNotifications"
+	install_applet "cosmic-applet-power" "com.system76.CosmicAppletPower"
+	install_applet "cosmic-applet-status-area" "com.system76.CosmicAppletStatusArea"
+	install_applet "cosmic-applet-tiling" "com.system76.CosmicAppletTiling"
+	install_applet "cosmic-applet-time" "com.system76.CosmicAppletTime"
+	install_applet "cosmic-applet-workspaces" "com.system76.CosmicAppletWorkspaces"
+
+	# Install buttons:
+	# - icons
+	# - desktop file
+	install_button "cosmic-panel-app-button" "com.system76.CosmicPanelAppButton"
+	install_button "cosmic-panel-workspaces-button" "com.system76.CosmicPanelWorkspacesButton"
+
+	# Install default schema
+	insinto /usr/share/cosmic
+	doins -r cosmic-app-list/data/default_schema
 }
