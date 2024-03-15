@@ -5,7 +5,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -51,14 +51,15 @@ src_install() {
 	local binfile="target/$profile_name/$PN"
 	dobin "$binfile"
 	dobin "$binfile-daemon"
-	
+
 	insinto /usr/share/dbus-1/system.d
 	doins dbus/com.system76.CosmicGreeter.conf
 
 	insinto /etc/greetd
 	doins cosmic-greeter.toml
-	
-	insinto /usr/lib/systemd/system
-	doins debian/cosmic-greeter-daemon.service
-	doins debian/cosmic-greeter.service
+
+	systemd_dounit debian/cosmic-greeter-daemon.service
+	systemd_dounit debian/cosmic-greeter.service
+
+	newtmpfiles "${FILESDIR}/systemd.tmpfiles" "${PN}.conf"
 }

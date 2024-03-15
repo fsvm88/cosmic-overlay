@@ -42,4 +42,7 @@ src_install() {
 
 	insinto /usr/share/applications
 	doins data/com.system76.CosmicWorkspaces.desktop
+
+	insinto /usr/share/icons/hicolor/scalable/apps
+	doins data/com.system76.CosmicWorkspaces.svg
 }

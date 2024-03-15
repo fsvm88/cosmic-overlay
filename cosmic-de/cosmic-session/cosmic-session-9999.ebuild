@@ -59,4 +59,7 @@ src_install() {
 
 	insinto /usr/share/wayland-sessions
 	doins data/cosmic.desktop
+
+	insinto /usr/share/applications
+	doinst data/cosmic-mimeapps.list
 }

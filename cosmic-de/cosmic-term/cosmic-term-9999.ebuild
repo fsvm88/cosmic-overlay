@@ -33,4 +33,7 @@ src_install() {
 
 	insinto /usr/share/applications
 	doins res/com.system76.CosmicTerm.desktop
+
+	insinto /usr/share/metainfo
+	doins res/com.system76.CosmicTerm.metainfo.xml
 }

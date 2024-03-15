@@ -30,7 +30,13 @@ RDEPEND="${RDEPEND}"
 
 src_install() {
 	dobin "target/$profile_name/$PN"
-	
+
 	insinto /usr/share/applications
 	doins res/com.system76.CosmicEdit.desktop
+
+	insinto /usr/share/metainfo
+	doins res/com.system76.CosmicEdit.metainfo.xml
+
+	insinto /usr/share/icons/hicolor
+	doins -r res/icons/hicolor/*
 }
