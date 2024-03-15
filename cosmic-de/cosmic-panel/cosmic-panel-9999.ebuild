@@ -41,6 +41,6 @@ src_install() {
 	insinto /etc/cosmic-panel
 	doins cosmic-panel-config/config.ron
 
-	insinto /usr/share/cosmic/data/default_schema
-	doins -r data/default_schema/*
+	insinto /usr/share/cosmic
+	doins -r data/default_schema
 }
