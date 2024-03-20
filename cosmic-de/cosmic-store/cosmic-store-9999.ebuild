@@ -35,4 +35,9 @@ src_install() {
 	dobin "target/$profile_name/$PN"
 
 	domenu res/com.system76.CosmicStore.desktop
+
+	cosmic-de_install_metainfo res/com.system76.CosmicStore.metainfo.xml
+
+	insinto /usr/share/icons/hicolor
+	doins -r res/icons/hicolor/*
 }

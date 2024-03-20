@@ -34,4 +34,7 @@ src_install() {
 	domenu res/com.system76.CosmicTerm.desktop
 
 	cosmic-de_install_metainfo res/com.system76.CosmicTerm.metainfo.xml
+
+	insinto /usr/share/icons/hicolor
+	doins -r res/icons/hicolor/*
 }
