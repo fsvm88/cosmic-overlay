@@ -10,5 +10,5 @@ LICENSE=0BSD Apache-2.0 Apache-2.0-with-LLVM-exceptions Artistic-2 BSD BSD-2 Boo
 PROPERTIES=live
 REQUIRED_USE=smol? ( !tokio ) tokio? ( !smol ) wayland? ( !winit ) winit? ( !wayland )
 SLOT=0
-_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	flag-o-matic	24c947ff5f858625cf0b33c15eed4425	git-r3	86fa1f157b70b9d2ff340c4633b1cf4b	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
+_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
 _md5_=10e2218f7b8015be565812279c58e305

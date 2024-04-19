@@ -1,6 +1,6 @@
 BDEPEND=dev-build/cmake >=dev-vcs/git-1.8.2.1[curl] >=virtual/rust-1.75.0 virtual/pkgconfig
 DEFINED_PHASES=compile configure install prepare test unpack
-DEPEND=dev-libs/libinput media-libs/fontconfig media-libs/libglvnd media-libs/mesa sys-apps/systemd sys-auth/seatd virtual/libudev x11-libs/libxcb dev-libs/wayland x11-libs/libxkbcommon
+DEPEND=dev-libs/libinput media-libs/fontconfig media-libs/libglvnd media-libs/mesa sys-apps/systemd sys-auth/seatd virtual/libudev x11-libs/libxcb x11-libs/pixman dev-libs/wayland x11-libs/libxkbcommon
 DESCRIPTION=compositor for COSMIC DE
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/cosmic-comp
@@ -12,5 +12,5 @@ PROPERTIES=live
 RDEPEND=dev-libs/wayland media-libs/mesa
 REQUIRED_USE=debug? ( !max-opt ) max-opt? ( !debug )
 SLOT=0
-_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	8d1b92847efdaadfd793283204ccf287	flag-o-matic	24c947ff5f858625cf0b33c15eed4425	git-r3	86fa1f157b70b9d2ff340c4633b1cf4b	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
-_md5_=e9c3b687c7f35db3d845e93d90dc868f
+_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	8d1b92847efdaadfd793283204ccf287	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
+_md5_=0ec17844daab299890061d680a518d5c

@@ -1,6 +1,6 @@
 BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/rust-1.75.0 virtual/pkgconfig virtual/pkgconfig
 DEFINED_PHASES=compile configure install prepare test unpack
-DEPEND=sys-devel/clang sys-libs/pam dev-libs/wayland x11-libs/libxkbcommon
+DEPEND=sys-apps/dbus sys-devel/clang sys-libs/pam dev-libs/wayland x11-libs/libxkbcommon
 DESCRIPTION=libcosmic greeter for greetd from COSMIC DE
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/cosmic-greeter
@@ -12,5 +12,5 @@ PROPERTIES=live
 RDEPEND=acct-user/cosmic-greeter cosmic-de/cosmic-comp gui-libs/greetd virtual/tmpfiles
 REQUIRED_USE=debug? ( !max-opt ) max-opt? ( !debug )
 SLOT=0
-_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	8d1b92847efdaadfd793283204ccf287	flag-o-matic	24c947ff5f858625cf0b33c15eed4425	git-r3	86fa1f157b70b9d2ff340c4633b1cf4b	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	systemd	c8b03e8df84486aa991d4396686e8942	tmpfiles	216aa76c3a6fcb5d893c23a0de86048f	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
-_md5_=cfa7c1b3b7ff46193299ae7c04ada2f5
+_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	8d1b92847efdaadfd793283204ccf287	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	systemd	c8b03e8df84486aa991d4396686e8942	tmpfiles	216aa76c3a6fcb5d893c23a0de86048f	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
+_md5_=7c9b7a8f7d5d4eefb05a3e13f4116877
