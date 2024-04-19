@@ -26,6 +26,7 @@ KEYWORDS="~amd64"
 # As per https://raw.githubusercontent.com/pop-os/cosmic-greeter/master/debian/control
 DEPEND="
 ${DEPEND}
+sys-apps/dbus
 sys-devel/clang
 sys-libs/pam
 "

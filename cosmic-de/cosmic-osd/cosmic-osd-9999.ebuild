@@ -28,6 +28,7 @@ KEYWORDS="~amd64"
 # As per https://raw.githubusercontent.com/pop-os/cosmic-osd/master/debian/control
 DEPEND="
 ${DEPEND}
+media-libs/libpulse
 virtual/libudev
 "
 BDEPEND="${BDEPEND}"

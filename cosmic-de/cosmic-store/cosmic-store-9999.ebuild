@@ -27,6 +27,7 @@ KEYWORDS="~amd64"
 DEPEND="
 ${DEPEND}
 >=sys-apps/flatpak-1.14.4-r3
+dev-libs/openssl
 "
 BDEPEND="${BDEPEND}"
 RDEPEND="${RDEPEND}"

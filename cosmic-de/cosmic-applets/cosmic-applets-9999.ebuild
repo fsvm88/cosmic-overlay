@@ -88,6 +88,7 @@ src_install() {
 	# - icons
 	# - desktop file
 	_install_button "cosmic-panel-app-button" "com.system76.CosmicPanelAppButton"
+	_install_button "cosmic-panel-launcher-button" "com.system76.CosmicPanelLauncherButton"
 	_install_button "cosmic-panel-workspaces-button" "com.system76.CosmicPanelWorkspacesButton"
 
 	# Install default schema

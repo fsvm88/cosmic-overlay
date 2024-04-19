@@ -36,6 +36,7 @@ sys-apps/systemd
 sys-auth/seatd
 virtual/libudev
 x11-libs/libxcb
+x11-libs/pixman
 "
 BDEPEND="
 ${BDEPEND}

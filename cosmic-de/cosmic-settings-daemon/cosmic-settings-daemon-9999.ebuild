@@ -29,6 +29,7 @@ KEYWORDS="~amd64"
 DEPEND="
 ${DEPEND}
 app-misc/geoclue
+sys-power/acpid
 virtual/libudev
 "
 BDEPEND="${BDEPEND}"
