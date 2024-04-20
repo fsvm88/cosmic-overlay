@@ -30,9 +30,10 @@ inherit cargo
 
 [[ "${PV}" == *9999* ]] && inherit git-r3
 
-IUSE="${IUSE} debug max-opt"
+IUSE="${IUSE} debug debug-line-tables-only max-opt"
 REQUIRED_USE="
 debug? ( !max-opt )
+debug-line-tables-only? ( !debug )
 max-opt? ( !debug )
 "
 
@@ -61,7 +62,6 @@ cosmic-de_src_prepare() {
 
 [profile.release-maximum-optimization]
 inherits = "release"
-debug = "line-tables-only"
 debug-assertions = false
 codegen-units = 1
 incremental = false
@@ -91,7 +91,11 @@ cosmic-de_src_configure() {
 	profile_name="release"
 	use debug && profile_name="debug"
 	use max-opt && profile_name="release-maximum-optimization"
-	cargo_src_configure "$@"
+	# The final "${@}" is required to support src_configure overrides (currently cosmic-greeter)
+	cargo_src_configure \
+		--profile $profile_name \
+		$(usev debug-line-tables-only "--config profile.$profile_name.debug=\"line-tables-only\"") \
+		"${@}"
 }
 
 # @FUNCTION: cosmic-de_src_compile
@@ -106,7 +110,7 @@ cosmic-de_src_compile() {
 	filter-lto
 	tc-export AR CC CXX PKG_CONFIG
 
-	set -- cargo build --profile "${profile_name}" "${ECARGO_ARGS[@]}" "$@"
+	set -- cargo build "${ECARGO_ARGS[@]}" "$@"
 	einfo "${@}"
 	"${@}" || die "failed to compile"
 }
@@ -120,7 +124,7 @@ cosmic-de_src_test() {
 	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
 		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
 
-	set -- cargo test --profile "${profile_name}" "${ECARGO_ARGS[@]}" "$@"
+	set -- cargo test "${ECARGO_ARGS[@]}" "$@"
 	einfo "${@}"
 	"${@}" || die "cargo test failed"
 }
