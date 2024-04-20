@@ -6,6 +6,7 @@ EAPI=8
 DESCRIPTION="Meta package for cosmic-de"
 HOMEPAGE="https://github.com/pop-os/cosmic-epoch"
 SRC_URI=""
+# Updated ebuilds at 2eadc4e 20.04.2024
 # This is a meta package, trying to include most of the licenses used by sub-packages, but no guarantee
 # Not sure how/if this should be handled better
 LICENSE="CC-BY-SA-4.0 GPL-3 GPL-3+ MPL-2.0"
