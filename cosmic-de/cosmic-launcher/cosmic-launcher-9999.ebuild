@@ -27,7 +27,9 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-edit/master/debian/control
-DEPEND="${DEPEND}"
+DEPEND="${DEPEND}
+=cosmic-de/pop-launcher-${PV}
+"
 BDEPEND="
 ${BDEPEND}
 dev-util/intltool
