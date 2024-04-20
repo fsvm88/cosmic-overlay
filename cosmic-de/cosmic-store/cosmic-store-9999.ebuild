@@ -30,7 +30,9 @@ ${DEPEND}
 dev-libs/openssl
 "
 BDEPEND="${BDEPEND}"
-RDEPEND="${RDEPEND}"
+RDEPEND="${RDEPEND}
+cosmic-de/pop-appstream-data
+"
 
 src_install() {
 	dobin "target/$profile_name/$PN"
