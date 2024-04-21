@@ -43,5 +43,5 @@ src_install() {
 	doins cosmic-panel-config/config.ron
 
 	insinto /usr/share/cosmic
-	doins -r data/default_schema
+	doins -r data/default_schema/*
 }
