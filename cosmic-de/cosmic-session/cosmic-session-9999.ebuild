@@ -52,6 +52,12 @@ x11-base/xwayland
 BDEPEND="${BDEPEND}"
 RDEPEND="${RDEPEND}"
 
+src_configure() {
+	# This is required because this string is incorporated in the binary during the build process
+	export XDP_COSMIC="/usr/libexec/xdg-desktop-portal-cosmic"
+	cosmic-de_src_configure
+}
+
 src_install() {
 	dobin "target/$profile_name/$PN"
 
