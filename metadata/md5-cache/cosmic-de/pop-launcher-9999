@@ -1,15 +1,15 @@
-BDEPEND=dev-util/intltool >=dev-vcs/git-1.8.2.1[curl] >=virtual/rust-1.75.0 virtual/pkgconfig
+BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/rust-1.75.0 virtual/pkgconfig
 DEFINED_PHASES=compile configure install prepare test unpack
-DEPEND==cosmic-de/pop-launcher-9999 dev-libs/wayland x11-libs/libxkbcommon
-DESCRIPTION=launcher for COSMIC DE
+DEPEND=media-libs/libglvnd dev-libs/wayland x11-libs/libxkbcommon
+DESCRIPTION=Modular IPC-based desktop launcher service
 EAPI=8
-HOMEPAGE=https://github.com/pop-os/cosmic-launcher
+HOMEPAGE=https://github.com/pop-os/launcher
 INHERIT=cosmic-de desktop
 IUSE=debug debug debug-line-tables-only max-opt
 KEYWORDS=~amd64
-LICENSE=GPL-3
+LICENSE=MPL-2.0
 PROPERTIES=live
 REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug )
 SLOT=0
 _eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	0321d9a17a624aa930c4d7516c6d6bb0	desktop	021728fdc1b03b36357dbc89489e0f0d	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
-_md5_=8b2573a0de02b29e7a250964243b14e8
+_md5_=a48a90fcde1ed5d5cba177620e90ea96
