@@ -17,12 +17,20 @@ esac
 
 # Not every package needs these, but 9 out of 10 do. Just factor these out.
 DEPEND="
-dev-libs/wayland
-x11-libs/libxkbcommon
+>=dev-libs/wayland-1.22
+>=media-libs/libglvnd-1.7.0
+>=x11-libs/libxkbcommon-1.6.0
 "
 BDEPEND="
+>=virtual/pkgconfig-3
 >=virtual/rust-1.75.0
-virtual/pkgconfig
+"
+# dbus is an RDEPEND pretty much for the entire DE
+# same for systemd
+RDEPEND="
+elogind? ( >=sys-auth/elogind-246.10-r3 )
+systemd? ( >=sys-apps/systemd-255.3-r1 )
+>=sys-apps/dbus-1.15.8
 "
 
 CARGO_OPTIONAL=1
@@ -30,11 +38,12 @@ inherit cargo
 
 [[ "${PV}" == *9999* ]] && inherit git-r3
 
-IUSE="${IUSE} debug debug-line-tables-only max-opt"
+IUSE="${IUSE} debug debug-line-tables-only elogind max-opt systemd"
 REQUIRED_USE="
 debug? ( !max-opt )
 debug-line-tables-only? ( !debug )
 max-opt? ( !debug )
+^^ ( elogind systemd )
 "
 
 # @FUNCTION: cosmic-de_src_unpack

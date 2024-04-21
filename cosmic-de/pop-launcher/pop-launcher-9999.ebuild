@@ -32,7 +32,14 @@ media-libs/libglvnd
 BDEPEND="
 ${BDEPEND}
 "
-RDEPEND="${RDEPEND}"
+# most of these are used by the plugins
+RDEPEND="${RDEPEND}
+>=cosmic-de/pop-icon-theme-${PV}
+>=cosmic-de/system76-power-${PV}
+>=sci-libs/libqalculate-5.0.0
+>=sys-apps/fd-9
+>=x11-misc/xdg-utils-1.2.1-r1
+"
 
 src_configure() {
 	cosmic-de_src_configure -p pop-launcher-bin

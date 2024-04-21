@@ -37,6 +37,7 @@ RDEPEND="
 =cosmic-de/cosmic-store-${PV}
 =cosmic-de/cosmic-term-${PV}
 =cosmic-de/cosmic-workspaces-epoch-${PV}
+=cosmic-de/pop-launcher-${PV}
 =cosmic-de/pop-theme-meta-${PV}
 =cosmic-de/xdg-desktop-portal-cosmic-${PV}
 "

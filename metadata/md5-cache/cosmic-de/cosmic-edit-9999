@@ -1,15 +1,16 @@
-BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/rust-1.75.0 virtual/pkgconfig
+BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/pkgconfig-3 >=virtual/rust-1.75.0
 DEFINED_PHASES=compile configure install prepare test unpack
-DEPEND=dev-libs/wayland x11-libs/libxkbcommon
+DEPEND=>=dev-libs/wayland-1.22 >=media-libs/libglvnd-1.7.0 >=x11-libs/libxkbcommon-1.6.0
 DESCRIPTION=text editor from COSMIC DE
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/cosmic-edit
 INHERIT=cosmic-de desktop
-IUSE=debug debug debug-line-tables-only max-opt
+IUSE=debug debug debug-line-tables-only elogind max-opt systemd
 KEYWORDS=~amd64
 LICENSE=GPL-3
 PROPERTIES=live
-REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug )
+RDEPEND=elogind? ( >=sys-auth/elogind-246.10-r3 ) systemd? ( >=sys-apps/systemd-255.3-r1 ) >=sys-apps/dbus-1.15.8
+REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug ) ^^ ( elogind systemd )
 SLOT=0
-_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	0321d9a17a624aa930c4d7516c6d6bb0	desktop	021728fdc1b03b36357dbc89489e0f0d	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
+_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	cd24cd82ff3cfc096500eb81551522b6	desktop	021728fdc1b03b36357dbc89489e0f0d	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
 _md5_=acb293e647eed9f54747adf951cbf847

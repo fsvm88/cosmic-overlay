@@ -1,15 +1,16 @@
-BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/rust-1.75.0 virtual/pkgconfig virtual/pkgconfig
+BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/pkgconfig-3 >=virtual/rust-1.75.0 virtual/pkgconfig
 DEFINED_PHASES=compile configure install prepare test unpack
-DEPEND=cosmic-de/cosmic-applets cosmic-de/cosmic-applibrary cosmic-de/cosmic-bg cosmic-de/cosmic-comp cosmic-de/cosmic-greeter cosmic-de/cosmic-icons cosmic-de/cosmic-launcher cosmic-de/cosmic-notifications cosmic-de/cosmic-osd cosmic-de/cosmic-panel cosmic-de/cosmic-randr cosmic-de/cosmic-screenshot cosmic-de/cosmic-settings cosmic-de/cosmic-settings-daemon cosmic-de/cosmic-workspaces-epoch cosmic-de/xdg-desktop-portal-cosmic cosmic-de/pop-fonts x11-base/xwayland dev-libs/wayland x11-libs/libxkbcommon
+DEPEND=cosmic-de/cosmic-applets cosmic-de/cosmic-applibrary cosmic-de/cosmic-bg cosmic-de/cosmic-comp cosmic-de/cosmic-greeter cosmic-de/cosmic-icons cosmic-de/cosmic-launcher cosmic-de/cosmic-notifications cosmic-de/cosmic-osd cosmic-de/cosmic-panel cosmic-de/cosmic-randr cosmic-de/cosmic-screenshot cosmic-de/cosmic-settings cosmic-de/cosmic-settings-daemon cosmic-de/cosmic-workspaces-epoch cosmic-de/xdg-desktop-portal-cosmic cosmic-de/pop-fonts x11-base/xwayland >=dev-libs/wayland-1.22 >=media-libs/libglvnd-1.7.0 >=x11-libs/libxkbcommon-1.6.0
 DESCRIPTION=sessions manager for the COSMIC DE
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/cosmic-session
 INHERIT=cosmic-de systemd
-IUSE=debug debug debug-line-tables-only max-opt
+IUSE=debug debug debug-line-tables-only elogind max-opt systemd
 KEYWORDS=~amd64
 LICENSE=GPL-3
 PROPERTIES=live
-REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug )
+RDEPEND=elogind? ( >=sys-auth/elogind-246.10-r3 ) systemd? ( >=sys-apps/systemd-255.3-r1 ) >=sys-apps/dbus-1.15.8
+REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug ) ^^ ( elogind systemd )
 SLOT=0
-_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	0321d9a17a624aa930c4d7516c6d6bb0	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	systemd	c8b03e8df84486aa991d4396686e8942	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
+_eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	cd24cd82ff3cfc096500eb81551522b6	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	systemd	c8b03e8df84486aa991d4396686e8942	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
 _md5_=b6863005c20d694c513970b5b830d634
