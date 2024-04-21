@@ -45,6 +45,9 @@ src_install() {
 	insinto /usr/share/xdg-desktop-portal/portals
 	doins data/cosmic.portal
 
+	insinto /usr/share/xdg-desktop-portal
+	doins data/cosmic-portals.conf
+
 	insinto /usr/share/icons/hicolor
 	doins -r data/icons/*
 }
