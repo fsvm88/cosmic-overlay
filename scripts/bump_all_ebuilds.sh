@@ -83,5 +83,5 @@ awk '{ print $3; }' "${__temp_submodule_hashes}" | while read -r one_pkg; do
     unset ebuild_file, git_commit_hash
 done
 
-log "ALL DONE! do not forget to push!"
+log "ALL DONE! do not forget to test and push!"
 exit 0
