@@ -1,6 +1,6 @@
-BDEPEND=dev-build/meson >=dev-build/meson-1.2.3 app-alternatives/ninja dev-build/meson-format-array >=dev-vcs/git-1.8.2.1[curl]
+BDEPEND=>=dev-build/meson-1.3.2 >=dev-build/meson-1.2.3 app-alternatives/ninja dev-build/meson-format-array >=dev-vcs/git-1.8.2.1[curl]
 DEFINED_PHASES=compile configure install test unpack
-DEPEND=x11-themes/adwaita-icon-theme x11-themes/hicolor-icon-theme
+DEPEND=>=x11-themes/adwaita-icon-theme-45.0 >=x11-themes/hicolor-icon-theme-0.17
 DESCRIPTION=PopOS icon theme for COSMIC DE
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/icon-theme
@@ -10,4 +10,4 @@ LICENSE=CC-BY-SA-4.0
 PROPERTIES=live
 SLOT=0
 _eclasses_=flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	meson	aecae905c2e0c201d7925fae52a5576d	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	ninja-utils	2df4e452cea39a9ec8fb543ce059f8d6	python-utils-r1	a1229a86bd0db058e474a2d7d9191cca	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
-_md5_=8813331e04447eac55155068634866bf
+_md5_=da1119cfcf266c241735afb55872fec2

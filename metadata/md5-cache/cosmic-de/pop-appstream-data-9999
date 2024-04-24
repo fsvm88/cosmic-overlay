@@ -1,4 +1,4 @@
-BDEPEND=dev-build/make >=dev-vcs/git-1.8.2.1[curl]
+BDEPEND=>=dev-build/make-4.4.1-r1 >=dev-vcs/git-1.8.2.1[curl]
 DEFINED_PHASES=install unpack
 DESCRIPTION=AppStream data for COSMIC DE
 EAPI=8
@@ -7,7 +7,7 @@ INHERIT=git-r3
 KEYWORDS=~amd64
 LICENSE=OFL-1.1
 PROPERTIES=live
-RDEPEND=dev-libs/appstream
+RDEPEND=>=dev-libs/appstream-0.16.4
 SLOT=0
 _eclasses_=git-r3	fbb2889c81f3a05910c1524db69425c1
-_md5_=99cf4a56c1ba3fc05f545abbebbe9ad3
+_md5_=fb21b1db854e2d58a3b2c818c2d129b2

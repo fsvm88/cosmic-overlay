@@ -1,4 +1,4 @@
-BDEPEND=dev-build/make >=dev-vcs/git-1.8.2.1[curl]
+BDEPEND=>=dev-build/make-4.4.1-r1 >=dev-vcs/git-1.8.2.1[curl]
 DEFINED_PHASES=unpack
 DESCRIPTION=PopOS fonts for COSMIC DE
 EAPI=8
@@ -9,4 +9,4 @@ LICENSE=OFL-1.1
 PROPERTIES=live
 SLOT=0
 _eclasses_=git-r3	fbb2889c81f3a05910c1524db69425c1
-_md5_=1275d0cca2c03b16b77f37701261595d
+_md5_=e80949b851f47f6ca434e0f1c884e9ca

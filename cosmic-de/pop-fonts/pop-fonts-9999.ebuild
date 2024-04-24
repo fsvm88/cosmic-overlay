@@ -17,4 +17,6 @@ if [ "${PV}" == "9999" ]; then
 fi
 IUSE=""
 
-BDEPEND="dev-build/make"
+BDEPEND="
+>=dev-build/make-4.4.1-r1
+"

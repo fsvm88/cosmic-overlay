@@ -17,8 +17,12 @@ if [ "${PV}" == "9999" ]; then
 fi
 IUSE=""
 
-BDEPEND="dev-build/make"
-RDEPEND="dev-libs/appstream"
+BDEPEND="
+>=dev-build/make-4.4.1-r1
+"
+RDEPEND="
+>=dev-libs/appstream-0.16.4
+"
 
 src_install() {
 	insinto /usr/share/app-info/yaml

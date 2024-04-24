@@ -19,9 +19,9 @@ fi
 IUSE=""
 
 DEPEND="
-x11-themes/adwaita-icon-theme
-x11-themes/hicolor-icon-theme
+>=x11-themes/adwaita-icon-theme-45.0
+>=x11-themes/hicolor-icon-theme-0.17
 "
 BDEPEND="
-dev-build/meson
+>=dev-build/meson-1.3.2
 "

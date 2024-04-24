@@ -18,10 +18,18 @@ if [ "${PV}" == "9999" ]; then
 fi
 IUSE="+icons gnome-shell gnome-shell-gresource +gtk +sounds +sessions +default +dark +light"
 
-DEPEND="dev-libs/glib"
 BDEPEND="
-dev-build/meson
-dev-lang/sassc
+>=dev-build/meson-1.3.2
+>=dev-lang/sassc-3.6.2
+>=dev-libs/glib-2.78.3
+"
+RDEPEND="
+${RDEPEND}
+>=dev-libs/glib-2.78.3
+>=x11-libs/gdk-pixbuf-2.42.10-r1
+>=x11-libs/gtk+-2.24:2
+>=x11-libs/gtk+-3.24:3
+>=x11-themes/gtk-engines-murrine-0.98.2-r3
 "
 
 src_configure() {

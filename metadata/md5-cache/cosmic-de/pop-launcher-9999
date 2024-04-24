@@ -1,6 +1,6 @@
 BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/pkgconfig-3 >=virtual/rust-1.75.0
 DEFINED_PHASES=compile configure install prepare test unpack
-DEPEND=media-libs/libglvnd >=dev-libs/wayland-1.22 >=media-libs/libglvnd-1.7.0 >=x11-libs/libxkbcommon-1.6.0
+DEPEND=>=dev-libs/wayland-1.22 >=media-libs/libglvnd-1.7.0 >=x11-libs/libxkbcommon-1.6.0
 DESCRIPTION=Modular IPC-based desktop launcher service
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/launcher
@@ -13,4 +13,4 @@ RDEPEND=>=cosmic-de/pop-icon-theme-9999 >=cosmic-de/system76-power-9999 >=sci-li
 REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug ) ^^ ( elogind systemd )
 SLOT=0
 _eclasses_=cargo	4dede41d64d595673f6da62ab5540fa0	cosmic-de	cd24cd82ff3cfc096500eb81551522b6	desktop	021728fdc1b03b36357dbc89489e0f0d	flag-o-matic	288c54efeb5e2aa70775e39032695ad4	git-r3	fbb2889c81f3a05910c1524db69425c1	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
-_md5_=dc5adc0ad4ec7f56596d6fd94f7c4b45
+_md5_=0330d05ec4f8e6acebd34238d3b12f99
