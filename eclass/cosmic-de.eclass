@@ -15,11 +15,29 @@ case ${EAPI} in
 	*) die "${ECLASS}: EAPI ${EAPI:-0} not supported" ;;
 esac
 
-# Not every package needs these, but 9 out of 10 do. Just factor these out.
+# Deps are factored out in the eclass, because rust links everything statically,
+# and pretty much every package in Cosmic depends on libcosmic, which depends
+# on iced, the GTK GUI toolkits, dbus, systemd, ....
+# Factoring these out ensures that if a user starts from a stage3 install,
+# we don't need to specify all deps for all packages, and these (b)deps are
+# emerged before we ever try to install the first cosmic-de package.
+# If we put them in the -meta package, portage would still potentially merge
+# them in parallel.
 DEPEND="
+>=dev-cpp/glibmm-2.66.7:2
+>=dev-libs/glib-2.78.3
+>=dev-libs/libinput-1.25.0
 >=dev-libs/wayland-1.22
+>=gui-libs/gtk-4.12.5
+>=media-libs/graphene-1.10.8
+>=media-libs/gstreamer-1.22.11
 >=media-libs/libglvnd-1.7.0
+>=media-libs/libpulse-17.0
+>=virtual/libudev-251-r2
+>=x11-libs/cairo-1.18:1.16
+>=x11-libs/gdk-pixbuf-2.42.10-r1
 >=x11-libs/libxkbcommon-1.6.0
+>=x11-libs/pango-1.52.1
 "
 BDEPEND="
 >=virtual/pkgconfig-3

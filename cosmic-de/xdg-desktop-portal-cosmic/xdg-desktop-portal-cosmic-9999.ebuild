@@ -21,14 +21,12 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-edit/master/debian/control
+# As per https://raw.githubusercontent.com/pop-os/xdg-desktop-portal-cosmic/master/debian/control
 DEPEND="
 ${DEPEND}
-media-libs/mesa
-media-video/pipewire
+>=media-libs/mesa-24.0.4
+>=media-video/pipewire-1.0.3
 "
-BDEPEND="${BDEPEND}"
-RDEPEND="${RDEPEND}"
 
 src_install() {
 	exeinto /usr/libexec

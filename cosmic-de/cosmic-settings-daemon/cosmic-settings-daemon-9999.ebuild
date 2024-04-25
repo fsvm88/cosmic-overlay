@@ -24,10 +24,6 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-settings-daemon/master/debian/control
-BDEPEND="
-${BDEPEND}
->=virtual/libudev-251-r2
-"
 RDEPEND="
 ${RDEPEND}
 >=app-misc/geoclue-2.7.1

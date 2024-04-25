@@ -26,9 +26,6 @@ DEPEND="
 ${DEPEND}
 >=sys-libs/pam-1.5.3-r1
 "
-BDEPEND="
-${BDEPEND}
-"
 RDEPEND="
 ${RDEPEND}
 =cosmic-de/cosmic-comp-${PV}

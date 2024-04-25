@@ -27,10 +27,8 @@ KEYWORDS="~amd64"
 BDEPEND="
 ${BDEPEND}
 >=dev-libs/expat-2.5.0
->=dev-libs/libinput-1.25.0
 >=media-libs/fontconfig-2.14.2-r3
 >=media-libs/freetype-2.13.2
->=virtual/libudev-251-r2
 "
 RDEPEND="
 ${RDEPEND}

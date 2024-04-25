@@ -26,11 +26,9 @@ KEYWORDS="~amd64"
 # As per https://raw.githubusercontent.com/pop-os/cosmic-comp/master/debian/control
 DEPEND="
 ${DEPEND}
->=dev-libs/libinput-1.25.0
 >=media-libs/fontconfig-2.14.2-r3
 >=media-libs/mesa-24.0.4
 >=sys-auth/seatd-0.8.0
->=virtual/libudev-251-r2
 >=x11-libs/libxcb-1.16.1
 >=x11-libs/pixman-0.43.4
 "

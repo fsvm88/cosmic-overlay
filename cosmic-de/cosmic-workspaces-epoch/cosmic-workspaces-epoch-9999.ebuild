@@ -24,11 +24,9 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-workspaces-epoch/master/debian/control
-BDEPEND="
-${BDEPEND}
->=dev-libs/libinput-1.25.0
+DEPEND="
+${DEPEND}
 >=media-libs/mesa-24.0.4
->=virtual/libudev-251-r2
 "
 
 src_install() {
