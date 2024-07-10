@@ -13,7 +13,7 @@ LICENSE="CC-BY-SA-4.0 GPL-3 GPL-3+ MPL-2.0"
 
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="greeter"
+IUSE="greeter store"
 
 RDEPEND="
         =cosmic-de/cosmic-applets-${PV}
@@ -33,10 +33,9 @@ RDEPEND="
         =cosmic-de/cosmic-session-${PV}
         =cosmic-de/cosmic-settings-${PV}
         =cosmic-de/cosmic-settings-daemon-${PV}
-        =cosmic-de/cosmic-store-${PV}
+        store? ( =cosmic-de/cosmic-store-${PV} )
         =cosmic-de/cosmic-term-${PV}
         =cosmic-de/cosmic-workspaces-epoch-${PV}
-        =cosmic-de/pop-launcher-${PV}
         =cosmic-de/pop-theme-meta-${PV}
         =cosmic-de/xdg-desktop-portal-cosmic-${PV}
 "
