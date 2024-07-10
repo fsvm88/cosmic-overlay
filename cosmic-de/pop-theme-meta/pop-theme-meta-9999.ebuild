@@ -8,9 +8,9 @@ HOMEPAGE="https://github.com/pop-os/theme"
 LICENSE="CC-BY-SA-4.0 OFL-1.1"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE=""
+IUSE="gtk-theme"
 RDEPEND="
-=cosmic-de/pop-fonts-${PV}
-=cosmic-de/pop-gtk-theme-${PV}
-=cosmic-de/pop-icon-theme-${PV}
+        =cosmic-de/pop-fonts-${PV}
+        gtk-theme? ( =cosmic-de/pop-gtk-theme-${PV} )
+        =cosmic-de/pop-icon-theme-${PV}
 "
