@@ -1,16 +1,16 @@
-BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/pkgconfig-3 >=virtual/rust-1.75.0
+BDEPEND=>=dev-vcs/git-1.8.2.1[curl] >=virtual/pkgconfig-3 >=virtual/rust-1.79.0
 DEFINED_PHASES=compile configure install prepare test unpack
 DEPEND=>=dev-cpp/glibmm-2.66.7:2 >=dev-libs/glib-2.78.3 >=dev-libs/libinput-1.25.0 >=dev-libs/wayland-1.22 >=gui-libs/gtk-4.12.5 >=media-libs/graphene-1.10.8 >=media-libs/gstreamer-1.22.11 >=media-libs/libglvnd-1.7.0 >=media-libs/libpulse-17.0 >=virtual/libudev-251-r2 >=x11-libs/cairo-1.18 >=x11-libs/gdk-pixbuf-2.42.10-r1 >=x11-libs/libxkbcommon-1.6.0 >=x11-libs/pango-1.52.1
 DESCRIPTION=utility for capturing screenshots via XDG Desktop Portal from COSMIC DE
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/cosmic-screenshot
 INHERIT=cosmic-de desktop
-IUSE=abi_x86_32 abi_x86_64 abi_x86_x32 abi_mips_n32 abi_mips_n64 abi_mips_o32 abi_s390_32 abi_s390_64 debug debug debug-line-tables-only elogind max-opt systemd
+IUSE=debug debug debug-line-tables-only elogind max-opt systemd
 KEYWORDS=~amd64
 LICENSE=GPL-3
 PROPERTIES=live
 RDEPEND=>=cosmic-de/xdg-desktop-portal-cosmic-9999 elogind? ( >=sys-auth/elogind-246.10-r3 ) systemd? ( >=sys-apps/systemd-255.3-r1 ) >=sys-apps/dbus-1.15.8
 REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug ) ^^ ( elogind systemd )
 SLOT=0
-_eclasses_=cargo	b672a677bc11cdf4c7510b906bfa534f	cosmic-de	916a33444f2fcab02b386dbe40dcd915	desktop	021728fdc1b03b36357dbc89489e0f0d	flag-o-matic	d309b9713dfc18e754cba88d3ba69653	git-r3	fbb2889c81f3a05910c1524db69425c1	multibuild	d67e78a235f541871c7dfe4cf7931489	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multilib-build	e8aed98bd43dbd25694310a660ad562c	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	out-of-source-utils	1a9007554652a6e627edbccb3c25a439	rust-toolchain	aa01c724f55c868b0aefd0b24b86b2a7	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
+_eclasses_=cargo	67ea64209e3442a3a0e095f048d43a62	cosmic-de	dc3c466a2eb2bc845499e43dd690a6bf	desktop	021728fdc1b03b36357dbc89489e0f0d	flag-o-matic	e503ea5acc20410237ba33ec3f7c857d	git-r3	875eb471682d3e1f18da124be97dcc81	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	rust-toolchain	68a6453cb41148db1da01fa2267527f0	toolchain-funcs	e56c7649b804f051623c8bc1a1c44084
 _md5_=bb0dd8dbab6b7c8a0ee43bf051562753

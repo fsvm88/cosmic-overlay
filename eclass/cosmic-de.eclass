@@ -41,7 +41,7 @@ DEPEND="
 "
 BDEPEND="
 >=virtual/pkgconfig-3
->=virtual/rust-1.75.0
+>=virtual/rust-1.79.0
 "
 # dbus is an RDEPEND pretty much for the entire DE
 # same for systemd

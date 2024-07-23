@@ -2,8 +2,9 @@ DEFINED_PHASES=-
 DESCRIPTION=Meta package for PopOS theme packages
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/theme
+IUSE=gtk-theme
 KEYWORDS=~amd64
 LICENSE=CC-BY-SA-4.0 OFL-1.1
-RDEPEND==cosmic-de/pop-fonts-9999 =cosmic-de/pop-gtk-theme-9999 =cosmic-de/pop-icon-theme-9999
+RDEPEND==cosmic-de/pop-fonts-9999 gtk-theme? ( =cosmic-de/pop-gtk-theme-9999 ) =cosmic-de/pop-icon-theme-9999
 SLOT=0
-_md5_=bac5d58a26bc1845c2a9d9e4cdf5271d
+_md5_=a9a4d4d2c46534d31a6853541548ca39
