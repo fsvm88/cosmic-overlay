@@ -29,7 +29,7 @@ RDEPEND="
 ${RDEPEND}
 >=cosmic-de/pop-icon-theme-${PV}
 >=cosmic-de/system76-power-${PV}
->=sci-libs/libqalculate-5.0.0
+sci-libs/libqalculate
 >=sys-apps/fd-9
 >=x11-misc/xdg-utils-1.2.1-r1
 "
