@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=5ecd697
+	EGIT_COMMIT=82580d5
 	# to drop when tab_click_double_opens_folder will be fixed
 	RESTRICT=test
 else
@@ -25,8 +25,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-files/master/debian/control
 RDEPEND="
-${RDEPEND}
-x11-misc/xdg-utils
+		${RDEPEND}
+		x11-misc/xdg-utils
 "
 
 src_install() {

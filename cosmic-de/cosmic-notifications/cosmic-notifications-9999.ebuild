@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=4a79052
+	EGIT_COMMIT=2caf2fb
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
@@ -25,8 +25,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-notifications/master/debian/control
 BDEPEND="
-${BDEPEND}
->=dev-util/intltool-0.51.0-r3
+		${BDEPEND}
+		>=dev-util/intltool-0.51.0-r3
 "
 
 src_install() {

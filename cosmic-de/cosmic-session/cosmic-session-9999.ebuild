@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=5613bc6
+	EGIT_COMMIT=577a181
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
@@ -25,27 +25,27 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-session/master/debian/control
 RDEPEND="
-${RDEPEND}
-=cosmic-de/cosmic-applets-${PV}
-=cosmic-de/cosmic-applibrary-${PV}
-=cosmic-de/cosmic-bg-${PV}
-=cosmic-de/cosmic-comp-${PV}
-=cosmic-de/cosmic-greeter-${PV}
-=cosmic-de/cosmic-icons-${PV}
-=cosmic-de/cosmic-launcher-${PV}
-=cosmic-de/cosmic-notifications-${PV}
-=cosmic-de/cosmic-osd-${PV}
-=cosmic-de/cosmic-panel-${PV}
-=cosmic-de/cosmic-randr-${PV}
-=cosmic-de/cosmic-screenshot-${PV}
-=cosmic-de/cosmic-settings-${PV}
-=cosmic-de/cosmic-settings-daemon-${PV}
-=cosmic-de/cosmic-workspaces-epoch-${PV}
-=cosmic-de/xdg-desktop-portal-cosmic-${PV}
-=cosmic-de/pop-fonts-${PV}
->=media-fonts/fira-mono-4.202
->=media-fonts/fira-sans-4.202
->=x11-base/xwayland-23.2.6
+		${RDEPEND}
+		=cosmic-de/cosmic-applets-${PV}
+		=cosmic-de/cosmic-applibrary-${PV}
+		=cosmic-de/cosmic-bg-${PV}
+		=cosmic-de/cosmic-comp-${PV}
+		=cosmic-de/cosmic-greeter-${PV}
+		=cosmic-de/cosmic-icons-${PV}
+		=cosmic-de/cosmic-launcher-${PV}
+		=cosmic-de/cosmic-notifications-${PV}
+		=cosmic-de/cosmic-osd-${PV}
+		=cosmic-de/cosmic-panel-${PV}
+		=cosmic-de/cosmic-randr-${PV}
+		=cosmic-de/cosmic-screenshot-${PV}
+		=cosmic-de/cosmic-settings-${PV}
+		=cosmic-de/cosmic-settings-daemon-${PV}
+		=cosmic-de/cosmic-workspaces-epoch-${PV}
+		=cosmic-de/xdg-desktop-portal-cosmic-${PV}
+		=cosmic-de/pop-fonts-${PV}
+		>=media-fonts/fira-mono-4.202
+		>=media-fonts/fira-sans-4.202
+		>=x11-base/xwayland-23.2.6
 "
 
 src_configure() {

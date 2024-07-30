@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=566b866
+	EGIT_COMMIT=813352e
 else
 	SRC_URI="https://github.com/${PN}/${PN}/archive/refs/tags/v${MY_PV}.tar.gz -> ${P}.tar.gz
 				$(cargo_crate_uris)"
@@ -23,9 +23,9 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/xdg-desktop-portal-cosmic/master/debian/control
 DEPEND="
-${DEPEND}
->=media-libs/mesa-24.0.4
->=media-video/pipewire-1.0.3
+		${DEPEND}
+		>=media-libs/mesa-24.0.4
+		>=media-video/pipewire-1.0.3
 "
 
 src_install() {
