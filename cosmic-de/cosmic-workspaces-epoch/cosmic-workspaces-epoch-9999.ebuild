@@ -25,8 +25,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-workspaces-epoch/master/debian/control
 DEPEND="
-		${DEPEND}
-		>=media-libs/mesa-24.0.4
+	${DEPEND}
+	>=media-libs/mesa-24.0.4
 "
 
 src_install() {

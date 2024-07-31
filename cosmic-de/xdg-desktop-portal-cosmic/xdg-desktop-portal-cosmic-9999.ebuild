@@ -23,9 +23,9 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/xdg-desktop-portal-cosmic/master/debian/control
 DEPEND="
-		${DEPEND}
-		>=media-libs/mesa-24.0.4
-		>=media-video/pipewire-1.0.3
+	${DEPEND}
+	>=media-libs/mesa-24.0.4
+	>=media-video/pipewire-1.0.3
 "
 
 src_install() {

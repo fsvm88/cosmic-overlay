@@ -25,12 +25,12 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-launcher/master/debian/control
 BDEPEND="
-		${BDEPEND}
-		>=dev-util/intltool-0.51.0-r3
+	${BDEPEND}
+	>=dev-util/intltool-0.51.0-r3
 "
 RDEPEND="
-		${RDEPEND}
-		=cosmic-de/pop-launcher-${PV}
+	${RDEPEND}
+	=cosmic-de/pop-launcher-${PV}
 "
 
 src_install() {

@@ -24,8 +24,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND="
-		${RDEPEND}
-		>=sys-power/acpid-2.0.34-r1
+	${RDEPEND}
+	>=sys-power/acpid-2.0.34-r1
 "
 
 src_install() {

@@ -25,8 +25,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-notifications/master/debian/control
 BDEPEND="
-		${BDEPEND}
-		>=dev-util/intltool-0.51.0-r3
+	${BDEPEND}
+	>=dev-util/intltool-0.51.0-r3
 "
 
 src_install() {

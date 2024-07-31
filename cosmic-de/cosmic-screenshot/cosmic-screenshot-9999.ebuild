@@ -23,8 +23,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-screenshot/master/debian/control
 RDEPEND="
-		${RDEPEND}
-		>=cosmic-de/xdg-desktop-portal-cosmic-${PV}
+	${RDEPEND}
+	>=cosmic-de/xdg-desktop-portal-cosmic-${PV}
 "
 
 src_install() {

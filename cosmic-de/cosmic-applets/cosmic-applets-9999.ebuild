@@ -24,8 +24,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND="
-		${RDEPEND}
-		=cosmic-de/cosmic-icons-${PV}
+	${RDEPEND}
+	=cosmic-de/cosmic-icons-${PV}
 "
 
 _install_icons() {

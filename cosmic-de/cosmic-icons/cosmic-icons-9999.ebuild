@@ -24,8 +24,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-icons/master/debian/control
 RDEPEND="
-		${RDEPEND}
-		=cosmic-de/pop-icon-theme-${PV}
+	${RDEPEND}
+	=cosmic-de/pop-icon-theme-${PV}
 "
 
 src_unpack() {

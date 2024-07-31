@@ -25,8 +25,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-files/master/debian/control
 RDEPEND="
-		${RDEPEND}
-		x11-misc/xdg-utils
+	${RDEPEND}
+	x11-misc/xdg-utils
 "
 
 src_install() {

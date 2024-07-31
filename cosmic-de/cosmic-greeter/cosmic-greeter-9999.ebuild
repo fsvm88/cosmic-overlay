@@ -23,14 +23,14 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-greeter/master/debian/control
 DEPEND="
-		${DEPEND}
-		>=sys-libs/pam-1.5.3-r1
+	${DEPEND}
+	>=sys-libs/pam-1.5.3-r1
 "
 RDEPEND="
-		${RDEPEND}
-		=cosmic-de/cosmic-comp-${PV}
-		>=acct-user/cosmic-greeter-0
-		>=gui-libs/greetd-0.9.0
+	${RDEPEND}
+	=cosmic-de/cosmic-comp-${PV}
+	>=acct-user/cosmic-greeter-0
+	>=gui-libs/greetd-0.9.0
 "
 
 src_configure() {

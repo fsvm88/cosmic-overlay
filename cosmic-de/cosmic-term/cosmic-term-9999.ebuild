@@ -23,8 +23,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-term/master/debian/control
 RDEPEND="
-		${RDEPEND}
-		>=cosmic-de/cosmic-icons-${PV}
+	${RDEPEND}
+	>=cosmic-de/cosmic-icons-${PV}
 "
 
 src_install() {

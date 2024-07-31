@@ -25,9 +25,9 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-osd/master/debian/control
 RDEPEND="
-		${RDEPEND}
-		>=media-libs/libpulse-17.0
-		>=virtual/libudev-251-r2
+	${RDEPEND}
+	>=media-libs/libpulse-17.0
+	>=virtual/libudev-251-r2
 "
 
 src_install() {
