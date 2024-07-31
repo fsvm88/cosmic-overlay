@@ -36,6 +36,7 @@ DEPEND="
 src_install() {
 	dobin "target/$profile_name/$PN"
 
-	insinto /etc/cosmic-comp
-	doins config.ron
+	# See https://github.com/pop-os/cosmic-comp/issues/602#issuecomment-2228684870
+	# insinto /etc/cosmic-comp
+	# doins config.ron
 }
