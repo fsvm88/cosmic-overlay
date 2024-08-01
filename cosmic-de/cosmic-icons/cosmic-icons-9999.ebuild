@@ -9,7 +9,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 if [ "${PV}" == "9999" ]; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=f48101c
+	EGIT_COMMIT=73be037
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
@@ -24,8 +24,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-icons/master/debian/control
 RDEPEND="
-${RDEPEND}
-=cosmic-de/pop-icon-theme-${PV}
+	${RDEPEND}
+	=cosmic-de/pop-icon-theme-${PV}
 "
 
 src_unpack() {

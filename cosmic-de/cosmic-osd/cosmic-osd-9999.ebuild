@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=dc4df2c
+	EGIT_COMMIT=27fc5e5
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
@@ -25,9 +25,9 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-osd/master/debian/control
 RDEPEND="
-${RDEPEND}
->=media-libs/libpulse-17.0
->=virtual/libudev-251-r2
+	${RDEPEND}
+	>=media-libs/libpulse-17.0
+	>=virtual/libudev-251-r2
 "
 
 src_install() {

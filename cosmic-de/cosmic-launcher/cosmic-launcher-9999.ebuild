@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=7752b9b
+	EGIT_COMMIT=96d9042
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
@@ -25,12 +25,12 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-launcher/master/debian/control
 BDEPEND="
-${BDEPEND}
->=dev-util/intltool-0.51.0-r3
+	${BDEPEND}
+	>=dev-util/intltool-0.51.0-r3
 "
 RDEPEND="
-${RDEPEND}
-=cosmic-de/pop-launcher-${PV}
+	${RDEPEND}
+	=cosmic-de/pop-launcher-${PV}
 "
 
 src_install() {

@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=08edc89
+	EGIT_COMMIT=5323a09
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
@@ -26,7 +26,7 @@ KEYWORDS="~amd64"
 src_install() {
 	# One of the few where $PN does not apply (would be cosmic-applibrary)
 	dobin "target/$profile_name/cosmic-app-library"
-	
+
 	domenu data/com.system76.CosmicAppLibrary.desktop
 
 	cosmic-de_install_metainfo data/com.system76.CosmicAppLibrary.metainfo.xml

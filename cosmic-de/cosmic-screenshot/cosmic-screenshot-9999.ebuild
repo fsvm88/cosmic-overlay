@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=f853446
+	EGIT_COMMIT=031eb66
 else
 	SRC_URI="https://github.com/${PN}/${PN}/archive/refs/tags/v${MY_PV}.tar.gz -> ${P}.tar.gz
 			$(cargo_crate_uris)"
@@ -23,8 +23,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-screenshot/master/debian/control
 RDEPEND="
-${RDEPEND}
->=cosmic-de/xdg-desktop-portal-cosmic-${PV}
+	${RDEPEND}
+	>=cosmic-de/xdg-desktop-portal-cosmic-${PV}
 "
 
 src_install() {

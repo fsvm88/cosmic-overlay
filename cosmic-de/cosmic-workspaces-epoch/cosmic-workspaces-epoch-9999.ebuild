@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ ${PV} == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=30b0cfe
+	EGIT_COMMIT=2de3669
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
@@ -25,8 +25,8 @@ KEYWORDS="~amd64"
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-workspaces-epoch/master/debian/control
 DEPEND="
-${DEPEND}
->=media-libs/mesa-24.0.4
+	${DEPEND}
+	>=media-libs/mesa-24.0.4
 "
 
 src_install() {

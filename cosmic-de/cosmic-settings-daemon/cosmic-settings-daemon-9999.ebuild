@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=bf2e505
+	EGIT_COMMIT=54700df
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
@@ -24,8 +24,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND="
-${RDEPEND}
->=sys-power/acpid-2.0.34-r1
+	${RDEPEND}
+	>=sys-power/acpid-2.0.34-r1
 "
 
 src_install() {
