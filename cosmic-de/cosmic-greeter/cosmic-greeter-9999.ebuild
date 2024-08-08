@@ -3,6 +3,7 @@
 
 EAPI=8
 
+EGIT_LFS=1
 inherit cosmic-de systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
@@ -49,6 +50,12 @@ src_install() {
 	doins cosmic-greeter.toml
 
 	systemd_dounit debian/cosmic-greeter-daemon.service
+
+	# We need to ensure this provides display-manager.service
+	sed -i \
+		-e '/#\[Install\]/s/^#//' \
+		-e '/#Alias/s/^#//' \
+		debian/cosmic-greeter.service
 	systemd_dounit debian/cosmic-greeter.service
 
 	newtmpfiles "${FILESDIR}/systemd.tmpfiles" "${PN}.conf"
