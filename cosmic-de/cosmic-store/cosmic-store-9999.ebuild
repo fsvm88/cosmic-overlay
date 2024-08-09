@@ -30,6 +30,7 @@ DEPEND="
 RDEPEND="
 	${RDEPEND}
 	=cosmic-de/pop-appstream-data-${PV}
+	=cosmic-de/cosmic-icons-${PV}
 "
 
 src_install() {

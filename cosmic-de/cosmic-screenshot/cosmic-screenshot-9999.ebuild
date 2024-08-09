@@ -31,4 +31,7 @@ src_install() {
 	dobin "target/$profile_name/$PN"
 
 	domenu resources/com.system76.CosmicScreenshot.desktop
+
+	insinto /usr/share/icons/hicolor
+	doins -r resources/icons/hicolor/*
 }

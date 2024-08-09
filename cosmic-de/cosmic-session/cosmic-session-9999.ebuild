@@ -23,7 +23,6 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-session/master/debian/control
 RDEPEND="
 	${RDEPEND}
 	=cosmic-de/cosmic-applets-${PV}
@@ -40,11 +39,13 @@ RDEPEND="
 	=cosmic-de/cosmic-screenshot-${PV}
 	=cosmic-de/cosmic-settings-${PV}
 	=cosmic-de/cosmic-settings-daemon-${PV}
+	=cosmic-de/cosmic-wallpapers-${PV}
 	=cosmic-de/cosmic-workspaces-epoch-${PV}
 	=cosmic-de/xdg-desktop-portal-cosmic-${PV}
 	=cosmic-de/pop-fonts-${PV}
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
+	>=sys-power/switcheroo-control-2.6-r2
 	>=x11-base/xwayland-23.2.6
 "
 
@@ -56,6 +57,10 @@ src_configure() {
 	cosmic-de_src_configure
 }
 
+# This is still missing the gsettings-override file, not sure how to do it properly
+# https://github.com/pop-os/cosmic-session/commit/c341953588098c1735f7984a13e64399b92d4313
+# https://github.com/pop-os/cosmic-session/commit/db1b12b7d764dd2d973933dbbb37ca276035c694
+# https://github.com/pop-os/cosmic-session/commit/153952c1ed2cb98772a84aa9b2c8729f6451c8ea
 src_install() {
 	dobin "target/$profile_name/$PN"
 
@@ -67,5 +72,5 @@ src_install() {
 	doins data/cosmic.desktop
 
 	insinto /usr/share/applications
-	doinst data/cosmic-mimeapps.list
+	doins data/cosmic-mimeapps.list
 }

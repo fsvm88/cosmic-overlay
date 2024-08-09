@@ -25,6 +25,7 @@ KEYWORDS="~amd64"
 # As per https://raw.githubusercontent.com/pop-os/cosmic-greeter/master/debian/control
 DEPEND="
 	${DEPEND}
+	>=dev-libs/libinput-1.26.1
 	>=sys-libs/pam-1.5.3-r1
 "
 RDEPEND="

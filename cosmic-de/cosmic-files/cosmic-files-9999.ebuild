@@ -23,7 +23,10 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-files/master/debian/control
+BDEPEND="
+	${BDEPEND}
+	dev-libs/glib:2
+"
 RDEPEND="
 	${RDEPEND}
 	x11-misc/xdg-utils

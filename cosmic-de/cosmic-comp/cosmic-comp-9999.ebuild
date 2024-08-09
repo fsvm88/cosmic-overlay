@@ -36,7 +36,7 @@ DEPEND="
 src_install() {
 	dobin "target/$profile_name/$PN"
 
-	# See https://github.com/pop-os/cosmic-comp/issues/602#issuecomment-2228684870
-	# insinto /etc/cosmic-comp
-	# doins config.ron
+	# Default keybindings
+	insinto /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1
+	newins data/keybindings.ron defaults
 }

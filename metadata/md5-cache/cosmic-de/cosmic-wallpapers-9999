@@ -1,0 +1,12 @@
+BDEPEND=media-gfx/imagemagick >=dev-vcs/git-1.8.2.1[curl] dev-vcs/git-lfs
+DEFINED_PHASES=install unpack
+DESCRIPTION=Wallpapers for the COSMIC DE
+EAPI=8
+HOMEPAGE=https://github.com/pop-os/cosmic-wallpapers
+INHERIT=git-r3
+KEYWORDS=~amd64
+LICENSE=Unknown
+PROPERTIES=live
+SLOT=0
+_eclasses_=git-r3	875eb471682d3e1f18da124be97dcc81
+_md5_=27fa7c44c2ec77428221ffb788446294
