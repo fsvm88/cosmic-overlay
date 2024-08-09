@@ -66,6 +66,7 @@ src_install() {
 	_install_applet "cosmic-applet-audio" "com.system76.CosmicAppletAudio"
 	_install_applet "cosmic-applet-battery" "com.system76.CosmicAppletBattery"
 	_install_applet "cosmic-applet-bluetooth" "com.system76.CosmicAppletBluetooth"
+	_install_applet "cosmic-applet-input-sources" "com.system76.CosmicAppletInputSources"
 	_install_applet "cosmic-applet-minimize" "com.system76.CosmicAppletMinimize"
 	_install_applet "cosmic-applet-network" "com.system76.CosmicAppletNetwork"
 	_install_applet "cosmic-applet-notifications" "com.system76.CosmicAppletNotifications"
