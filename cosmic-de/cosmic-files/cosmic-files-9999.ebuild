@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=82580d5
+	EGIT_COMMIT=190029a
 	# to drop when tab_click_double_opens_folder will be fixed
 	RESTRICT=test
 else
