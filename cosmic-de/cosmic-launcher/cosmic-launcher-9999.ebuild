@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/$PN"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=96d9042
+	EGIT_COMMIT=d84fda0
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
