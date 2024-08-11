@@ -57,10 +57,6 @@ src_configure() {
 	cosmic-de_src_configure
 }
 
-# This is still missing the gsettings-override file, not sure how to do it properly
-# https://github.com/pop-os/cosmic-session/commit/c341953588098c1735f7984a13e64399b92d4313
-# https://github.com/pop-os/cosmic-session/commit/db1b12b7d764dd2d973933dbbb37ca276035c694
-# https://github.com/pop-os/cosmic-session/commit/153952c1ed2cb98772a84aa9b2c8729f6451c8ea
 src_install() {
 	dobin "target/$profile_name/$PN"
 
@@ -73,4 +69,11 @@ src_install() {
 
 	insinto /usr/share/applications
 	doins data/cosmic-mimeapps.list
+
+	# This install was copied from the cosmic-session debian package available from Pop!_OS
+	# https://github.com/pop-os/cosmic-session/commit/c341953588098c1735f7984a13e64399b92d4313
+	# https://github.com/pop-os/cosmic-session/commit/db1b12b7d764dd2d973933dbbb37ca276035c694
+	# https://github.com/pop-os/cosmic-session/commit/153952c1ed2cb98772a84aa9b2c8729f6451c8ea
+	insinto /usr/share/glib-2.0/schemas
+	newins debian/cosmic-session.gsettings-override 50_cosmic-session.gschema.override
 }

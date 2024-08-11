@@ -13,4 +13,4 @@ RDEPEND=elogind? ( >=sys-auth/elogind-246.10-r3 ) systemd? ( >=sys-apps/systemd-
 REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug ) ^^ ( elogind systemd )
 SLOT=0
 _eclasses_=cargo	c806360bab90e2b49223df1810172c2b	cosmic-de	ffdb1a1d2388e0cb139af21855ea0ff1	flag-o-matic	e503ea5acc20410237ba33ec3f7c857d	git-r3	875eb471682d3e1f18da124be97dcc81	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	rust-toolchain	2170de6b588d2626aaf369dbd57d7a0c	toolchain-funcs	0c713337f7872f1a002cecaaea9bef73
-_md5_=20c2f034939b9bffe9ba4341ffbad827
+_md5_=1b4bf911bdbad6cd0ca966cffb09e550

@@ -85,5 +85,5 @@ src_install() {
 
 	# Install default schema
 	insinto /usr/share/cosmic
-	doins -r cosmic-app-list/data/default_schema
+	doins -r cosmic-app-list/data/default_schema/*
 }

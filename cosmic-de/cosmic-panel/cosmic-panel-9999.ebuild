@@ -23,13 +23,8 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-panel/master/debian/control
-
 src_install() {
 	dobin "target/$profile_name/$PN"
-
-	insinto /etc/cosmic-panel
-	doins cosmic-panel-config/config.ron
 
 	insinto /usr/share/cosmic
 	doins -r data/default_schema/*
