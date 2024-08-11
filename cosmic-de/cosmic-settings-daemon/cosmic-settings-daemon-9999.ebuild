@@ -25,6 +25,7 @@ KEYWORDS="~amd64"
 
 RDEPEND="
 	${RDEPEND}
+	>=app-misc/geoclue-2.7.1
 	>=media-sound/playerctl-2.3.1
 	>=sys-power/acpid-2.0.34-r1
 "

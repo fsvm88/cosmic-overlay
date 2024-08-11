@@ -9,8 +9,8 @@ IUSE=debug debug debug-line-tables-only elogind max-opt systemd
 KEYWORDS=~amd64
 LICENSE=GPL-3
 PROPERTIES=live
-RDEPEND=>=media-sound/playerctl-2.3.1 >=sys-power/acpid-2.0.34-r1 elogind? ( >=sys-auth/elogind-246.10-r3 ) systemd? ( >=sys-apps/systemd-255.3-r1 ) >=sys-apps/dbus-1.15.8
+RDEPEND=>=app-misc/geoclue-2.7.1 >=media-sound/playerctl-2.3.1 >=sys-power/acpid-2.0.34-r1 elogind? ( >=sys-auth/elogind-246.10-r3 ) systemd? ( >=sys-apps/systemd-255.3-r1 ) >=sys-apps/dbus-1.15.8
 REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug ) ^^ ( elogind systemd )
 SLOT=0
-_eclasses_=cargo	c806360bab90e2b49223df1810172c2b	cosmic-de	ffdb1a1d2388e0cb139af21855ea0ff1	flag-o-matic	e503ea5acc20410237ba33ec3f7c857d	git-r3	875eb471682d3e1f18da124be97dcc81	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	rust-toolchain	2170de6b588d2626aaf369dbd57d7a0c	toolchain-funcs	e7e7331166166e7a516d19e264b098c2
-_md5_=14eafd16fda792de808dad9b2946b8c4
+_eclasses_=cargo	c806360bab90e2b49223df1810172c2b	cosmic-de	ffdb1a1d2388e0cb139af21855ea0ff1	flag-o-matic	e503ea5acc20410237ba33ec3f7c857d	git-r3	875eb471682d3e1f18da124be97dcc81	multilib	c19072c3cd7ac5cb21de013f7e9832e0	multiprocessing	30ead54fa2e2b5f9cd4e612ffc34d0fe	rust-toolchain	2170de6b588d2626aaf369dbd57d7a0c	toolchain-funcs	0c713337f7872f1a002cecaaea9bef73
+_md5_=afc8744278ebcd21d5cc162c32888b15
