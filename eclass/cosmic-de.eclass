@@ -54,7 +54,7 @@ systemd? ( >=sys-apps/systemd-255.3-r1 )
 CARGO_OPTIONAL=1
 inherit cargo
 
-[[ "${PV}" == *9999* ]] && inherit git-r3
+[[ "${PV}" == *9999* ]] || [[ "${COSMIC_GIT_UNPACK}" -ne 0 ]] && inherit git-r3
 
 IUSE="${IUSE} debug debug-line-tables-only elogind max-opt systemd"
 REQUIRED_USE="
@@ -68,9 +68,13 @@ max-opt? ( !debug )
 # @DESCRIPTION:
 # Unpacks the package and the cargo registry.
 cosmic-de_src_unpack() {
-	if [[ "${PV}" == *9999* ]]; then
+	if [[ "${PV}" == *9999* ]] || [[ "${COSMIC_GIT_UNPACK}" -ne 0 ]]; then
 		git-r3_src_unpack
-		cargo_live_src_unpack
+		if [[ "${COSMIC_GIT_UNPACK}" -ne 0 ]]; then
+			PV=9999 cargo_live_src_unpack
+		else
+			cargo_live_src_unpack
+		fi
 	else
 		cargo_src_unpack
 	fi
