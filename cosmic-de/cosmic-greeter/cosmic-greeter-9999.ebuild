@@ -9,13 +9,8 @@ inherit cosmic-de systemd tmpfiles
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
 
-if [ "${PV}" == "9999" ]; then
-	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=cc744b0
-else
-	SRC_URI="https://github.com/${PN}/${PN}/archive/refs/tags/v${MY_PV}.tar.gz -> ${P}.tar.gz
-			$(cargo_crate_uris)"
-fi
+EGIT_REPO_URI="${HOMEPAGE}"
+EGIT_BRANCH=master
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"

@@ -8,15 +8,8 @@ inherit cosmic-de desktop
 DESCRIPTION="workspaces support for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
 
-if [ ${PV} == "9999" ]; then
-	EGIT_REPO_URI="${HOMEPAGE}"
-	EGIT_COMMIT=c1acf0c
-else
-	# TODO this is not really working atm
-	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
-				$(cargo_crate_uris)
-"
-fi
+EGIT_REPO_URI="${HOMEPAGE}"
+EGIT_BRANCH=master
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
