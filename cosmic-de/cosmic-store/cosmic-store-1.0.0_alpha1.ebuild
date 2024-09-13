@@ -25,7 +25,7 @@ DEPEND="
 "
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/pop-appstream-data-${PV}
+	=cosmic-de/pop-appstream-data-9999
 	=cosmic-de/cosmic-icons-${PV}
 "
 

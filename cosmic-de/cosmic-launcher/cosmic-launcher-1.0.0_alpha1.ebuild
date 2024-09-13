@@ -24,7 +24,7 @@ BDEPEND="
 "
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/pop-launcher-${PV}
+	=cosmic-de/pop-launcher-9999
 "
 
 src_install() {
