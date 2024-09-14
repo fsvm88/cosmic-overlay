@@ -26,6 +26,14 @@ DEPEND="
 	>=x11-libs/pixman-0.43.4
 "
 
+src_configure() {
+	if use elogind; then
+		cosmic-de_src_configure --no-default-features
+	else
+		cosmic-de_src_configure
+	fi
+}
+
 src_install() {
 	dobin "target/$profile_name/$PN"
 
