@@ -13,4 +13,4 @@ RDEPEND==cosmic-de/cosmic-applets-1.0.0_alpha1 =cosmic-de/cosmic-applibrary-1.0.
 REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug ) ^^ ( elogind systemd )
 SLOT=0
 _eclasses_=cargo	c806360bab90e2b49223df1810172c2b	cosmic-de	ae2f047c0b03840c2ef17f27ed02992f	flag-o-matic	fa33e3696fe4689dda7e9affe92e2c94	git-r3	875eb471682d3e1f18da124be97dcc81	multilib	7e1347c006a76bb812f3a9f663b79991	multiprocessing	e644caa6eb7ce7e5ab0864383ac13ad9	rust-toolchain	3f822985d9297438ed2443aa1fbdf33e	systemd	0f241b5c9f3758c3d3423df59a7f655a	toolchain-funcs	948855ec7ad9f11351edf9066708dfa9
-_md5_=467b4c5e5b0d1df3987c6054ad5ed212
+_md5_=3b55cd53fec6c3ebcd71ad1141306e61
