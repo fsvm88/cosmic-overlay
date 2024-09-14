@@ -43,12 +43,21 @@ RDEPEND="
 	>=x11-base/xwayland-23.2.6
 "
 
+src_prepare() {
+	use elogind && eapply "${FILESDIR}/no_journald-systemctl.patch"
+	cosmic-de_src_prepare
+}
+
 src_configure() {
 	# This is required because this string is incorporated in the binary during the build process
 	# Technically there's a fallback .unwrap_or_default() in the code,
 	# but we should still keep this aligned to xdg-desktop-portal-cosmic
 	export XDP_COSMIC="/usr/libexec/xdg-desktop-portal-cosmic"
-	cosmic-de_src_configure
+	if use elogind; then
+		cosmic-de_src_configure --no-default-features
+	else
+		cosmic-de_src_configure
+	fi
 }
 
 src_install() {
