@@ -33,6 +33,7 @@ DEPEND="
 >=media-libs/gstreamer-1.22.11
 >=media-libs/libglvnd-1.7.0
 >=media-libs/libpulse-17.0
+>=media-video/pipewire-1.0.5
 >=virtual/libudev-251-r2
 >=x11-libs/cairo-1.18
 >=x11-libs/gdk-pixbuf-2.42.10-r1

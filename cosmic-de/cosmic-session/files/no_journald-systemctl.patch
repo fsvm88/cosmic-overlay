@@ -1,0 +1,35 @@
+# As per bug: https://github.com/fsvm88/cosmic-overlay/issues/9
+# https://reddoglinux.ddns.net/linux/cosmic/source/cosmic-session/no_journald-systemctl.patch
+diff --git a/src/systemd.rs b/src/systemd.rs
+index 9d617d5..6ee03da 100644
+--- a/src/systemd.rs
++++ b/src/systemd.rs
+@@ -11,22 +11,22 @@ use zbus_systemd::systemd1::ManagerProxy as SystemdManagerProxy;
+ 
+ pub async fn set_systemd_environment(key: &str, value: &str) {
+ 	run_optional_command(
+-		"systemctl",
+-		&["--user", "set-environment", &format!("{key}={value}")],
++		"loginctl",
++		&["attach", &format!("{key}={value}")],
+ 	)
+ }
+ 
+ pub async fn start_systemd_target() {
+ 	run_optional_command(
+-		"systemctl",
+-		&["--user", "start", "--no-block", "cosmic-session.target"],
++		"loginctl",
++		&["activate", "--ignore-inhibitors"],
+ 	)
+ }
+ 
+ pub fn stop_systemd_target() {
+ 	run_optional_command(
+-		"systemctl",
+-		&["--user", "stop", "--no-block", "cosmic-session.target"],
++		"loginctl",
++		&["terminate-session", "--ignore-inhibitors"],
+ 	)
+ }
+ 
