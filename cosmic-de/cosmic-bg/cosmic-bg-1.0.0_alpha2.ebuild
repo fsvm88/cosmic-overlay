@@ -10,7 +10,7 @@ DESCRIPTION="display background service for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.1"
+EGIT_COMMIT="epoch-1.0.0-alpha.2"
 
 # use cargo-license for a more accurate license picture
 LICENSE="MPL-2.0"
