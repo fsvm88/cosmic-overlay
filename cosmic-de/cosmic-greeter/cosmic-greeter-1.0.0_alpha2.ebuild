@@ -3,6 +3,7 @@
 
 EAPI=8
 
+COSMIC_GIT_UNPACK=1
 EGIT_LFS=1
 inherit cosmic-de pam systemd tmpfiles
 
@@ -10,7 +11,7 @@ DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+EGIT_COMMIT="epoch-1.0.0-alpha.2"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
