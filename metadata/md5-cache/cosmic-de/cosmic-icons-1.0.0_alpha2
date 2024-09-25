@@ -1,0 +1,13 @@
+BDEPEND=>=dev-vcs/git-1.8.2.1[curl]
+DEFINED_PHASES=install unpack
+DESCRIPTION=icon set COSMIC DE
+EAPI=8
+HOMEPAGE=https://github.com/pop-os/cosmic-icons
+INHERIT=git-r3
+KEYWORDS=~amd64
+LICENSE=CC-BY-SA-4.0
+PROPERTIES=live
+RDEPEND==cosmic-de/pop-icon-theme-9999
+SLOT=0
+_eclasses_=git-r3	875eb471682d3e1f18da124be97dcc81
+_md5_=a5a5b5d0a1f08c2a635209eed32ccca9
