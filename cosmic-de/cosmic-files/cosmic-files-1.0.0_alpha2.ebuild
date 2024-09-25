@@ -3,13 +3,14 @@
 
 EAPI=8
 
+COSMIC_GIT_UNPACK=1
 inherit cosmic-de desktop
 
 DESCRIPTION="file manager from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+EGIT_COMMIT="epoch-1.0.0-alpha.2"
 # to drop when tab_click_double_opens_folder will be fixed
 RESTRICT=test
 
