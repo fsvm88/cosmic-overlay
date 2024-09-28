@@ -10,4 +10,4 @@ PROPERTIES=live
 RDEPEND==cosmic-de/pop-icon-theme-9999
 SLOT=0
 _eclasses_=git-r3	875eb471682d3e1f18da124be97dcc81
-_md5_=decd7e2061fe68e560bb7d2a5fff2afc
+_md5_=87cca17602c4404db35a6e1ce321fe57

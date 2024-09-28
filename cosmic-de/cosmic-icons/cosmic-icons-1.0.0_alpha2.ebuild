@@ -22,7 +22,7 @@ RDEPEND="
 "
 
 src_unpack() {
-	if [[ "${PV}" == *9999* ]]; then
+	if [[ "${PV}" == *9999* ]] || [[ -n "$EGIT_REPO_URI" ]]; then
 		git-r3_src_unpack
 	else
 		if [[ -n ${A} ]]; then
