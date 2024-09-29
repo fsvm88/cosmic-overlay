@@ -4,7 +4,7 @@
 EAPI=8
 
 EGIT_LFS=1
-inherit cosmic-de systemd tmpfiles
+inherit cosmic-de pam systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
@@ -47,6 +47,8 @@ src_install() {
 	doins cosmic-greeter.toml
 
 	systemd_dounit debian/cosmic-greeter-daemon.service
+
+	dopamd debian/cosmic-greeter.pam
 
 	# We need to ensure this provides display-manager.service
 	sed -i \

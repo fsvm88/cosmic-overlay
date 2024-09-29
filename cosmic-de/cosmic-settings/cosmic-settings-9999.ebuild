@@ -22,6 +22,7 @@ BDEPEND="
 	>=dev-libs/expat-2.5.0
 	>=media-libs/fontconfig-2.14.2-r3
 	>=media-libs/freetype-2.13.2
+	>=sys-devel/clang-18
 "
 RDEPEND="
 	${RDEPEND}
@@ -30,6 +31,8 @@ RDEPEND="
 	>=app-text/iso-codes-4.16.0
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
+	>=net-misc/networkmanager-1.46.0
+	>=net-vpn/networkmanager-openvpn-1.10.2
 	>=sys-apps/accountsservice-23.13.9
 	>=sys-devel/gettext-0.22.4
 	>=x11-misc/xkeyboard-config-2.41

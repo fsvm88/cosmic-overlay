@@ -40,4 +40,8 @@ src_install() {
 	# Default keybindings
 	insinto /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1
 	newins data/keybindings.ron defaults
+
+	# Tiling exceptions
+	insinto /usr/share/cosmic/com.system76.CosmicSettings.WindowRules/v1
+	newins data/tiling-exceptions.ron tiling_exception_defaults
 }

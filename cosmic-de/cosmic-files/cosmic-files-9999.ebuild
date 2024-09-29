@@ -27,8 +27,14 @@ RDEPEND="
 	x11-misc/xdg-utils
 "
 
+src_compile() {
+	cosmic-de_src_compile
+	cosmic-de_src_compile --package "$PN-applet"
+}
+
 src_install() {
 	dobin "target/$profile_name/$PN"
+	dobin "target/$profile_name/$PN-applet"
 
 	domenu res/com.system76.CosmicFiles.desktop
 

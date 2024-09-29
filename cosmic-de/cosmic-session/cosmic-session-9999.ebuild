@@ -7,6 +7,7 @@ inherit cosmic-de systemd
 
 DESCRIPTION="sessions manager for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
+IUSE="${IUSE} cups"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
@@ -32,7 +33,7 @@ RDEPEND="
 	=cosmic-de/cosmic-screenshot-${PV}
 	=cosmic-de/cosmic-settings-${PV}
 	=cosmic-de/cosmic-settings-daemon-${PV}
-	=cosmic-de/cosmic-wallpapers-${PV}
+	=cosmic-de/cosmic-wallpapers-9999
 	=cosmic-de/cosmic-workspaces-epoch-${PV}
 	=cosmic-de/xdg-desktop-portal-cosmic-${PV}
 	=cosmic-de/pop-fonts-${PV}
@@ -40,6 +41,7 @@ RDEPEND="
 	>=media-fonts/fira-sans-4.202
 	>=sys-power/switcheroo-control-2.6-r2
 	>=x11-base/xwayland-23.2.6
+	cups? ( >=app-admin/system-config-printer-1.5.18-r2 )
 "
 
 src_prepare() {

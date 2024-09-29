@@ -26,9 +26,13 @@ _install_icons() {
 	doins -r "$1"/data/icons/*
 }
 
-_install_applet() {
+_link_applet() {
 	# Symlink to the multicall binary
 	dosym -r "/usr/bin/${PN}" "/usr/bin/$1"
+}
+
+_install_applet() {
+	_link_applet "$1"
 
 	# Insert icons
 	_install_icons "$1"
@@ -48,8 +52,6 @@ _install_button() {
 src_install() {
 	# This git project now creates one multicall binary
 	dobin "target/$profile_name/${PN}"
-	# This ebuild also provides this
-	dobin "target/$profile_name/cosmic-panel-button"
 
 	# Install applets:
 	# - s-link to multicall binary
@@ -75,6 +77,9 @@ src_install() {
 	_install_button "cosmic-panel-app-button" "com.system76.CosmicPanelAppButton"
 	_install_button "cosmic-panel-launcher-button" "com.system76.CosmicPanelLauncherButton"
 	_install_button "cosmic-panel-workspaces-button" "com.system76.CosmicPanelWorkspacesButton"
+
+	# cosmic-panel-button is only s-linked to the multicall binary
+	_link_applet "cosmic-panel-button"
 
 	# Install default schema
 	insinto /usr/share/cosmic
