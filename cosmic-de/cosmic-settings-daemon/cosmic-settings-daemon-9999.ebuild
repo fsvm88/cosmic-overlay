@@ -7,6 +7,7 @@ inherit cosmic-de
 
 DESCRIPTION="settings daemon for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/$PN"
+IUSE="${IUSE} mpris"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
@@ -19,7 +20,7 @@ KEYWORDS="~amd64"
 RDEPEND="
 	${RDEPEND}
 	>=app-misc/geoclue-2.7.1
-	>=media-sound/playerctl-2.3.1
+	mpris? ( >=media-sound/playerctl-2.3.1 )
 	>=sys-power/acpid-2.0.34-r1
 "
 
