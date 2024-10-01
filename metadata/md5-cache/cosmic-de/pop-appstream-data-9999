@@ -4,10 +4,9 @@ DESCRIPTION=AppStream data for COSMIC DE
 EAPI=8
 HOMEPAGE=https://github.com/pop-os/appstream-data
 INHERIT=git-r3
-KEYWORDS=~amd64
 LICENSE=OFL-1.1
 PROPERTIES=live
 RDEPEND=>=dev-libs/appstream-0.16.4
 SLOT=0
 _eclasses_=git-r3	875eb471682d3e1f18da124be97dcc81
-_md5_=fb21b1db854e2d58a3b2c818c2d129b2
+_md5_=a04903f1e938e4ef7056c7d6032ad9d1
