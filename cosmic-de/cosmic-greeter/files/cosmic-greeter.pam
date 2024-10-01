@@ -1,0 +1,7 @@
+# this file was copied from the one provided by greetd at /etc/pam.d/greetd
+# this should be sufficient to get cosmic-greeter working for the time being,
+# until a better pamfile is written
+auth            include         login
+account         include         login
+password        include         login
+session         include         login
