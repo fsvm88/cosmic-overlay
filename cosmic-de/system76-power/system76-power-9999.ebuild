@@ -16,7 +16,6 @@ else
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
 				$(cargo_crate_uris)
 "
-	KEYWORDS="~amd64"
 fi
 
 # use cargo-license for a more accurate license picture
