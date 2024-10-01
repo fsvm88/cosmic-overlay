@@ -18,6 +18,10 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
+if [[ ${PV} == 9999 ]]; then
+	KEYWORDS=""
+fi
+
 BDEPEND="
 	${BDEPEND}
 	dev-libs/glib:2

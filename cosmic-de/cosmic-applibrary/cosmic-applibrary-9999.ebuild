@@ -16,6 +16,10 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
+if [[ ${PV} == 9999 ]]; then
+	KEYWORDS=""
+fi
+
 src_install() {
 	# One of the few where $PN does not apply (would be cosmic-applibrary)
 	dobin "target/$profile_name/cosmic-app-library"

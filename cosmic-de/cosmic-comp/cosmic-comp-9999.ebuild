@@ -16,6 +16,10 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
+if [[ ${PV} == 9999 ]]; then
+	KEYWORDS=""
+fi
+
 # As per https://raw.githubusercontent.com/pop-os/cosmic-comp/master/debian/control
 DEPEND="
 	${DEPEND}
