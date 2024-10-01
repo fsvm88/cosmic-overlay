@@ -52,7 +52,7 @@ src_install() {
 
 	systemd_dounit debian/cosmic-greeter-daemon.service
 
-	dopamd debian/cosmic-greeter.pam
+	newpamd debian/cosmic-greeter.pam cosmic-greeter
 
 	# We need to ensure this provides display-manager.service
 	sed -i \
