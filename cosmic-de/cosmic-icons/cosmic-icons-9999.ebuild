@@ -15,6 +15,10 @@ LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
+if [[ ${PV} == 9999 ]]; then
+	KEYWORDS=""
+fi
+
 # As per https://raw.githubusercontent.com/pop-os/cosmic-icons/master/debian/control
 RDEPEND="
 	${RDEPEND}

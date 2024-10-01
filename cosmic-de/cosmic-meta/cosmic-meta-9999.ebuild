@@ -15,6 +15,10 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE="store"
 
+if [[ ${PV} == 9999 ]]; then
+	KEYWORDS=""
+fi
+
 RDEPEND="
         =cosmic-de/cosmic-applets-${PV}
         =cosmic-de/cosmic-applibrary-${PV}

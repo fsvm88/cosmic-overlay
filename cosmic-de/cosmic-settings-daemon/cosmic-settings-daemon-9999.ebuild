@@ -17,6 +17,10 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
+if [[ ${PV} == 9999 ]]; then
+	KEYWORDS=""
+fi
+
 RDEPEND="
 	${RDEPEND}
 	>=app-misc/geoclue-2.7.1

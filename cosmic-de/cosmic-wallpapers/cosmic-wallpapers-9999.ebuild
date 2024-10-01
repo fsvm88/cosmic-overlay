@@ -20,6 +20,10 @@ LICENSE="Unknown"
 SLOT="0"
 KEYWORDS="~amd64"
 
+if [[ ${PV} == 9999 ]]; then
+	KEYWORDS=""
+fi
+
 src_unpack() {
 	if [[ "${PV}" == *9999* ]]; then
 		git-r3_src_unpack

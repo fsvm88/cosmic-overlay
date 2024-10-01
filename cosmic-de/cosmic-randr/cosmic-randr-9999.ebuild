@@ -16,6 +16,10 @@ LICENSE="MPL-2.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
+if [[ ${PV} == 9999 ]]; then
+	KEYWORDS=""
+fi
+
 # As per https://raw.githubusercontent.com/pop-os/cosmic-randr/master/debian/control
 
 src_install() {
