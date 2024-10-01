@@ -7,10 +7,10 @@ inherit cosmic-de desktop systemd
 
 DESCRIPTION="system76-power is a utility for managing graphics and power profiles"
 HOMEPAGE="https://github.com/pop-os/system76-power"
+KEYWORDS="~amd64"
 
 if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
-	KEYWORDS=""
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
