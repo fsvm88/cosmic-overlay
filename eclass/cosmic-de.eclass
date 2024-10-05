@@ -1,23 +1,34 @@
-# shellcheck shell=bash
 # Copyright 2024 Fabio Scaccabarozzi
 # Distributed under the terms of the MIT License
+# shellcheck shell=bash
 
 # @ECLASS: cosmic-de.eclass
 # @MAINTAINER:
 # cosmic-de-li7vb3aqt46@fs88.email
 # @AUTHOR:
 # Fabio Scaccabarozzi
+# @BUGREPORTS: Open an Issue at https://github.com/fsvm88/cosmic-overlay/issues
+# @VCSURL: https://github.com/fsvm88/cosmic-overlay
+# @PROVIDES: cargo git-r3
 # @SUPPORTED_EAPIS: 8
 # @BLURB: common functions for Cosmic DE packages
+# @DESCRIPTION:
+# This eclass contains common functions for Cosmic DE packages.
 
 case ${EAPI} in
 	8) ;;
 	*) die "${ECLASS}: EAPI ${EAPI:-0} not supported" ;;
 esac
 
-# Deps are factored out in the eclass, because rust links everything statically,
-# and pretty much every package in Cosmic depends on libcosmic, which depends
-# on iced, the GTK GUI toolkits, dbus, systemd, ....
+# @ECLASS_VARIABLE: DEPEND
+# @OUTPUT_VARIABLE
+# @DESCRIPTION:
+# Deps are factored out in the eclass, because currently the only way to build
+# rust packages is to vendor crates, either "statically" in non-9999 ebuilds,
+# or live in 9999 ebuilds.
+#
+# Being COSMIC an entire DE, pretty much every package depends on libcosmic,
+# which depends on iced, the GTK GUI toolkits, dbus, systemd, ....
 # Factoring these out ensures that if a user starts from a stage3 install,
 # we don't need to specify all deps for all packages, and these (b)deps are
 # emerged before we ever try to install the first cosmic-de package.
@@ -40,22 +51,48 @@ DEPEND="
 >=x11-libs/libxkbcommon-1.6.0
 >=x11-libs/pango-1.52.1
 "
+
+# @ECLASS_VARIABLE: BDEPEND
+# @OUTPUT_VARIABLE
+# @DESCRIPTION:
+# See description of BDEPEND
 BDEPEND="
 >=virtual/pkgconfig-3
 >=virtual/rust-1.80.1
 "
+
+# @ECLASS_VARIABLE: RDEPEND
+# @OUTPUT_VARIABLE
+# @DESCRIPTION:
+# See description of RDEPEND
+#
 # dbus is an RDEPEND pretty much for the entire DE
 # same for systemd
 RDEPEND="
 elogind? ( >=sys-auth/elogind-246.10-r3 )
 systemd? ( >=sys-apps/systemd-255.3-r1 )
->=sys-apps/dbus-1.15.8
+|| (
+	>=sys-apps/dbus-1.15.8
+	>=sys-apps/dbus-broker-36
+)
 "
 
+# @ECLASS_VARIABLE: CARGO_OPTIONAL
+# @INTERNAL
+# @DESCRIPTION:
+# See description in cargo.eclass from main tree.
+# This is set to allow fine-tuning of which functions we use, and when.
 CARGO_OPTIONAL=1
 inherit cargo
 
-[[ "${PV}" == *9999* ]] || [[ "${COSMIC_GIT_UNPACK}" -ne 0 ]] && inherit git-r3
+# @ECLASS_VARIABLE: COSMIC_GIT_UNPACK
+# @DEFAULT_UNSET
+# @DESCRIPTION:
+# Allows to use git fetching on non-9999 ebuilds,
+# set to anything other than 0 to enable.
+[[ "${PV}" == *9999* ]] ||
+	[[ "${COSMIC_GIT_UNPACK}" -ne 0 ]] &&
+	inherit git-r3
 
 IUSE="${IUSE} debug debug-line-tables-only elogind max-opt systemd"
 REQUIRED_USE="
@@ -68,6 +105,7 @@ max-opt? ( !debug )
 # @FUNCTION: cosmic-de_src_unpack
 # @DESCRIPTION:
 # Unpacks the package and the cargo registry.
+# If COSMIC_GIT_UNPACK is enabled, uses git to fetch non-9999 ebuilds.
 cosmic-de_src_unpack() {
 	if [[ "${PV}" == *9999* ]] || [[ "${COSMIC_GIT_UNPACK}" -ne 0 ]]; then
 		git-r3_src_unpack
@@ -104,16 +142,6 @@ panic = "unwind"
 EOF
 		} >> Cargo.toml
 	fi
-
-	if [ -f justfile ]; then
-		# Allow configurable profile name for output folder for _install_bin (debug, release-maximum-optimization)
-		# This will need to be passed later
-		sed -i 's,^bin-src.*,bin-src \:= "target" / profile_name / name,' justfile
-		# This is required to allow the change above to take place
-		if ! grep -q '^target' justfile; then
-			sed -i '1i profile_name := "release"' justfile
-		fi
-	fi
 }
 
 # @FUNCTION: cosmic-de_src_configure
@@ -130,6 +158,14 @@ cosmic-de_src_configure() {
 		"${@}"
 }
 
+##### NOTE!
+# src_compile and src_test were copy-pasted from cargo.eclass and slightly updated.
+#
+# cargo.eclass at the moment only supports "debug" or "release" profile, and nothing else.
+# This is hardcoded in the conditionals, so while we may pass the entire "profile.release-maximum-optimization"
+# via src_configure overrides, it just generates a very long command-line and is less readable.
+# Perhaps we can ask upstream to support different profiles at a later time, and remove most of this.
+
 # @FUNCTION: cosmic-de_src_compile
 # @DESCRIPTION:
 # Compiles the package with the selected profile_name
@@ -137,7 +173,7 @@ cosmic-de_src_compile() {
 	debug-print-function "${FUNCNAME}" "$@"
 
 	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
-		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
+		die "FATAL: please call cosmic-de_src_configure before using ${FUNCNAME}"
 	
 	filter-lto
 	tc-export AR CC CXX PKG_CONFIG
@@ -154,7 +190,7 @@ cosmic-de_src_test() {
 	debug-print-function "${FUNCNAME}" "$@"
 
 	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
-		die "FATAL: please call cargo_gen_config before using ${FUNCNAME}"
+		die "FATAL: please call cosmic-de_src_test before using ${FUNCNAME}"
 
 	set -- cargo test "${ECARGO_ARGS[@]}" "$@"
 	einfo "${@}"
