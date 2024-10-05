@@ -1,22 +1,49 @@
 # cosmic overlay
 
-Overlay for Cosmic desktop environment, developed by System76
+Unofficial Gentoo overlay for Cosmic desktop environment developed by System76
 
 ## Details
 
 - **this is highly in-flux, no guarantees are given**
 - done in a best-effort basis to try out the COSMIC DE, likely not representative of the final product if/when shipped in Gentoo
 - it is my first experience writing so many ebuilds and an entire eclass (a lot is taken from gentoo's repo `cargo.eclass`), so expect bugs, and you're welcome to submit PRs for improvements :)
-- packages are building according to the submodule commits of the main [pop-os/cosmic-epoch repo](https://github.com/pop-os/cosmic-epoch) - ebuilds DO NOT use `master` branch anymore as of 20.04.2024
+- packages in live ebuilds use the `master` branch from `git`
+- packages in non-live (non-9999 ebuilds) use `tags` from `git` due to libcosmic depending on bundled libs (hopefully this will go away at some point)
+- please submit issues in this repo's issue tracker if you notice immediate usability issues (e.g: broken manifests), usually I can take care of them in 2-3 days
 
 ## Quick how-to
 
-### Adding the repo and emerging the DE
+### Adding the repo
 
 ```shell
 eselect repository add cosmic-overlay git https://github.com/fsvm88/cosmic-overlay.git
+```
 
-emerge -1 cosmic-meta pop-theme-meta -pv
+### Emerging the DE
+
+#### Unmasking unstable ebuilds
+
+For the latest tagged release, you can unmask the packages in `/etc/portage/package.accept_keywords/cosmic-de` (or whatever file you prefer):
+
+```
+cosmic-de/*
+```
+
+#### Unmasking live ebuilds
+
+To try out the latest commits from `master` branch, you can unmask the packages in `/etc/portage/package.accept_keywords/cosmic-de` (or whatever file you prefer):
+
+```
+# live ebuilds are masked via "missing" keywords
+cosmic-de/* **
+```
+
+**NOTE**: sometimes new files to install are added on master, and live ebuilds may lag behind a bit. Feel free to open an issue or a PR.
+
+#### Actually emerging the DE
+
+```
+emerge cosmic-meta pop-theme-meta -pv
 ```
 
 ### Removing the repo
