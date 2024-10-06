@@ -15,7 +15,6 @@ KEYWORDS="~amd64"
 if [ "${PV}" == "9999" ]; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
-	KEYWORDS=""
 fi
 IUSE="+icons gnome-shell gnome-shell-gresource +gtk +sounds +sessions +default +dark +light"
 
