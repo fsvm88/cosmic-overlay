@@ -85,6 +85,9 @@ src_install() {
 	# cosmic-panel-button is only s-linked to the multicall binary
 	_link_applet "cosmic-panel-button"
 
+	# Install metainfo
+	cosmic-de_install_metainfo data/com.system76.CosmicApplets.metainfo.xml
+
 	# Install default schema
 	insinto /usr/share/cosmic
 	doins -r cosmic-app-list/data/default_schema/*
