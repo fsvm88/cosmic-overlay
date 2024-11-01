@@ -29,6 +29,7 @@ RDEPEND="
 	=cosmic-de/cosmic-comp-${PV}
 	=cosmic-de/cosmic-greeter-${PV}
 	=cosmic-de/cosmic-icons-${PV}
+	=cosmic-de/cosmic-idle-${PV}
 	=cosmic-de/cosmic-launcher-${PV}
 	=cosmic-de/cosmic-notifications-${PV}
 	=cosmic-de/cosmic-osd-${PV}

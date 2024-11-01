@@ -16,15 +16,8 @@ BDEPEND="
 	media-gfx/imagemagick
 "
 
-# With help from: https://devmanual.gentoo.org/general-concepts/licenses/
-# The files part of the package, referenced in the README ->
-# https://github.com/pop-os/cosmic-wallpapers/blob/master/README.md
-# either have CC-BY-4.0-INT -> CC-BY-4.0 (ESA images) or the license
-# is not mentioned anywhere
-# Go with the approach mentioned in the license page above -->
-# all-rights-reserved, RESTRICT="bindist mirror"
-LICENSE="CC-BY-4.0 all-rights-reserved"
-RESTRICT="bindist mirror"
+# As of 2024-11-01, the git repo now provides a LICENSE
+LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
