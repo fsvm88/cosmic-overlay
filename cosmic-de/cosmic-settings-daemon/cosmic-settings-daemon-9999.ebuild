@@ -6,24 +6,21 @@ EAPI=8
 inherit cosmic-de
 
 DESCRIPTION="settings daemon for the COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
-IUSE="${IUSE} mpris"
+HOMEPAGE="https://github.com/pop-os/cosmic-settings-daemon"
+# use cargo-license for a more accurate license picture
+LICENSE="GPL-3"
+SLOT="0"
+KEYWORDS=""
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
 
-# use cargo-license for a more accurate license picture
-LICENSE="GPL-3"
-SLOT="0"
-KEYWORDS="~amd64"
-
-if [[ ${PV} == 9999 ]]; then
-	KEYWORDS=""
-fi
+IUSE="${IUSE} mpris"
 
 RDEPEND="
 	${RDEPEND}
 	>=app-misc/geoclue-2.7.1
+	media-sound/alsa-utils
 	mpris? ( >=media-sound/playerctl-2.3.1 )
 	>=sys-power/acpid-2.0.34-r1
 "
