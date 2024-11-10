@@ -11,6 +11,6 @@
     <flag name="max-opt">Compile in release-maximum-optimization injected profile (codegen-units=1). Still compatible with debug-line-tables-only.</flag>
   </use>
   <upstream>
-    <remote-id type="github">pop-os/system76-power</remote-id>
+    <remote-id type="github">pop-os/xdg-desktop-portal-cosmic</remote-id>
   </upstream>
 </pkgmetadata>
