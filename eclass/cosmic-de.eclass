@@ -104,7 +104,7 @@ max-opt? ( !debug )
 # @ECLASS_VARIABLE: RUST_MIN_VER
 # @OUTPUT_VARIABLE
 # @DESCRIPTION:
-# See description in cargo.eclass from main tree.
+# See description in rust.eclass from main tree.
 # This is set to specify the minimum Rust version
 RUST_MIN_VER="1.80.1"
 
