@@ -8,7 +8,7 @@ DESCRIPTION="PopOS GTK theme for COSMIC DE"
 
 HOMEPAGE="https://github.com/pop-os/gtk-theme"
 
-LICENSE="CC-BY-SA-4.0"
+LICENSE="GPL-3 CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS="~amd64"
 

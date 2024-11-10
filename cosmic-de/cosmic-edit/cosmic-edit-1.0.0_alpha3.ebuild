@@ -8,7 +8,7 @@ EGIT_LFS=1
 inherit cosmic-de desktop
 
 DESCRIPTION="text editor from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-edit"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.3"

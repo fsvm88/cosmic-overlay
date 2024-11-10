@@ -7,7 +7,7 @@ COSMIC_GIT_UNPACK=1
 inherit cosmic-de desktop
 
 DESCRIPTION="settings application for the COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-settings"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.3"
@@ -27,8 +27,8 @@ BDEPEND="
 "
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/cosmic-icons-${PV}
-	=cosmic-de/cosmic-randr-${PV}
+	~cosmic-de/cosmic-icons-${PV}
+	~cosmic-de/cosmic-randr-${PV}
 	>=app-text/iso-codes-4.16.0
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202

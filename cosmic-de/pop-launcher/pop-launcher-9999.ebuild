@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de
 
 DESCRIPTION="Modular IPC-based desktop launcher service"
 HOMEPAGE="https://github.com/pop-os/launcher"
@@ -13,7 +13,7 @@ if [ "${PV}" == "9999" ]; then
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
-				$(cargo_crate_uris)
+				${CARGO_CRATE_URIS}
 "
 fi
 

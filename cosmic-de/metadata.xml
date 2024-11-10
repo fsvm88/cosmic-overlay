@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE catmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<catmetadata>
+	<longdescription lang="en">
+		The cosmic-de category contains non-core applications which relate to
+		COSMIC Desktop Environment, developed by System76.
+	</longdescription>
+</catmetadata>

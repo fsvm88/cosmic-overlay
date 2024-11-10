@@ -6,7 +6,7 @@ EAPI=8
 inherit cosmic-de desktop
 
 DESCRIPTION="settings application for the COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-settings"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
@@ -14,11 +14,7 @@ EGIT_BRANCH=master
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
-
-if [[ ${PV} == 9999 ]]; then
-	KEYWORDS=""
-fi
+KEYWORDS=""
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-settings/master/debian/control
 BDEPEND="
@@ -30,8 +26,8 @@ BDEPEND="
 "
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/cosmic-icons-${PV}
-	=cosmic-de/cosmic-randr-${PV}
+	~cosmic-de/cosmic-icons-${PV}
+	~cosmic-de/cosmic-randr-${PV}
 	>=app-text/iso-codes-4.16.0
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202

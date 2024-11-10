@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>cosmic-overlay-lkuaw25@fs88.email</email>
+    <name>Fabio Scaccabarozzi</name>
+    <description>Primary maintainer</description>
+  </maintainer>
+  <longdescription>
+    Meta package for Pop!_OS theme, for Cosmic DE.
+
+    You can enable the GTK theme via USE=gtk-theme.
+  </longdescription>
+  <use>
+    <flag name="gtk-theme">Depend on Pop!_OS GTK theme.</flag>
+  </use>
+  <upstream>
+    <remote-id type="github">pop-os/theme</remote-id>
+  </upstream>
+</pkgmetadata>

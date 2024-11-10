@@ -7,17 +7,18 @@ COSMIC_GIT_UNPACK=1
 inherit cosmic-de desktop
 
 DESCRIPTION="file manager from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-files"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.2"
-# to drop when tab_click_double_opens_folder will be fixed
-RESTRICT=test
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
+
+# to drop when tab_click_double_opens_folder will be fixed
+RESTRICT=test
 
 BDEPEND="
 	${BDEPEND}

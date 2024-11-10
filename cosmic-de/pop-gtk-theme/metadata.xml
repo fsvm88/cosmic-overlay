@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>cosmic-overlay-lkuaw25@fs88.email</email>
+    <name>Fabio Scaccabarozzi</name>
+    <description>Primary maintainer</description>
+  </maintainer>
+  <use>
+    <flag name="dark">Build Pop gtk dark variant.</flag>
+    <flag name="default">Build Pop gtk default variant.</flag>
+    <flag name="gnome-shell">Build gnome-shell component.</flag>
+    <flag name="gnome-shell-gresource">Build gnome-shell component in gresources.</flag>
+    <flag name="gtk">Build gtk component.</flag>
+    <flag name="icons">Build icon components.</flag>
+    <flag name="light">Build Pop gtk light variant.</flag>
+    <flag name="sessions">Build sessions component.</flag>
+    <flag name="sounds">Build sounds component.</flag>
+  </use>
+  <upstream>
+    <remote-id type="github">pop-os/gtk-theme</remote-id>
+  </upstream>
+</pkgmetadata>

@@ -7,7 +7,7 @@ EGIT_LFS=1
 inherit cosmic-de pam systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
@@ -15,11 +15,7 @@ EGIT_BRANCH=master
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
-
-if [[ ${PV} == 9999 ]]; then
-	KEYWORDS=""
-fi
+KEYWORDS=""
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-greeter/master/debian/control
 DEPEND="
@@ -30,7 +26,7 @@ DEPEND="
 "
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/cosmic-comp-${PV}
+	~cosmic-de/cosmic-comp-${PV}
 	>=acct-user/cosmic-greeter-0
 	>=gui-libs/greetd-0.9.0
 "

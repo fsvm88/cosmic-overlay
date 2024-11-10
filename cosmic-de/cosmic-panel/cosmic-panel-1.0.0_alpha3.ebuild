@@ -7,7 +7,7 @@ COSMIC_GIT_UNPACK=1
 inherit cosmic-de
 
 DESCRIPTION="panel for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-panel"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.3"

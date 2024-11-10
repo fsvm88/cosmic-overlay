@@ -4,7 +4,7 @@
 EAPI=8
 
 DESCRIPTION="icon set COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-icons"
 
 inherit git-r3
 EGIT_REPO_URI="${HOMEPAGE}"
@@ -18,7 +18,7 @@ KEYWORDS="~amd64"
 # As per https://raw.githubusercontent.com/pop-os/cosmic-icons/master/debian/control
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/pop-icon-theme-9999
+	~cosmic-de/pop-icon-theme-9999
 "
 
 src_unpack() {

@@ -8,7 +8,7 @@ EGIT_LFS=1
 inherit cosmic-de pam systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.2"
@@ -27,7 +27,7 @@ DEPEND="
 "
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/cosmic-comp-${PV}
+	~cosmic-de/cosmic-comp-${PV}
 	>=acct-user/cosmic-greeter-0
 	>=gui-libs/greetd-0.9.0
 "

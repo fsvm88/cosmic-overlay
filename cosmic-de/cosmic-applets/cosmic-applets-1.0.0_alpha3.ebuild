@@ -7,7 +7,7 @@ COSMIC_GIT_UNPACK=1
 inherit cosmic-de desktop
 
 DESCRIPTION="applets for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-applets"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.3"
@@ -18,8 +18,8 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND="
-	${RDEPEND}
-	=cosmic-de/cosmic-icons-${PV}
+${RDEPEND}
+~cosmic-de/cosmic-icons-${PV}
 "
 
 _install_icons() {
@@ -84,7 +84,7 @@ src_install() {
 
 	# Install metainfo
 	cosmic-de_install_metainfo data/com.system76.CosmicApplets.metainfo.xml
-	
+
 	# Install default schema
 	insinto /usr/share/cosmic
 	doins -r cosmic-app-list/data/default_schema/*

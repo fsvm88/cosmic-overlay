@@ -3,45 +3,41 @@
 
 EAPI=8
 
-inherit cosmic-de systemd
+inherit cosmic-de desktop systemd
 
 DESCRIPTION="sessions manager for the COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-session"
+# use cargo-license for a more accurate license picture
+LICENSE="GPL-3"
+
+SLOT="0"
+KEYWORDS=""
 IUSE="${IUSE} cups"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
 
-# use cargo-license for a more accurate license picture
-LICENSE="GPL-3"
-SLOT="0"
-KEYWORDS="~amd64"
-
-if [[ ${PV} == 9999 ]]; then
-	KEYWORDS=""
-fi
-
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/cosmic-applets-${PV}
-	=cosmic-de/cosmic-applibrary-${PV}
-	=cosmic-de/cosmic-bg-${PV}
-	=cosmic-de/cosmic-comp-${PV}
-	=cosmic-de/cosmic-greeter-${PV}
-	=cosmic-de/cosmic-icons-${PV}
-	=cosmic-de/cosmic-idle-${PV}
-	=cosmic-de/cosmic-launcher-${PV}
-	=cosmic-de/cosmic-notifications-${PV}
-	=cosmic-de/cosmic-osd-${PV}
-	=cosmic-de/cosmic-panel-${PV}
-	=cosmic-de/cosmic-randr-${PV}
-	=cosmic-de/cosmic-screenshot-${PV}
-	=cosmic-de/cosmic-settings-${PV}
-	=cosmic-de/cosmic-settings-daemon-${PV}
-	=cosmic-de/cosmic-wallpapers-9999
-	=cosmic-de/cosmic-workspaces-epoch-${PV}
-	=cosmic-de/xdg-desktop-portal-cosmic-${PV}
-	=cosmic-de/pop-fonts-${PV}
+	~cosmic-de/cosmic-applets-${PV}
+	~cosmic-de/cosmic-applibrary-${PV}
+	~cosmic-de/cosmic-bg-${PV}
+	~cosmic-de/cosmic-comp-${PV}
+	~cosmic-de/cosmic-greeter-${PV}
+	~cosmic-de/cosmic-icons-${PV}
+	~cosmic-de/cosmic-idle-${PV}
+	~cosmic-de/cosmic-launcher-${PV}
+	~cosmic-de/cosmic-notifications-${PV}
+	~cosmic-de/cosmic-osd-${PV}
+	~cosmic-de/cosmic-panel-${PV}
+	~cosmic-de/cosmic-randr-${PV}
+	~cosmic-de/cosmic-screenshot-${PV}
+	~cosmic-de/cosmic-settings-${PV}
+	~cosmic-de/cosmic-settings-daemon-${PV}
+	~cosmic-de/cosmic-wallpapers-9999
+	~cosmic-de/cosmic-workspaces-epoch-${PV}
+	~cosmic-de/xdg-desktop-portal-cosmic-${PV}
+	~cosmic-de/pop-fonts-${PV}
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
 	>=sys-power/switcheroo-control-2.6-r2
@@ -76,8 +72,7 @@ src_install() {
 	insinto /usr/share/wayland-sessions
 	doins data/cosmic.desktop
 
-	insinto /usr/share/applications
-	doins data/cosmic-mimeapps.list
+	domenu data/cosmic-mimeapps.list
 
 	# This install was copied from the cosmic-session debian package available from Pop!_OS
 	# https://github.com/pop-os/cosmic-session/commit/c341953588098c1735f7984a13e64399b92d4313

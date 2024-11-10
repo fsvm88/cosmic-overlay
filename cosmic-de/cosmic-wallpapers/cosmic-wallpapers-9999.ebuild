@@ -6,7 +6,7 @@ EAPI=8
 EGIT_LFS=1
 
 DESCRIPTION="Wallpapers for the COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-wallpapers"
 
 inherit git-r3
 EGIT_REPO_URI="${HOMEPAGE}"
