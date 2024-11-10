@@ -58,7 +58,6 @@ DEPEND="
 # See description of BDEPEND
 BDEPEND="
 >=virtual/pkgconfig-3
->=virtual/rust-1.80.1
 "
 
 # @ECLASS_VARIABLE: RDEPEND
@@ -101,6 +100,13 @@ debug-line-tables-only? ( !debug )
 max-opt? ( !debug )
 ^^ ( elogind systemd )
 "
+
+# @ECLASS_VARIABLE: RUST_MIN_VER
+# @OUTPUT_VARIABLE
+# @DESCRIPTION:
+# See description in cargo.eclass from main tree.
+# This is set to specify the minimum Rust version
+RUST_MIN_VER="1.80.1"
 
 # @FUNCTION: cosmic-de_src_unpack
 # @DESCRIPTION:
