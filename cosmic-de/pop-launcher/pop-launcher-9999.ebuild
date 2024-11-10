@@ -28,10 +28,13 @@ KEYWORDS="~amd64"
 RDEPEND="
 ${RDEPEND}
 >=cosmic-de/pop-icon-theme-${PV}
->=cosmic-de/system76-power-${PV}
 sci-libs/libqalculate
 >=sys-apps/fd-9
 >=x11-misc/xdg-utils-1.2.1-r1
+|| (
+	>=cosmic-de/system76-power-${PV}
+	>=sys-power/power-profiles-daemon-0.21
+)
 "
 
 src_configure() {
