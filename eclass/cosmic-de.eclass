@@ -20,6 +20,26 @@ case ${EAPI} in
 	*) die "${ECLASS}: EAPI ${EAPI:-0} not supported" ;;
 esac
 
+### NOTE!
+## RUST_MIN_VER and CARGO_OPTIONAL
+## MUST come before "inherit cargo"
+## otherwise the RUST_DEPEND string is not built
+
+# @ECLASS_VARIABLE: RUST_MIN_VER
+# @OUTPUT_VARIABLE
+# @DESCRIPTION:
+# See description in rust.eclass from main tree.
+# This is set to specify the minimum Rust version
+RUST_MIN_VER="1.80.1"
+
+# @ECLASS_VARIABLE: CARGO_OPTIONAL
+# @INTERNAL
+# @DESCRIPTION:
+# See description in cargo.eclass from main tree.
+# This is set to allow fine-tuning of which functions we use, and when.
+CARGO_OPTIONAL=1
+inherit cargo
+
 # @ECLASS_VARIABLE: DEPEND
 # @OUTPUT_VARIABLE
 # @DESCRIPTION:
@@ -58,6 +78,7 @@ DEPEND="
 # See description of BDEPEND
 BDEPEND="
 >=virtual/pkgconfig-3
+${RUST_DEPEND}
 "
 
 # @ECLASS_VARIABLE: RDEPEND
@@ -76,14 +97,6 @@ systemd? ( sys-apps/systemd:= )
 )
 "
 
-# @ECLASS_VARIABLE: CARGO_OPTIONAL
-# @INTERNAL
-# @DESCRIPTION:
-# See description in cargo.eclass from main tree.
-# This is set to allow fine-tuning of which functions we use, and when.
-CARGO_OPTIONAL=1
-inherit cargo
-
 # @ECLASS_VARIABLE: COSMIC_GIT_UNPACK
 # @DEFAULT_UNSET
 # @DESCRIPTION:
@@ -100,13 +113,6 @@ debug-line-tables-only? ( !debug )
 max-opt? ( !debug )
 ^^ ( elogind systemd )
 "
-
-# @ECLASS_VARIABLE: RUST_MIN_VER
-# @OUTPUT_VARIABLE
-# @DESCRIPTION:
-# See description in rust.eclass from main tree.
-# This is set to specify the minimum Rust version
-RUST_MIN_VER="1.80.1"
 
 # @FUNCTION: cosmic-de_src_unpack
 # @DESCRIPTION:
