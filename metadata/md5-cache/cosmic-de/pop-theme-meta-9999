@@ -5,6 +5,6 @@ HOMEPAGE=https://github.com/pop-os/theme
 IUSE=gtk-theme
 KEYWORDS=~amd64
 LICENSE=CC-BY-SA-4.0 OFL-1.1
-RDEPEND==cosmic-de/pop-fonts-9999 gtk-theme? ( =cosmic-de/pop-gtk-theme-9999 ) =cosmic-de/pop-icon-theme-9999
+RDEPEND=~cosmic-de/pop-fonts-9999 ~cosmic-de/pop-icon-theme-9999 gtk-theme? ( ~cosmic-de/pop-gtk-theme-9999 )
 SLOT=0
-_md5_=a9a4d4d2c46534d31a6853541548ca39
+_md5_=669ecbb68649f3ab10d2ad3be0860cfd

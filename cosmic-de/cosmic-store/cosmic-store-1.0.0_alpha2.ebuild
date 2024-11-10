@@ -7,7 +7,7 @@ COSMIC_GIT_UNPACK=1
 inherit cosmic-de desktop
 
 DESCRIPTION="app store from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-store"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.2"
@@ -25,8 +25,8 @@ DEPEND="
 "
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/pop-appstream-data-9999
-	=cosmic-de/cosmic-icons-${PV}
+	~cosmic-de/pop-appstream-data-9999
+	~cosmic-de/cosmic-icons-${PV}
 "
 
 src_install() {

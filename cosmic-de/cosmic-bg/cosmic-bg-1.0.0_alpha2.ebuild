@@ -7,7 +7,7 @@ COSMIC_GIT_UNPACK=1
 inherit cosmic-de desktop
 
 DESCRIPTION="display background service for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-bg"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.2"

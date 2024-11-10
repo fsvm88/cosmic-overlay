@@ -1,5 +1,5 @@
 BDEPEND=>=dev-util/intltool-0.51.0-r3 >=dev-vcs/git-1.8.2.1[curl] >=virtual/pkgconfig-3 >=virtual/rust-1.80.1
-DEFINED_PHASES=compile configure install prepare test unpack
+DEFINED_PHASES=compile configure install prepare setup test unpack
 DEPEND=>=dev-cpp/glibmm-2.66.7:2 >=dev-libs/glib-2.78.3 >=dev-libs/libinput-1.25.0 >=dev-libs/wayland-1.22 >=gui-libs/gtk-4.12.5 >=media-libs/graphene-1.10.8 >=media-libs/gstreamer-1.22.11 >=media-libs/libglvnd-1.7.0 >=media-libs/libpulse-17.0 >=media-video/pipewire-1.0.5 >=virtual/libudev-251-r2 >=x11-libs/cairo-1.18 >=x11-libs/gdk-pixbuf-2.42.10-r1 >=x11-libs/libxkbcommon-1.6.0 >=x11-libs/pango-1.52.1
 DESCRIPTION=layer shell notifications daemon for COSMIC DE
 EAPI=8
@@ -9,8 +9,8 @@ IUSE=debug debug debug-line-tables-only elogind max-opt systemd
 KEYWORDS=~amd64
 LICENSE=GPL-3
 PROPERTIES=live
-RDEPEND=elogind? ( >=sys-auth/elogind-246.10-r3 ) systemd? ( >=sys-apps/systemd-255.3-r1 ) || ( >=sys-apps/dbus-1.15.8 >=sys-apps/dbus-broker-36 )
+RDEPEND=elogind? ( >=sys-auth/elogind-246.10-r3 ) systemd? ( sys-apps/systemd:= ) || ( >=sys-apps/dbus-1.15.8 >=sys-apps/dbus-broker-36 )
 REQUIRED_USE=debug? ( !max-opt ) debug-line-tables-only? ( !debug ) max-opt? ( !debug ) ^^ ( elogind systemd )
 SLOT=0
-_eclasses_=cargo	aed68000b8e49b4c4dd13a256149971f	cosmic-de	4201008cba6a0960d22f8cc0be7df134	desktop	3a72ffe0d8e1dd73af3a1c8c15a59fed	flag-o-matic	f14aba975c94ccaa9f357a27e3b17ffe	git-r3	875eb471682d3e1f18da124be97dcc81	multilib	b2a329026f2e404e9e371097dda47f96	multiprocessing	1e32df7deee68372153dca65f4a7c21f	rust-toolchain	3f822985d9297438ed2443aa1fbdf33e	toolchain-funcs	d3d42b22a610ce81c267b644bcec9b87
-_md5_=f57af6a77920c2192ee1bda693c0012b
+_eclasses_=toolchain-funcs	d3d42b22a610ce81c267b644bcec9b87	multilib	b2a329026f2e404e9e371097dda47f96	flag-o-matic	f14aba975c94ccaa9f357a27e3b17ffe	multiprocessing	1e32df7deee68372153dca65f4a7c21f	rust	c53b37c06a4a1456b7cb3d7e697ba220	rust-toolchain	3f822985d9297438ed2443aa1fbdf33e	cargo	b586dbead117ba8254f79b1b79533f54	git-r3	875eb471682d3e1f18da124be97dcc81	cosmic-de	64be068371dc4d49532d4055f6567935	desktop	3a72ffe0d8e1dd73af3a1c8c15a59fed
+_md5_=b2fa6e3c743dd0362d6852a3afb3b46a

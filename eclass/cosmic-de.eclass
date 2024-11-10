@@ -70,7 +70,7 @@ BDEPEND="
 # same for systemd
 RDEPEND="
 elogind? ( >=sys-auth/elogind-246.10-r3 )
-systemd? ( >=sys-apps/systemd-255.3-r1 )
+systemd? ( sys-apps/systemd:= )
 || (
 	>=sys-apps/dbus-1.15.8
 	>=sys-apps/dbus-broker-36

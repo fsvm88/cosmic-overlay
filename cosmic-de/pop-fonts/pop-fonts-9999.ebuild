@@ -15,7 +15,6 @@ if [ "${PV}" == "9999" ]; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}"
 fi
-IUSE=""
 
 BDEPEND="
 >=dev-build/make-4.4.1-r1

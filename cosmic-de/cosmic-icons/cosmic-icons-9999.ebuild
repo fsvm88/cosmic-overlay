@@ -4,7 +4,7 @@
 EAPI=8
 
 DESCRIPTION="icon set COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-icons"
 
 inherit git-r3
 EGIT_REPO_URI="${HOMEPAGE}"
@@ -13,16 +13,12 @@ EGIT_BRANCH=master
 # use cargo-license for a more accurate license picture
 LICENSE="CC-BY-SA-4.0"
 SLOT="0"
-KEYWORDS="~amd64"
-
-if [[ ${PV} == 9999 ]]; then
-	KEYWORDS=""
-fi
+KEYWORDS=""
 
 # As per https://raw.githubusercontent.com/pop-os/cosmic-icons/master/debian/control
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/pop-icon-theme-${PV}
+	~cosmic-de/pop-icon-theme-${PV}
 "
 
 src_unpack() {

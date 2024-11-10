@@ -3,10 +3,14 @@
 
 EAPI=8
 
-inherit cosmic-de desktop systemd
+inherit cosmic-de systemd
 
 DESCRIPTION="system76-power is a utility for managing graphics and power profiles"
 HOMEPAGE="https://github.com/pop-os/system76-power"
+# use cargo-license for a more accurate license picture
+LICENSE="GPL-3"
+
+SLOT="0"
 KEYWORDS="~amd64"
 
 if [ "${PV}" == "9999" ]; then
@@ -14,13 +18,9 @@ if [ "${PV}" == "9999" ]; then
 else
 	# TODO this is not really working atm
 	SRC_URI="https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${P}.tar.gz
-				$(cargo_crate_uris)
+				${CARGO_CRATE_URIS}
 "
 fi
-
-# use cargo-license for a more accurate license picture
-LICENSE="GPL-3"
-SLOT="0"
 
 # As per https://raw.githubusercontent.com/pop-os/system76-power/master/debian/control
 BDEPEND="

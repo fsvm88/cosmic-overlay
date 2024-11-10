@@ -10,7 +10,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE="gtk-theme"
 RDEPEND="
-        =cosmic-de/pop-fonts-${PV}
-        gtk-theme? ( =cosmic-de/pop-gtk-theme-${PV} )
-        =cosmic-de/pop-icon-theme-${PV}
+~cosmic-de/pop-fonts-${PV}
+~cosmic-de/pop-icon-theme-${PV}
+gtk-theme? ( ~cosmic-de/pop-gtk-theme-${PV} )
 "

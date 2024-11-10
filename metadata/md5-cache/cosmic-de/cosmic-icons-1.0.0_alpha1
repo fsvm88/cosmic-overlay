@@ -7,7 +7,7 @@ INHERIT=git-r3
 KEYWORDS=~amd64
 LICENSE=CC-BY-SA-4.0
 PROPERTIES=live
-RDEPEND==cosmic-de/pop-icon-theme-9999
+RDEPEND=~cosmic-de/pop-icon-theme-9999
 SLOT=0
 _eclasses_=git-r3	875eb471682d3e1f18da124be97dcc81
-_md5_=87cca17602c4404db35a6e1ce321fe57
+_md5_=e7c79635cf86798c0c0bdcb8161bc89c

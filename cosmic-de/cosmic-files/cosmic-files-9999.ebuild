@@ -6,21 +6,18 @@ EAPI=8
 inherit cosmic-de desktop
 
 DESCRIPTION="file manager from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-files"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
-# to drop when tab_click_double_opens_folder will be fixed
-RESTRICT=test
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 
-if [[ ${PV} == 9999 ]]; then
-	KEYWORDS=""
-fi
+# to drop when tab_click_double_opens_folder will be fixed
+RESTRICT=test
 
 BDEPEND="
 	${BDEPEND}

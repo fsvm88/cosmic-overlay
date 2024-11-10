@@ -6,7 +6,7 @@ EAPI=8
 inherit cosmic-de desktop
 
 DESCRIPTION="applets for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-applets"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
@@ -14,15 +14,11 @@ EGIT_BRANCH=master
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
-
-if [[ ${PV} == 9999 ]]; then
-	KEYWORDS=""
-fi
+KEYWORDS=""
 
 RDEPEND="
-	${RDEPEND}
-	=cosmic-de/cosmic-icons-${PV}
+${RDEPEND}
+~cosmic-de/cosmic-icons-${PV}
 "
 
 _install_icons() {

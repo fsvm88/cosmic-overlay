@@ -4,6 +4,6 @@ EAPI=8
 HOMEPAGE=https://github.com/pop-os/cosmic-epoch
 IUSE=store
 LICENSE=CC-BY-SA-4.0 GPL-3 GPL-3+ MPL-2.0
-RDEPEND==cosmic-de/cosmic-applets-9999 =cosmic-de/cosmic-applibrary-9999 =cosmic-de/cosmic-bg-9999 =cosmic-de/cosmic-comp-9999 =cosmic-de/cosmic-edit-9999 =cosmic-de/cosmic-files-9999 =cosmic-de/cosmic-greeter-9999 =cosmic-de/cosmic-icons-9999 =cosmic-de/cosmic-idle-9999 =cosmic-de/cosmic-launcher-9999 =cosmic-de/cosmic-notifications-9999 =cosmic-de/cosmic-osd-9999 =cosmic-de/cosmic-panel-9999 =cosmic-de/cosmic-randr-9999 =cosmic-de/cosmic-screenshot-9999 =cosmic-de/cosmic-session-9999 =cosmic-de/cosmic-settings-9999 =cosmic-de/cosmic-settings-daemon-9999 store? ( =cosmic-de/cosmic-store-9999 ) =cosmic-de/cosmic-term-9999 =cosmic-de/cosmic-workspaces-epoch-9999 =cosmic-de/pop-launcher-9999 =cosmic-de/pop-theme-meta-9999 =cosmic-de/xdg-desktop-portal-cosmic-9999
+RDEPEND=~cosmic-de/cosmic-applets-9999 ~cosmic-de/cosmic-applibrary-9999 ~cosmic-de/cosmic-bg-9999 ~cosmic-de/cosmic-comp-9999 ~cosmic-de/cosmic-edit-9999 ~cosmic-de/cosmic-files-9999 ~cosmic-de/cosmic-greeter-9999 ~cosmic-de/cosmic-icons-9999 ~cosmic-de/cosmic-idle-9999 ~cosmic-de/cosmic-launcher-9999 ~cosmic-de/cosmic-notifications-9999 ~cosmic-de/cosmic-osd-9999 ~cosmic-de/cosmic-panel-9999 ~cosmic-de/cosmic-randr-9999 ~cosmic-de/cosmic-screenshot-9999 ~cosmic-de/cosmic-session-9999 ~cosmic-de/cosmic-settings-9999 ~cosmic-de/cosmic-settings-daemon-9999 store? ( ~cosmic-de/cosmic-store-9999 ) ~cosmic-de/cosmic-term-9999 ~cosmic-de/cosmic-workspaces-epoch-9999 ~cosmic-de/pop-launcher-9999 ~cosmic-de/pop-theme-meta-9999 ~cosmic-de/xdg-desktop-portal-cosmic-9999
 SLOT=0
-_md5_=54c395df25aa09fa591385d6cfca8e03
+_md5_=41d49782382db876dd0a2dd4bd632391

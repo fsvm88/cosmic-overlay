@@ -6,8 +6,8 @@ EAPI=8
 COSMIC_GIT_UNPACK=1
 inherit cosmic-de
 
-DESCRIPTION="xdg-desktop-portal-cosmic"
-HOMEPAGE="https://github.com/pop-os/$PN"
+DESCRIPTION="Cosmic backend for xdg-desktop-portal"
+HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.2"

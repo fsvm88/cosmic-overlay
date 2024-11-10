@@ -7,7 +7,7 @@ COSMIC_GIT_UNPACK=1
 inherit cosmic-de desktop
 
 DESCRIPTION="launcher for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-launcher"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.2"
@@ -24,7 +24,7 @@ BDEPEND="
 "
 RDEPEND="
 	${RDEPEND}
-	=cosmic-de/pop-launcher-9999
+	~cosmic-de/pop-launcher-9999
 "
 
 src_install() {

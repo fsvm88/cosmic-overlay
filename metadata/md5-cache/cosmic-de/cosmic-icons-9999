@@ -6,7 +6,7 @@ HOMEPAGE=https://github.com/pop-os/cosmic-icons
 INHERIT=git-r3
 LICENSE=CC-BY-SA-4.0
 PROPERTIES=live
-RDEPEND==cosmic-de/pop-icon-theme-9999
+RDEPEND=~cosmic-de/pop-icon-theme-9999
 SLOT=0
 _eclasses_=git-r3	875eb471682d3e1f18da124be97dcc81
-_md5_=e9735c5f75244f63088c92ec5955a455
+_md5_=58c75f0808971e88174346e259cfd9db

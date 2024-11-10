@@ -6,7 +6,7 @@ EAPI=8
 inherit cosmic-de desktop
 
 DESCRIPTION="app library for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/$PN"
+HOMEPAGE="https://github.com/pop-os/cosmic-applibrary"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
@@ -14,11 +14,7 @@ EGIT_BRANCH=master
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
-
-if [[ ${PV} == 9999 ]]; then
-	KEYWORDS=""
-fi
+KEYWORDS=""
 
 src_install() {
 	# One of the few where $PN does not apply (would be cosmic-applibrary)
