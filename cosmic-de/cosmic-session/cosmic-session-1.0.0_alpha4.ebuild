@@ -3,6 +3,7 @@
 
 EAPI=8
 
+COSMIC_GIT_UNPACK=1
 inherit cosmic-de desktop systemd
 
 DESCRIPTION="sessions manager for the COSMIC DE"
@@ -11,11 +12,11 @@ HOMEPAGE="https://github.com/pop-os/cosmic-session"
 LICENSE="GPL-3"
 
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 IUSE="${IUSE} cups"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+EGIT_COMMIT="epoch-1.0.0-alpha.4"
 
 RDEPEND="
 	${RDEPEND}
@@ -37,7 +38,7 @@ RDEPEND="
 	~cosmic-de/cosmic-wallpapers-9999
 	~cosmic-de/cosmic-workspaces-epoch-${PV}
 	~cosmic-de/xdg-desktop-portal-cosmic-${PV}
-	~cosmic-de/pop-fonts-${PV}
+	~cosmic-de/pop-fonts-9999
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
 	>=sys-power/switcheroo-control-2.6-r2
@@ -46,7 +47,7 @@ RDEPEND="
 "
 
 src_prepare() {
-	use elogind && epatch "${FILESDIR}/no_journald-systemctl.patch"
+	use elogind && eapply "${FILESDIR}/no_journald-systemctl.patch"
 	cosmic-de_src_prepare
 }
 

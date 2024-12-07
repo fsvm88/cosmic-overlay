@@ -160,6 +160,21 @@ EOF
 # @DESCRIPTION:
 # Configures the package by selecting the desired profile_name
 cosmic-de_src_configure() {
+	if [[ "${PV}" == *9999* ]] || [[ "${COSMIC_GIT_UNPACK}" -ne 0 ]]; then
+		# These two variables are exported to satisfy vergen's scripts (build.rs).
+		# For some projects, some deps are imported via git, however "cargo vendor"
+		# seems to strip the ".git" folder, which makes the build scripts fail.
+		# Exporting these variables as empty vars is enough to satisfy the scripts.
+		# We do not care about these mechanisms anyway in the context of emerge.
+		#
+		# Example: cosmic-edit depends on cosmic-files via git, which has a build
+		# script that tries to configure rebuild information based on
+		# GIT_COMMIT_DATE or GIT_SHA.
+		#
+		# Rather than copy-pasting them when needed in some ebuilds,
+		# simply apply them to all projects if we're handling a live ebuild or cloning via git.
+		export VERGEN_GIT_COMMIT_DATE="" VERGEN_GIT_SHA=""
+	fi
 	profile_name="release"
 	use debug && profile_name="debug"
 	use max-opt && profile_name="release-maximum-optimization"
