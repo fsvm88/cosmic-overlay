@@ -23,8 +23,11 @@ ${RDEPEND}
 "
 
 _install_icons() {
-	insinto /usr/share/icons/hicolor
-	doins -r "$1"/data/icons/*
+	local icons_folder="$1"/data/icons
+	if [ -d "$icons_folder" ]; then
+		insinto /usr/share/icons/hicolor
+		doins -r "$icons_folder"/*
+	fi
 }
 
 _link_applet() {
