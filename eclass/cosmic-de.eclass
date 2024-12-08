@@ -102,9 +102,26 @@ systemd? ( sys-apps/systemd:= )
 # @DESCRIPTION:
 # Allows to use git fetching on non-9999 ebuilds,
 # set to anything other than 0 to enable.
-[[ "${PV}" == *9999* ]] ||
-	[[ "${COSMIC_GIT_UNPACK}" -ne 0 ]] &&
+if [[ "${PV}" == *9999* ]] ||
+	[[ "${COSMIC_GIT_UNPACK}" -ne 0 ]]; then
+	# Due to the way things are setup at the moment, we reuse the same DISTDIR repo
+	# for multiple versions (e.g.: alpha2 -> alpha3 -> alpha4).
+	#
+	# Problem is that every time we emerge a new version, the repo with CLONE_TYPE=single
+	# does not contain all other refs and is not reset,
+	# so the user needs to manually remove it and reclone it.
+	#
+	# While CLONE_TYPE=mirror increases repo size, for cosmic-edit and cosmic-term
+	# this is ~+1MB (~1.5M -> ~2.5M).
+	#
+	# It's still better for the user to cleanup once/year (or whenever) instead of
+	# every time a new version hits the repo. Old/deleted refs are purged in this mode.
+	#
+	# Related https://github.com/fsvm88/cosmic-overlay/issues/23
+	EGIT_CLONE_TYPE=mirror
+	EGIT_LFS_CLONE_TYPE=mirror
 	inherit git-r3
+fi
 
 IUSE="${IUSE} debug debug-line-tables-only elogind max-opt systemd"
 REQUIRED_USE="
