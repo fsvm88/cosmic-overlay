@@ -173,7 +173,12 @@ cosmic-de_src_configure() {
 		#
 		# Rather than copy-pasting them when needed in some ebuilds,
 		# simply apply them to all projects if we're handling a live ebuild or cloning via git.
-		export VERGEN_GIT_COMMIT_DATE="" VERGEN_GIT_SHA=""
+		#
+		# Previously these were set to empty values, but some components (e.g.: cosmic-edit, cosmic-term)
+		# use these to display the build information in the About page.
+		VERGEN_GIT_COMMIT_DATE="$(git log -1 --format=%cd)"
+		VERGEN_GIT_SHA="$(git rev-parse HEAD)"
+		export VERGEN_GIT_COMMIT_DATE VERGEN_GIT_SHA
 	fi
 	profile_name="release"
 	use debug && profile_name="debug"
