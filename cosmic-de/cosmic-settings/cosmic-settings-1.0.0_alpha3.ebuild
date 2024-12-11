@@ -23,7 +23,7 @@ BDEPEND="
 	>=dev-libs/expat-2.5.0
 	>=media-libs/fontconfig-2.14.2-r3
 	>=media-libs/freetype-2.13.2
-	>=sys-devel/clang-18
+	>=llvm-core/clang-18
 "
 RDEPEND="
 	${RDEPEND}

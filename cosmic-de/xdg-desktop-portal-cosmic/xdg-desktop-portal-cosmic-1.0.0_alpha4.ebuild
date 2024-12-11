@@ -22,7 +22,7 @@ DEPEND="
 	${DEPEND}
 	>=media-libs/mesa-24.0.4
 	>=media-video/pipewire-1.0.3
-	>=sys-devel/clang-18
+	>=llvm-core/clang-18
 "
 
 src_install() {
