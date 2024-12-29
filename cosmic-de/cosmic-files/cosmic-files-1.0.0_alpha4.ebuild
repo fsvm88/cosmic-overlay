@@ -16,6 +16,7 @@ EGIT_COMMIT="epoch-1.0.0-alpha.4"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
+IUSE="${IUSE} ${COSMIC_DE_GVFS_IUSE}"
 
 # to drop when tab_click_double_opens_folder will be fixed
 RESTRICT=test
@@ -23,10 +24,12 @@ RESTRICT=test
 BDEPEND="
 	${BDEPEND}
 	dev-libs/glib:2
+	${COSMIC_DE_GVFS_DEPENDS}
 "
 RDEPEND="
 	${RDEPEND}
 	x11-misc/xdg-utils
+	${COSMIC_DE_GVFS_DEPENDS}
 "
 
 src_compile() {

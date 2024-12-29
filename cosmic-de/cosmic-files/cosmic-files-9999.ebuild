@@ -15,6 +15,7 @@ EGIT_BRANCH=master
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
+IUSE="${IUSE} ${COSMIC_DE_GVFS_IUSE}"
 
 # to drop when tab_click_double_opens_folder will be fixed
 RESTRICT=test
@@ -22,10 +23,12 @@ RESTRICT=test
 BDEPEND="
 	${BDEPEND}
 	dev-libs/glib:2
+	${COSMIC_DE_GVFS_DEPENDS}
 "
 RDEPEND="
 	${RDEPEND}
 	x11-misc/xdg-utils
+	${COSMIC_DE_GVFS_DEPENDS}
 "
 
 src_compile() {
