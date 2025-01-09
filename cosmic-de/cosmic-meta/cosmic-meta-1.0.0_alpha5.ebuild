@@ -29,6 +29,7 @@ RDEPEND="
 ~cosmic-de/cosmic-notifications-${PV}
 ~cosmic-de/cosmic-osd-${PV}
 ~cosmic-de/cosmic-panel-${PV}
+~cosmic-de/cosmic-player-${PV}
 ~cosmic-de/cosmic-randr-${PV}
 ~cosmic-de/cosmic-screenshot-${PV}
 ~cosmic-de/cosmic-session-${PV}
