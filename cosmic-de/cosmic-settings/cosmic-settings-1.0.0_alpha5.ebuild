@@ -10,7 +10,7 @@ DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.3"
+EGIT_COMMIT="epoch-1.0.0-alpha.5"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
@@ -54,4 +54,7 @@ src_install() {
 
 	insinto /usr/share/polkit-1/rules.d/
 	doins resources/polkit-1/rules.d/cosmic-settings.rules
+
+	insinto /usr/share/polkit-1/actions
+	doins resources/polkit-1/actions/com.system76.CosmicSettings.Users.policy
 }

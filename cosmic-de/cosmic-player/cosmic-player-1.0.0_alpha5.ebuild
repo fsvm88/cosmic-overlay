@@ -4,14 +4,13 @@
 EAPI=8
 
 COSMIC_GIT_UNPACK=1
-EGIT_LFS=1
-inherit cosmic-de desktop
+inherit cosmic-de
 
-DESCRIPTION="text editor from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-edit"
+DESCRIPTION="player for COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-player"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.3"
+EGIT_COMMIT="epoch-1.0.0-alpha.5"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
@@ -21,9 +20,9 @@ KEYWORDS="~amd64"
 src_install() {
 	dobin "target/$profile_name/$PN"
 
-	domenu res/com.system76.CosmicEdit.desktop
+	domenu res/com.system76.CosmicPlayer.desktop
 
-	cosmic-de_install_metainfo res/com.system76.CosmicEdit.metainfo.xml
+	cosmic-de_install_metainfo res/com.system76.CosmicPlayer.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*

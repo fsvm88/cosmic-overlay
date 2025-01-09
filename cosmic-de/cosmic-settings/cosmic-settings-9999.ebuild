@@ -53,4 +53,7 @@ src_install() {
 
 	insinto /usr/share/polkit-1/rules.d/
 	doins resources/polkit-1/rules.d/cosmic-settings.rules
+
+	insinto /usr/share/polkit-1/actions
+	doins resources/polkit-1/actions/com.system76.CosmicSettings.Users.policy
 }

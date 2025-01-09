@@ -10,7 +10,7 @@ DESCRIPTION="applets for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-applets"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.3"
+EGIT_COMMIT="epoch-1.0.0-alpha.5"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
@@ -23,8 +23,11 @@ ${RDEPEND}
 "
 
 _install_icons() {
-	insinto /usr/share/icons/hicolor
-	doins -r "$1"/data/icons/*
+	local icons_folder="$1"/data/icons
+	if [ -d "$icons_folder" ]; then
+		insinto /usr/share/icons/hicolor
+		doins -r "$icons_folder"/*
+	fi
 }
 
 _link_applet() {
@@ -59,6 +62,7 @@ src_install() {
 	# - icons
 	# - desktop file
 	_install_applet "cosmic-app-list" "com.system76.CosmicAppList"
+	_install_applet "cosmic-applet-a11y" "com.system76.CosmicAppletA11y"
 	_install_applet "cosmic-applet-audio" "com.system76.CosmicAppletAudio"
 	_install_applet "cosmic-applet-battery" "com.system76.CosmicAppletBattery"
 	_install_applet "cosmic-applet-bluetooth" "com.system76.CosmicAppletBluetooth"

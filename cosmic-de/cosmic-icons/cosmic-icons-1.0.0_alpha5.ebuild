@@ -8,7 +8,7 @@ HOMEPAGE="https://github.com/pop-os/cosmic-icons"
 
 inherit git-r3
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.3"
+EGIT_COMMIT="epoch-1.0.0-alpha.5"
 
 # use cargo-license for a more accurate license picture
 LICENSE="CC-BY-SA-4.0"

@@ -10,7 +10,7 @@ DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.3"
+EGIT_COMMIT="epoch-1.0.0-alpha.5"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
@@ -22,6 +22,7 @@ DEPEND="
 	${DEPEND}
 	>=media-libs/mesa-24.0.4
 	>=media-video/pipewire-1.0.3
+	>=llvm-core/clang-18
 "
 
 src_install() {
