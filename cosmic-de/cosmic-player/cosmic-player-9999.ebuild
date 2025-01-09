@@ -21,7 +21,7 @@ src_install() {
 
 	domenu res/com.system76.CosmicPlayer.desktop
 
-	cosmic-de_install_metainfo data/com.system76.CosmicPlayer.metainfo.xml
+	cosmic-de_install_metainfo res/com.system76.CosmicPlayer.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*
