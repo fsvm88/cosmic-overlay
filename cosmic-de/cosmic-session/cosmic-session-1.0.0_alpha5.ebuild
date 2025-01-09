@@ -16,7 +16,7 @@ KEYWORDS="~amd64"
 IUSE="${IUSE} cups"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.3"
+EGIT_COMMIT="epoch-1.0.0-alpha.5"
 
 RDEPEND="
 	${RDEPEND}
@@ -81,4 +81,10 @@ src_install() {
 	# https://github.com/pop-os/cosmic-session/commit/153952c1ed2cb98772a84aa9b2c8729f6451c8ea
 	insinto /usr/share/glib-2.0/schemas
 	newins debian/cosmic-session.gsettings-override 50_cosmic-session.gschema.override
+
+	# dconf profile - upstream installs at /usr/share/dconf/profile/, but according to
+	# https://github.com/pop-os/cosmic-session/pull/90#issuecomment-2521418496
+	# this should be installed in /etc/dconf/profile
+	insinto /etc/dconf/profile
+	doins data/dconf/profile/cosmic
 }

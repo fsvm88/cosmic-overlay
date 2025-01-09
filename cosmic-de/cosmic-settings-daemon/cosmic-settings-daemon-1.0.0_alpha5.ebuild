@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.3"
+EGIT_COMMIT="epoch-1.0.0-alpha.5"
 
 IUSE="${IUSE} mpris"
 
