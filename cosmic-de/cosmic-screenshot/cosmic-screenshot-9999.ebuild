@@ -16,9 +16,7 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-screenshot/master/debian/control
-RDEPEND="
-	${RDEPEND}
+RDEPEND+="
 	>=cosmic-de/xdg-desktop-portal-cosmic-${PV}
 "
 

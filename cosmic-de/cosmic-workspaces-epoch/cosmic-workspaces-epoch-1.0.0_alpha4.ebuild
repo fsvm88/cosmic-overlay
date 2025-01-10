@@ -17,9 +17,7 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-workspaces-epoch/master/debian/control
-DEPEND="
-	${DEPEND}
+RDEPEND+="
 	>=media-libs/mesa-24.0.4
 "
 

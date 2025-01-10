@@ -12,13 +12,12 @@ LICENSE="GPL-3"
 
 SLOT="0"
 KEYWORDS=""
-IUSE="${IUSE} cups"
+IUSE+=" cups"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
 
-RDEPEND="
-	${RDEPEND}
+RDEPEND+="
 	~cosmic-de/cosmic-applets-${PV}
 	~cosmic-de/cosmic-applibrary-${PV}
 	~cosmic-de/cosmic-bg-${PV}

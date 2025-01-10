@@ -15,9 +15,7 @@ LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS=""
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-icons/master/debian/control
-RDEPEND="
-	${RDEPEND}
+RDEPEND+="
 	~cosmic-de/pop-icon-theme-${PV}
 "
 

@@ -15,10 +15,9 @@ KEYWORDS=""
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
 
-IUSE="${IUSE} mpris"
+IUSE+=" mpris"
 
-RDEPEND="
-	${RDEPEND}
+RDEPEND+="
 	>=app-misc/geoclue-2.7.1
 	media-sound/alsa-utils
 	mpris? ( >=media-sound/playerctl-2.3.1 )

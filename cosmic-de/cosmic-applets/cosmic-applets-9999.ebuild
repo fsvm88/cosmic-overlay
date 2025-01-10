@@ -16,8 +16,7 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-RDEPEND="
-${RDEPEND}
+RDEPEND+="
 ~cosmic-de/cosmic-icons-${PV}
 "
 

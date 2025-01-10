@@ -17,10 +17,10 @@ if [ "${PV}" == "9999" ]; then
 	EGIT_REPO_URI="${HOMEPAGE}"
 fi
 
-DEPEND="
->=x11-themes/adwaita-icon-theme-45.0
->=x11-themes/hicolor-icon-theme-0.17
-"
 BDEPEND="
 >=dev-build/meson-1.3.2
+"
+RDEPEND="
+>=x11-themes/adwaita-icon-theme-45.0
+>=x11-themes/hicolor-icon-theme-0.17
 "

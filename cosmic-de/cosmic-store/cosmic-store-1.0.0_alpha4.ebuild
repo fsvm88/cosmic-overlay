@@ -17,14 +17,9 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-store/master/debian/control
-DEPEND="
-	${DEPEND}
+RDEPEND+="
 	>=dev-libs/openssl-3.0.13-r2
 	>=sys-apps/flatpak-1.14.4-r3
-"
-RDEPEND="
-	${RDEPEND}
 	~cosmic-de/pop-appstream-data-9999
 	~cosmic-de/cosmic-icons-${PV}
 "
