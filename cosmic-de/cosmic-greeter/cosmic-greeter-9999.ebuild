@@ -17,18 +17,15 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-greeter/master/debian/control
-DEPEND="
-	${DEPEND}
+BDEPEND+="
 	>=llvm-core/clang-18
-	>=dev-libs/libinput-1.26.1
-	>=sys-libs/pam-1.5.3-r1
 "
-RDEPEND="
-	${RDEPEND}
+RDEPEND+="
 	~cosmic-de/cosmic-comp-${PV}
 	>=acct-user/cosmic-greeter-0
+	>=dev-libs/libinput-1.26.1
 	>=gui-libs/greetd-0.9.0
+	>=sys-libs/pam-1.5.3-r1
 "
 
 src_configure() {

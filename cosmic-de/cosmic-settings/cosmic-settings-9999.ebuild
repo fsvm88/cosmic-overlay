@@ -16,21 +16,18 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-settings/master/debian/control
-BDEPEND="
-	${BDEPEND}
-	>=dev-libs/expat-2.5.0
-	>=media-libs/fontconfig-2.14.2-r3
-	>=media-libs/freetype-2.13.2
+BDEPEND+="
 	>=llvm-core/clang-18
 "
-RDEPEND="
-	${RDEPEND}
+RDEPEND+="
 	~cosmic-de/cosmic-icons-${PV}
 	~cosmic-de/cosmic-randr-${PV}
 	>=app-text/iso-codes-4.16.0
+	>=dev-libs/expat-2.5.0
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
+	>=media-libs/fontconfig-2.14.2-r3
+	>=media-libs/freetype-2.13.2
 	>=net-misc/networkmanager-1.46.0
 	>=net-vpn/networkmanager-openvpn-1.10.2
 	>=sys-apps/accountsservice-23.13.9

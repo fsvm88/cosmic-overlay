@@ -22,13 +22,10 @@ else
 "
 fi
 
-# As per https://raw.githubusercontent.com/pop-os/system76-power/master/debian/control
-BDEPEND="
-${BDEPEND}
+BDEPEND+="
 virtual/libusb:1
 "
-RDEPEND="
-${RDEPEND}
+RDEPEND+="
 >=sys-auth/polkit-123
 !sys-power/power-profiles-daemon
 "

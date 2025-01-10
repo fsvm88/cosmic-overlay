@@ -16,9 +16,7 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-comp/master/debian/control
-DEPEND="
-	${DEPEND}
+RDEPEND+="
 	>=media-libs/fontconfig-2.14.2-r3
 	>=media-libs/mesa-24.0.4
 	>=sys-auth/seatd-0.8.0

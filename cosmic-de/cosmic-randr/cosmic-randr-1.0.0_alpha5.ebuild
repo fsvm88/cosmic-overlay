@@ -17,8 +17,6 @@ LICENSE="MPL-2.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-randr/master/debian/control
-
 src_install() {
 	dobin "target/$profile_name/$PN"
 }

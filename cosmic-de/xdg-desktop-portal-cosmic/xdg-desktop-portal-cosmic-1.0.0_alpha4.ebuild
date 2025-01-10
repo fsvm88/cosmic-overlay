@@ -17,12 +17,12 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# As per https://raw.githubusercontent.com/pop-os/xdg-desktop-portal-cosmic/master/debian/control
-DEPEND="
-	${DEPEND}
+BDEPEND+="
+	>=llvm-core/clang-18
+"
+RDEPEND+="
 	>=media-libs/mesa-24.0.4
 	>=media-video/pipewire-1.0.3
-	>=llvm-core/clang-18
 "
 
 src_install() {

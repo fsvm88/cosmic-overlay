@@ -16,9 +16,7 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-osd/master/debian/control
-RDEPEND="
-	${RDEPEND}
+RDEPEND+="
 	>=media-libs/libpulse-17.0
 	>=virtual/libudev-251-r2
 "

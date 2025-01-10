@@ -16,8 +16,8 @@
 # This eclass contains common functions for Cosmic DE packages.
 
 case ${EAPI} in
-	8) ;;
-	*) die "${ECLASS}: EAPI ${EAPI:-0} not supported" ;;
+8) ;;
+*) die "${ECLASS}: EAPI ${EAPI:-0} not supported" ;;
 esac
 
 ### NOTE!
@@ -40,7 +40,16 @@ RUST_MIN_VER="1.80.1"
 CARGO_OPTIONAL=1
 inherit cargo
 
-# @ECLASS_VARIABLE: DEPEND
+# @ECLASS_VARIABLE: BDEPEND
+# @OUTPUT_VARIABLE
+# @DESCRIPTION:
+# See description of BDEPEND
+BDEPEND="
+>=virtual/pkgconfig-3
+${RUST_DEPEND}
+"
+
+# @ECLASS_VARIABLE: RDEPEND
 # @OUTPUT_VARIABLE
 # @DESCRIPTION:
 # Deps are factored out in the eclass, because currently the only way to build
@@ -54,7 +63,10 @@ inherit cargo
 # emerged before we ever try to install the first cosmic-de package.
 # If we put them in the -meta package, portage would still potentially merge
 # them in parallel.
-DEPEND="
+#
+# dbus is an RDEPEND pretty much for the entire DE
+# same for systemd
+RDEPEND="
 >=dev-cpp/glibmm-2.66.7:2
 >=dev-libs/glib-2.78.3
 >=dev-libs/libinput-1.25.0
@@ -70,25 +82,6 @@ DEPEND="
 >=x11-libs/gdk-pixbuf-2.42.10-r1
 >=x11-libs/libxkbcommon-1.6.0
 >=x11-libs/pango-1.52.1
-"
-
-# @ECLASS_VARIABLE: BDEPEND
-# @OUTPUT_VARIABLE
-# @DESCRIPTION:
-# See description of BDEPEND
-BDEPEND="
->=virtual/pkgconfig-3
-${RUST_DEPEND}
-"
-
-# @ECLASS_VARIABLE: RDEPEND
-# @OUTPUT_VARIABLE
-# @DESCRIPTION:
-# See description of RDEPEND
-#
-# dbus is an RDEPEND pretty much for the entire DE
-# same for systemd
-RDEPEND="
 elogind? ( >=sys-auth/elogind-246.10-r3 )
 systemd? ( sys-apps/systemd:= )
 || (
@@ -136,7 +129,7 @@ if [[ "${PV}" == *9999* ]] ||
 	inherit git-r3
 fi
 
-IUSE="${IUSE} debug debug-line-tables-only elogind max-opt systemd"
+IUSE+=" debug debug-line-tables-only elogind max-opt systemd"
 REQUIRED_USE="
 debug? ( !max-opt )
 debug-line-tables-only? ( !debug )
@@ -166,11 +159,11 @@ cosmic-de_src_unpack() {
 # Prepares the package and adds the "release-maximum-optimization" profile
 cosmic-de_src_prepare() {
 	default
-	if has max-opt $USE \
-		&& use max-opt \
-		&& [ -f Cargo.toml ] ; then
+	if has max-opt $USE &&
+		use max-opt &&
+		[ -f Cargo.toml ]; then
 		{
-		cat <<'EOF'
+			cat <<'EOF'
 
 [profile.release-maximum-optimization]
 inherits = "release"
@@ -182,7 +175,7 @@ opt-level = 3
 overflow-checks = false
 panic = "unwind"
 EOF
-		} >> Cargo.toml
+		} >>Cargo.toml
 	fi
 }
 
@@ -234,9 +227,9 @@ cosmic-de_src_configure() {
 cosmic-de_src_compile() {
 	debug-print-function "${FUNCNAME}" "$@"
 
-	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
+	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] ||
 		die "FATAL: please call cosmic-de_src_configure before using ${FUNCNAME}"
-	
+
 	filter-lto
 	tc-export AR CC CXX PKG_CONFIG
 
@@ -251,7 +244,7 @@ cosmic-de_src_compile() {
 cosmic-de_src_test() {
 	debug-print-function "${FUNCNAME}" "$@"
 
-	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] || \
+	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] ||
 		die "FATAL: please call cosmic-de_src_test before using ${FUNCNAME}"
 
 	set -- cargo test "${ECARGO_ARGS[@]}" "$@"

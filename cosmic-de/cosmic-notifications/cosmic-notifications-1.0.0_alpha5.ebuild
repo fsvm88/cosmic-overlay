@@ -17,9 +17,7 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# As per https://raw.githubusercontent.com/pop-os/cosmic-notifications/master/debian/control
-BDEPEND="
-	${BDEPEND}
+BDEPEND+="
 	>=dev-util/intltool-0.51.0-r3
 "
 

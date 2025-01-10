@@ -13,13 +13,12 @@ LICENSE="GPL-3"
 
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="${IUSE} cups"
+IUSE+=" cups"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="epoch-1.0.0-alpha.4"
 
-RDEPEND="
-	${RDEPEND}
+RDEPEND+="
 	~cosmic-de/cosmic-applets-${PV}
 	~cosmic-de/cosmic-applibrary-${PV}
 	~cosmic-de/cosmic-bg-${PV}
