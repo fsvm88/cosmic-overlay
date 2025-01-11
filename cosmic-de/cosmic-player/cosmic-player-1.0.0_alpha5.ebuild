@@ -17,6 +17,11 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
+RDEPEND+="
+	>=media-libs/gst-plugins-base-1.22.10
+	>=media-libs/gst-plugins-good-1.22.10
+"
+
 src_install() {
 	dobin "target/$profile_name/$PN"
 
