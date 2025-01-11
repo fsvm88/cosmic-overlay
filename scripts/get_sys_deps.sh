@@ -96,6 +96,7 @@ rg submodule .gitmodules | rg '"[A-Za-z0-9-].*"' -o | sed 's:"::g' | sort -u | w
         "zstd-sys") echo 'app-arch/zstd:0' ;;
         "liblzma-sys") echo 'app-arch/xz-utils:0' ;;
         "libpulse-sys") echo 'media-libs/libpulse:0' ;;
+        "pixman-sys") echo 'x11-libs/pixman:0' ;;
         *)
             echo "unsupported crate: ${crate}"
             exit 254
