@@ -24,6 +24,7 @@ RDEPEND+="
 	~cosmic-de/cosmic-randr-${PV}
 	>=app-text/iso-codes-4.16.0
 	>=dev-libs/expat-2.5.0
+	>=gnome-extra/nm-applet-1.36.0
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
 	>=media-libs/fontconfig-2.14.2-r3
