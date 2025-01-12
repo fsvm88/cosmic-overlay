@@ -3,7 +3,9 @@
 
 EAPI=8
 
-inherit cosmic-de
+LLVM_COMPAT=({18..19})
+LLVM_OPTIONAL=1
+inherit cosmic-de llvm-r1
 
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
@@ -16,13 +18,21 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-BDEPEND+="
-	>=llvm-core/clang-18
-"
+REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
+
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
 	>=media-video/pipewire-1.0.3
+	$(llvm_gen_dep '
+		llvm-core/clang:${LLVM_SLOT}
+		llvm-core/llvm:${LLVM_SLOT}
+	')
 "
+
+pkg_setup() {
+	rust_pkg_setup
+	llvm-r1_pkg_setup
+}
 
 src_install() {
 	exeinto /usr/libexec

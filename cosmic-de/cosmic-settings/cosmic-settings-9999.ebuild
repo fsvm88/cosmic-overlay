@@ -3,7 +3,9 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+LLVM_COMPAT=({18..19})
+LLVM_OPTIONAL=1
+inherit cosmic-de desktop llvm-r1
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
@@ -16,9 +18,8 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-BDEPEND+="
-	>=llvm-core/clang-18
-"
+REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
+
 RDEPEND+="
 	~cosmic-de/cosmic-icons-${PV}
 	~cosmic-de/cosmic-randr-${PV}
@@ -35,7 +36,16 @@ RDEPEND+="
 	>=sys-apps/accountsservice-23.13.9
 	>=sys-devel/gettext-0.22.4
 	>=x11-misc/xkeyboard-config-2.41
+	$(llvm_gen_dep '
+		llvm-core/clang:${LLVM_SLOT}
+		llvm-core/llvm:${LLVM_SLOT}
+	')
 "
+
+pkg_setup() {
+	rust_pkg_setup
+	llvm-r1_pkg_setup
+}
 
 src_install() {
 	dobin "target/$profile_name/$PN"
