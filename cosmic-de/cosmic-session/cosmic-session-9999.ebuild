@@ -12,7 +12,7 @@ LICENSE="GPL-3"
 
 SLOT="0"
 KEYWORDS=""
-IUSE+=" cups"
+IUSE+="+greeter cups"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
@@ -22,7 +22,7 @@ RDEPEND+="
 	~cosmic-de/cosmic-applibrary-${PV}
 	~cosmic-de/cosmic-bg-${PV}
 	~cosmic-de/cosmic-comp-${PV}
-	~cosmic-de/cosmic-greeter-${PV}
+	greeter? ( ~cosmic-de/cosmic-greeter-${PV} )
 	~cosmic-de/cosmic-icons-${PV}
 	~cosmic-de/cosmic-idle-${PV}
 	~cosmic-de/cosmic-launcher-${PV}
