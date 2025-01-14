@@ -7,6 +7,7 @@
     <description>Primary maintainer</description>
   </maintainer>
   <use>
+    <flag name="greeter"> Enable cosmic-greeter dependency.</flag>
     <flag name="store">Enable cosmic-store dependency.</flag>
   </use>
   <upstream>
