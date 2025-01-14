@@ -4,22 +4,24 @@
 EAPI=8
 
 COSMIC_GIT_UNPACK=1
-inherit cosmic-de desktop
+LLVM_COMPAT=({18..19})
+LLVM_OPTIONAL=1
+inherit cosmic-de desktop llvm-r1
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.4"
+EGIT_COMMIT="epoch-1.0.0-alpha.5"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
+IUSE="+networkmanager openvpn"
 
-BDEPEND+="
-	>=llvm-core/clang-18
-"
+REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
+
 RDEPEND+="
 	~cosmic-de/cosmic-icons-${PV}
 	~cosmic-de/cosmic-randr-${PV}
@@ -31,12 +33,23 @@ RDEPEND+="
 	>=media-fonts/fira-sans-4.202
 	>=media-libs/fontconfig-2.14.2-r3
 	>=media-libs/freetype-2.13.2
-	>=net-misc/networkmanager-1.46.0
-	>=net-vpn/networkmanager-openvpn-1.10.2
+	networkmanager? (
+		>=net-misc/networkmanager-1.46.0
+		openvpn? ( >=net-vpn/networkmanager-openvpn-1.10.2 )
+	)
 	>=sys-apps/accountsservice-23.13.9
 	>=sys-devel/gettext-0.22.4
 	>=x11-misc/xkeyboard-config-2.41
+	$(llvm_gen_dep '
+		llvm-core/clang:${LLVM_SLOT}
+		llvm-core/llvm:${LLVM_SLOT}
+	')
 "
+
+pkg_setup() {
+	rust_pkg_setup
+	llvm-r1_pkg_setup
+}
 
 src_install() {
 	dobin "target/$profile_name/$PN"
@@ -53,4 +66,7 @@ src_install() {
 
 	insinto /usr/share/polkit-1/rules.d/
 	doins resources/polkit-1/rules.d/cosmic-settings.rules
+
+	insinto /usr/share/polkit-1/actions
+	doins resources/polkit-1/actions/com.system76.CosmicSettings.Users.policy
 }
