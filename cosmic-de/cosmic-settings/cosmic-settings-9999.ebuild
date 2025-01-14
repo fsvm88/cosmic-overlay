@@ -17,6 +17,7 @@ EGIT_BRANCH=master
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
+IUSE="+networkmanager openvpn"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 
@@ -31,8 +32,10 @@ RDEPEND+="
 	>=media-fonts/fira-sans-4.202
 	>=media-libs/fontconfig-2.14.2-r3
 	>=media-libs/freetype-2.13.2
-	>=net-misc/networkmanager-1.46.0
-	>=net-vpn/networkmanager-openvpn-1.10.2
+	networkmanager? (
+		>=net-misc/networkmanager-1.46.0
+		openvpn? ( >=net-vpn/networkmanager-openvpn-1.10.2 )
+	)
 	>=sys-apps/accountsservice-23.13.9
 	>=sys-devel/gettext-0.22.4
 	>=x11-misc/xkeyboard-config-2.41
