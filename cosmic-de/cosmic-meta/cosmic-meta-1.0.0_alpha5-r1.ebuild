@@ -13,7 +13,7 @@ LICENSE="CC-BY-SA-4.0 GPL-3 GPL-3+ MPL-2.0"
 
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="store"
+IUSE="+greeter store"
 
 RDEPEND="
 ~cosmic-de/cosmic-applets-${PV}
@@ -22,7 +22,7 @@ RDEPEND="
 ~cosmic-de/cosmic-comp-${PV}
 ~cosmic-de/cosmic-edit-${PV}
 ~cosmic-de/cosmic-files-${PV}
-~cosmic-de/cosmic-greeter-${PV}
+greeter? ( ~cosmic-de/cosmic-greeter-${PV} )
 ~cosmic-de/cosmic-icons-${PV}
 ~cosmic-de/cosmic-idle-${PV}
 ~cosmic-de/cosmic-launcher-${PV}
@@ -32,7 +32,7 @@ RDEPEND="
 ~cosmic-de/cosmic-player-${PV}
 ~cosmic-de/cosmic-randr-${PV}
 ~cosmic-de/cosmic-screenshot-${PV}
-~cosmic-de/cosmic-session-${PV}
+~cosmic-de/cosmic-session-${PV}[greeter=]
 ~cosmic-de/cosmic-settings-${PV}
 ~cosmic-de/cosmic-settings-daemon-${PV}
 store? ( ~cosmic-de/cosmic-store-${PV} )
