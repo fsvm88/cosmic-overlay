@@ -13,7 +13,7 @@ DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_COMMIT="epoch-1.0.0-alpha.5"
+EGIT_COMMIT="epoch-1.0.0-alpha.5.1"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
