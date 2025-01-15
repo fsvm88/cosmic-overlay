@@ -12,7 +12,7 @@ LICENSE="GPL-3"
 
 SLOT="0"
 KEYWORDS=""
-IUSE+="+greeter cups"
+IUSE+=" +greeter cups"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master

@@ -17,7 +17,7 @@ EGIT_BRANCH=master
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
-IUSE="+networkmanager openvpn"
+IUSE+=" +networkmanager openvpn"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 

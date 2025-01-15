@@ -18,7 +18,7 @@ EGIT_COMMIT="epoch-1.0.0-alpha.5.1"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="+networkmanager openvpn"
+IUSE+=" +networkmanager openvpn"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 
