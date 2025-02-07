@@ -22,13 +22,13 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 src_unpack() {
-	if [[ "${PV}" == *1.0.0_alpha6* ]]; then
-		git-r3_src_unpack
-	else
-		if [[ -n ${A} ]]; then
-			unpack "${A}"
-		fi
-	fi
+	# if [[ "${PV}" == *9999* ]]; then
+	git-r3_src_unpack
+	# else
+	# 	if [[ -n ${A} ]]; then
+	# 		unpack "${A}"
+	# 	fi
+	# fi
 }
 
 src_install() {

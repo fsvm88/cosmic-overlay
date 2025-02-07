@@ -35,7 +35,7 @@ RDEPEND+="
 	~cosmic-de/cosmic-screenshot-${PV}
 	~cosmic-de/cosmic-settings-${PV}
 	~cosmic-de/cosmic-settings-daemon-${PV}
-	~cosmic-de/cosmic-wallpapers-1.0.0_alpha6
+	~cosmic-de/cosmic-wallpapers-${PV}
 	~cosmic-de/cosmic-workspaces-epoch-${PV}
 	~cosmic-de/xdg-desktop-portal-cosmic-${PV}
 	~cosmic-de/pop-fonts-${PV}
