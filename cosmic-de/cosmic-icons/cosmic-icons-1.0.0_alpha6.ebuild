@@ -16,7 +16,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND+="
-	~cosmic-de/pop-icon-theme-${PV}
+	~cosmic-de/pop-icon-theme-9999
 "
 
 src_unpack() {

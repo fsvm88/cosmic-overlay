@@ -35,10 +35,10 @@ RDEPEND+="
 	~cosmic-de/cosmic-screenshot-${PV}
 	~cosmic-de/cosmic-settings-${PV}
 	~cosmic-de/cosmic-settings-daemon-${PV}
-	~cosmic-de/cosmic-wallpapers-${PV}
+	~cosmic-de/cosmic-wallpapers-9999
 	~cosmic-de/cosmic-workspaces-epoch-${PV}
 	~cosmic-de/xdg-desktop-portal-cosmic-${PV}
-	~cosmic-de/pop-fonts-${PV}
+	~cosmic-de/pop-fonts-9999
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
 	>=sys-power/switcheroo-control-2.6-r2

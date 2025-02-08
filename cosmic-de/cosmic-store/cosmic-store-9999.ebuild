@@ -19,7 +19,7 @@ KEYWORDS=""
 RDEPEND+="
 	>=dev-libs/openssl-3.0.13-r2
 	>=sys-apps/flatpak-1.14.4-r3
-	~cosmic-de/pop-appstream-data-${PV}
+	~cosmic-de/pop-appstream-data-9999
 	~cosmic-de/cosmic-icons-${PV}
 "
 
