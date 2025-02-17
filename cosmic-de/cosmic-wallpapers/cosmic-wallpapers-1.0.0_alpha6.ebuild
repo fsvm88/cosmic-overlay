@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/pop-os/cosmic-wallpapers"
 
 inherit git-r3
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+EGIT_COMMIT="epoch-1.0.0-alpha.6"
 
 BDEPEND="
 	media-gfx/imagemagick
