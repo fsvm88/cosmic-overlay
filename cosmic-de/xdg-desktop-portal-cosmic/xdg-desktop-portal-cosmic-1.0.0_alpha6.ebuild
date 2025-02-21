@@ -22,6 +22,10 @@ KEYWORDS="~amd64"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 
+PATCHES=(
+	"${FILESDIR}/"xdg-desktop-portal-cosmic-1.0.0_alpha6-backport-fix-tests-f831ce7a.patch
+)
+
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
 	>=media-video/pipewire-1.0.3
