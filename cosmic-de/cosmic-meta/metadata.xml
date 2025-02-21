@@ -7,7 +7,8 @@
     <description>Primary maintainer</description>
   </maintainer>
   <use>
-    <flag name="greeter"> Enable cosmic-greeter dependency.</flag>
+    <flag name="fonts">Pull in media-fonts/open-sans and media-fonts/noto to theme-sync GTK apps to COSMIC defaults.</flag>
+    <flag name="greeter">Enable cosmic-greeter dependency.</flag>
     <flag name="store">Enable cosmic-store dependency.</flag>
   </use>
   <upstream>
