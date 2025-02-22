@@ -19,7 +19,7 @@ BDEPEND="
 # As of 2024-11-01, the git repo now provides a LICENSE
 LICENSE="CC-BY-SA-4.0"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 
 src_unpack() {
 	# if [[ "${PV}" == *9999* ]]; then
