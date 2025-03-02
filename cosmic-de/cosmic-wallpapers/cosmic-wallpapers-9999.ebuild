@@ -8,9 +8,9 @@ EGIT_LFS=1
 DESCRIPTION="Wallpapers for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-wallpapers"
 
-inherit git-r3
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
+inherit git-r3
 
 BDEPEND="
 	media-gfx/imagemagick
