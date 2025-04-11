@@ -49,6 +49,13 @@ RDEPEND+="
 src_prepare() {
 	use elogind && epatch "${FILESDIR}/no_journald-systemctl.patch"
 	cosmic-de_src_prepare
+
+	# patch for dconf profile as done in justfile upstream
+	# no more need for workaround in src_install
+	# https://github.com/pop-os/cosmic-session/pull/95/files
+	sed \
+		-i "s|DCONF_PROFILE=cosmic|DCONF_PROFILE=/usr/share/dconf/profile/cosmic|" \
+		data/start-cosmic
 }
 
 src_configure() {
@@ -82,9 +89,6 @@ src_install() {
 	insinto /usr/share/glib-2.0/schemas
 	newins debian/cosmic-session.gsettings-override 50_cosmic-session.gschema.override
 
-	# dconf profile - upstream installs at /usr/share/dconf/profile/, but according to
-	# https://github.com/pop-os/cosmic-session/pull/90#issuecomment-2521418496
-	# this should be installed in /etc/dconf/profile
-	insinto /etc/dconf/profile
+	insinto /usr/share/dconf/profile
 	doins data/dconf/profile/cosmic
 }
