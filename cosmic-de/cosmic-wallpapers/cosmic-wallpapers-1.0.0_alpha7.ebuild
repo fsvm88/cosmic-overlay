@@ -14,7 +14,7 @@ DESCRIPTION="Wallpapers for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-wallpapers"
 
 EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+EGIT_COMMIT="epoch-1.0.0-alpha.7"
 inherit git-r3
 
 BDEPEND="
@@ -24,10 +24,10 @@ BDEPEND="
 # As of 2024-11-01, the git repo now provides a LICENSE
 LICENSE="CC-BY-SA-4.0"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 
 src_unpack() {
-	# if [[ "${PV}" == *9999* ]]; then
+	# if [[ "${PV}" == *1.0.0_alpha7* ]]; then
 	git-r3_src_unpack
 	# else
 	# 	if [[ -n ${A} ]]; then
