@@ -19,9 +19,6 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE+=" ${COSMIC_DE_GVFS_IUSE}"
 
-# to drop when tab_click_double_opens_folder will be fixed
-RESTRICT=test
-
 BDEPEND+="
 	dev-libs/glib:2
 	${COSMIC_DE_GVFS_DEPENDS}
