@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 EPOCH_URL=https://github.com/pop-os/cosmic-epoch
+OVERLAY_URL=https://github.com/fsvm88/cosmic-overlay
 
 # Get the parent folder, which is the overlay root
 __script_dir="$(dirname "$(dirname "$(realpath "$0")")")"
@@ -32,6 +33,18 @@ trap cleanup EXIT SIGINT SIGTERM
     errorExit 2 "git was not found in $PATH, you need git installed to run this script"
 ! which jq &>/dev/null &&
     errorExit 2 "jq was not found in $PATH, you need jq installed to run this script"
+! which gh &>/dev/null &&
+    errorExit 2 "GitHub CLI (gh) was not found in $PATH, you need gh installed to run this script"
+
+# Check if gh is authenticated and has required permissions
+if ! gh auth status &>/dev/null; then
+    errorExit 3 "GitHub CLI is not authenticated. Please run 'gh auth login' first"
+fi
+
+# Test release creation permissions by checking repo access
+if ! gh repo view "${OVERLAY_URL}" --json 'viewerPermission' -q '.viewerPermission' | grep -q 'ADMIN'; then
+    errorExit 4 "GitHub CLI lacks required permissions to create releases. Please ensure you have admin access to ${OVERLAY_URL}"
+fi
 
 # Convert cosmic version to Gentoo version format
 # Example: epoch-1.0.0-alpha.5 → 1.0.0_alpha5
@@ -68,6 +81,8 @@ function get_commit_hash() {
 # Check if version argument is provided
 [ $# -ne 1 ] && errorExit 1 "Usage: $0 <version>"
 REQ_TAG="$1"
+# Convert tag to Gentoo version format once
+gentoo_version="$(convert_version "${REQ_TAG}")"
 
 # Check if the requested tag exists on remote
 git ls-remote --exit-code "${EPOCH_URL}" refs/tags/"${REQ_TAG}" &>/dev/null ||
@@ -102,8 +117,9 @@ while IFS= read -r module_path; do
     if [ -d "${module_path}" ]; then
         push_d "${module_path}"
         if [ -f "Cargo.toml" ]; then
-            gentoo_version="$(convert_version "${REQ_TAG}")"
-            tarball_path="${__temp_folder}/${module_path}-${gentoo_version}-crates.tar"
+            # Get the current commit hash
+            commit_hash="$(git rev-parse --short HEAD)"
+            tarball_path="${__temp_folder}/${module_path}-${gentoo_version}-${commit_hash}-crates.tar"
             zst_path="${tarball_path}.zst"
 
             # Create vendor directory and archive it
@@ -140,5 +156,26 @@ while IFS= read -r module_path; do
     fi
 done < <(awk '{ print $3; }' "${__temp_submodule_hashes}")
 pop_d
+
+# Convert tag to Gentoo version for release
+gentoo_version="$(convert_version "${REQ_TAG}")"
+
+# Create GitHub release
+log "Creating GitHub release for tag ${gentoo_version}..."
+if ! gh release create "${gentoo_version}" \
+    --repo "${OVERLAY_URL}" \
+    --title "${gentoo_version}" \
+    --notes "Script-generated vendored crates for COSMIC ${gentoo_version}"; then
+    errorExit 30 "Failed to create GitHub release"
+fi
+
+# Upload all generated tarballs
+log "Uploading tarballs to release ${gentoo_version}..."
+find "${__temp_folder}" -name "*-crates.tar.zst" -type f | while read -r tarball; do
+    if ! gh release upload "${gentoo_version}" "${tarball}" --repo "${OVERLAY_URL}"; then
+        errorExit 31 "Failed to upload ${tarball} to release"
+    fi
+    log "Uploaded: $(basename "${tarball}")"
+done
 
 exit 0
