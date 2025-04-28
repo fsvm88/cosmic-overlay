@@ -45,6 +45,7 @@ inherit cargo
 # @DESCRIPTION:
 # See description of BDEPEND
 BDEPEND="
+app-arch/zstd
 >=virtual/pkgconfig-3
 ${RUST_DEPEND}
 "
