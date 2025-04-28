@@ -137,6 +137,34 @@ max-opt? ( !debug )
 ^^ ( elogind systemd )
 "
 
+# @FUNCTION: _cosmic-de_src_unpack_tagged
+# @DESCRIPTION:
+# internal function to unpack a non-live (non-9999) package
+# currently using scripts/generate_tarballs_for_tag.sh
+# as some crates still use submodules
+_cosmic-de_src_unpack_tagged() {
+	debug-print-function ${FUNCNAME} "$@"
+
+	pushd "${DISTDIR}" >/dev/null || die
+
+	mkdir -p "${S}" || die
+
+	for archive in ${A}; do
+		case "${archive}" in
+		*-crates.tar.zst)
+			tar -x -I 'zstd --long=31' -C "${WORKDIR}" -f "${archive}"
+			;;
+		*)
+			tar -x -C "${S}" -f "${archive}" --strip-components=1
+			;;
+		esac
+	done
+
+	popd >/dev/null || die
+
+	cargo_gen_config
+}
+
 # @FUNCTION: cosmic-de_src_unpack
 # @DESCRIPTION:
 # Unpacks the package and the cargo registry.
@@ -150,7 +178,8 @@ cosmic-de_src_unpack() {
 			cargo_live_src_unpack
 		fi
 	else
-		cargo_src_unpack
+		ECARGO_VENDOR="${WORKDIR}/vendor"
+		_cosmic-de_src_unpack_tagged "$@"
 	fi
 }
 
@@ -211,6 +240,16 @@ cosmic-de_src_configure() {
 		--profile $profile_name \
 		$(usev debug-line-tables-only "--config profile.$profile_name.debug=\"line-tables-only\"") \
 		"${@}"
+
+	# use vendored crates
+	if [[ "${PV}" != *9999* ]] && [[ -z "${COSMIC_GIT_UNPACK}" ]]; then
+		sed -i "${ECARGO_HOME}/config.toml" -e '/source.gentoo/d' || die
+		sed -i "${ECARGO_HOME}/config.toml" -e '/directory = .*/d' || die
+		sed -i "${ECARGO_HOME}/config.toml" -e '/source.crates-io/d' || die
+		sed -i "${ECARGO_HOME}/config.toml" -e '/replace-with = "gentoo"/d' || die
+		sed -i "${ECARGO_HOME}/config.toml" -e '/local-registry = "\/nonexistent"/d' || die
+		cat "${WORKDIR}/config.toml" >>"${ECARGO_HOME}/config.toml" || die
+	fi
 }
 
 ##### NOTE!
