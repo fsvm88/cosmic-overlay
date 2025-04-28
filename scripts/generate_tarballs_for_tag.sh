@@ -35,6 +35,8 @@ trap cleanup EXIT SIGINT SIGTERM
     errorExit 2 "jq was not found in $PATH, you need jq installed to run this script"
 ! which gh &>/dev/null &&
     errorExit 2 "GitHub CLI (gh) was not found in $PATH, you need gh installed to run this script"
+! which zstd &>/dev/null &&
+    errorExit 2 "zstd was not found in $PATH, you need zstd installed to run this script"
 
 # Check if gh is authenticated and has required permissions
 if ! gh auth status &>/dev/null; then
@@ -44,6 +46,24 @@ fi
 # Test release creation permissions by checking repo access
 if ! gh repo view "${OVERLAY_URL}" --json 'viewerPermission' -q '.viewerPermission' | grep -q 'ADMIN'; then
     errorExit 4 "GitHub CLI lacks required permissions to create releases. Please ensure you have admin access to ${OVERLAY_URL}"
+fi
+
+# Check if we can read make.conf
+if [ ! -f /etc/portage/make.conf ]; then
+    errorExit 5 "Could not find /etc/portage/make.conf"
+fi
+
+# Source make.conf to check DISTDIR
+# shellcheck disable=SC1091
+source /etc/portage/make.conf
+
+# Verify DISTDIR is set and writable
+if [ -z "${DISTDIR}" ]; then
+    error "DISTDIR not found in /etc/portage/make.conf"
+    DISTDIR="/var/cache/distfiles" # Use default Gentoo location as fallback
+fi
+if [ ! -w "${DISTDIR}" ]; then
+    errorExit 6 "DISTDIR (${DISTDIR}) is not writable"
 fi
 
 # Convert cosmic version to Gentoo version format
@@ -117,36 +137,22 @@ while IFS= read -r module_path; do
     if [ -d "${module_path}" ]; then
         push_d "${module_path}"
         if [ -f "Cargo.toml" ]; then
-            # Get the current commit hash
-            commit_hash="$(git rev-parse --short HEAD)"
-            tarball_path="${__temp_folder}/${module_path}-${gentoo_version}-${commit_hash}-crates.tar"
+            tarball_path="${__temp_folder}/${module_path}-${gentoo_version}-crates.tar"
             zst_path="${tarball_path}.zst"
+            config_file="config.toml"
 
             # Create vendor directory and archive it
-            if cargo vendor "${distdir}/vendor" &&
-                tar -C "${distdir}" -cf "${tarball_path}" vendor &&
+            if cargo vendor | head -n -0 >"${config_file}" &&
+                tar -cf "${tarball_path}" vendor "${config_file}" &&
                 zstd --long=31 -15 -T0 "${tarball_path}" -o "${zst_path}"; then
                 rm -f "${tarball_path}" # Remove the uncompressed tarball
-                rm -rf "${distdir}/vendor"
+                rm -rf vendor "${config_file}"
                 log "Created compressed tarball: ${zst_path}"
             else
                 rm -f "${tarball_path}" "${zst_path}" # Cleanup on failure
+                rm -rf vendor "${config_file}"        # Clean vendor files on failure
                 errorExit 20 "Failed to create tarball for ${module_path}"
             fi
-
-            # Legacy pycargoebuild implementation kept for reference
-            # if grep -q '^\[workspace\]' Cargo.toml; then
-            #     # This is a workspace, get all members
-            #     members=$(cargo metadata --no-deps | jq '.packages[].name' -r | tr '\n' ' ')
-            #     pycargoebuild ${members} \
-            #         --crate-tarball \
-            #         --crate-tarball-path "${tarball_path}"
-            # else
-            #     # Single crate
-            #     pycargoebuild . \
-            #         --crate-tarball \
-            #         --crate-tarball-path "${tarball_path}"
-            # fi
         else
             log "Skipping ${module_path} - no Cargo.toml found"
         fi
@@ -176,6 +182,15 @@ find "${__temp_folder}" -name "*-crates.tar.zst" -type f | while read -r tarball
         errorExit 31 "Failed to upload ${tarball} to release"
     fi
     log "Uploaded: $(basename "${tarball}")"
+done
+
+# Copy tarballs to DISTDIR
+log "Copying tarballs to DISTDIR (${DISTDIR})..."
+find "${__temp_folder}" -name "*-crates.tar.zst" -type f | while read -r tarball; do
+    if ! cp "${tarball}" "${DISTDIR}/"; then
+        errorExit 32 "Failed to copy ${tarball} to ${DISTDIR}"
+    fi
+    log "Copied: $(basename "${tarball}") to ${DISTDIR}"
 done
 
 exit 0
