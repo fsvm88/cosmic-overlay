@@ -24,6 +24,14 @@ RDEPEND+="
 	>=cosmic-de/cosmic-icons-${PV}
 "
 
+src_configure() {
+	# Required for some crates to build properly due to build.rs scripts
+	export VERGEN_GIT_COMMIT_DATE='Sat Apr 19 17:53:47 2025 -0600'
+	export VERGEN_GIT_SHA=2c22dc8afa981e90964b51b4fb855ce493b71491
+
+	cosmic-de_src_configure
+}
+
 src_install() {
 	dobin "target/$profile_name/$PN"
 

@@ -20,6 +20,14 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
+src_configure() {
+	# Required for some crates to build properly due to build.rs scripts
+	export VERGEN_GIT_COMMIT_DATE='Thu Apr 17 08:12:02 2025 -0600'
+	export VERGEN_GIT_SHA=d4294713d8fc5c44ed7c9b1957aa6db7ee16a4d4
+
+	cosmic-de_src_configure
+}
+
 src_install() {
 	dobin "target/$profile_name/$PN"
 
