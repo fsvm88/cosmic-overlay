@@ -1,0 +1,14 @@
+#!/sbin/openrc-run
+# Copyright 2025 Michal Rostecki
+# Distributed under the terms of the GNU General Public License v2
+
+command="/usr/bin/system76-power"
+command_args="daemon ${command_args:-}"
+command_background="true"
+pidfile="${pidfile:-/run/${RC_SVCNAME}.pid}"
+LOGFILE="/var/log/${RC_SVCNAME}.log"
+start_stop_daemon_args="--stderr ${LOGFILE} --stdout ${LOGFILE}"
+
+depend() {
+        need dbus
+}

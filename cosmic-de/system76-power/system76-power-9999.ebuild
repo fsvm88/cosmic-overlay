@@ -44,5 +44,6 @@ src_install() {
 	insinto /usr/share/polkit-1/actions/
 	doins "data/${appid}.policy"
 
+	newinitd "${FILESDIR}"/${PN}.init ${PN}
 	systemd_dounit "data/${appid}.service"
 }
