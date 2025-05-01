@@ -14,7 +14,7 @@ RDEPEND="
 	kde? ( kde-plasma/plasma-workspace )
 	!gnome? ( !kde? ( || (
 		x11-misc/notification-daemon
-		cosmic-de/cosmic-notifications
+		cosmic-base/cosmic-notifications
 		gnome-extra/cinnamon
 		gui-apps/mako
 		xfce-extra/xfce4-notifyd
