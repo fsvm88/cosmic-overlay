@@ -38,7 +38,7 @@ RUST_MIN_VER="1.85.1"
 # See description in cargo.eclass from main tree.
 # This is set to allow fine-tuning of which functions we use, and when.
 CARGO_OPTIONAL=1
-inherit cargo
+inherit cargo xdg
 
 # @ECLASS_VARIABLE: BDEPEND
 # @OUTPUT_VARIABLE
@@ -292,7 +292,28 @@ cosmic-de_src_test() {
 	"${@}" || die "cargo test failed"
 }
 
-EXPORT_FUNCTIONS src_unpack src_prepare src_configure src_compile src_test
+# @FUNCTION: cosmic-de_pkg_preinst
+# @DESCRIPTION:
+# See xdg eclass
+cosmic-de_pkg_preinst() {
+	xdg_pkg_preinst
+}
+
+# @FUNCTION: cosmic-de_pkg_preinst
+# @DESCRIPTION:
+# See xdg eclass
+cosmic-de_pkg_postinst() {
+	xdg_pkg_postinst
+}
+
+# @FUNCTION: cosmic-de_pkg_preinst
+# @DESCRIPTION:
+# See xdg eclass
+cosmic-de_pkg_postrm() {
+	xdg_pkg_postrm
+}
+
+EXPORT_FUNCTIONS src_unpack src_prepare src_configure src_compile src_test pkg_preinst pkg_postinst pkg_postrm
 
 # @FUNCTION: cosmic-de_install_metainfo
 # @DESCRIPTION:
