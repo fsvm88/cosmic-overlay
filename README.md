@@ -3,11 +3,11 @@
 Unofficial Gentoo overlay for Cosmic desktop environment developed by System76
 
 > [!WARNING]
-> [!WARNING] The package category for most packages has moved to cosmic-base/ as of 05.2025, this is to better align with Gentoo's naming with other DEs.
+> The package category for most packages has moved to cosmic-base/ as of 05.2025, this is to better align with Gentoo's naming with other DEs.
 > This should automatically be applied the next time sync the overlay through a pkgmove.
 
 > [!WARNING]
-> [!WARNING] If you unmasked th packages following the guides below (`cosmic-de/*`), pkgmove **will not** automatically migrate this entry.
+> If you unmasked the packages following the guides below (`cosmic-de/*`), pkgmove **will not** automatically migrate this entry.
 > After the sync is done, and you apply the updates in `/etc`, you'll need to also manually update the wildcard unmasks to `cosmic-base/*`.
 
 ## Details
