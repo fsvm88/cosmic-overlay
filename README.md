@@ -2,6 +2,14 @@
 
 Unofficial Gentoo overlay for Cosmic desktop environment developed by System76
 
+> [!WARNING]
+> The package category for most packages has moved to cosmic-base/ as of 05.2025, this is to better align with Gentoo's naming with other DEs.
+> This should automatically be applied the next time sync the overlay through a pkgmove.
+
+> [!WARNING]
+> If you unmasked the packages following the guides below (`cosmic-de/*`), pkgmove **will not** automatically migrate this entry.
+> After the sync is done, and you apply the updates in `/etc`, you'll need to also manually update the wildcard unmasks to `cosmic-base/*`.
+
 ## Details
 
 - **this is highly in-flux, no guarantees are given**
@@ -23,19 +31,19 @@ eselect repository add cosmic-overlay git https://github.com/fsvm88/cosmic-overl
 
 #### Unmasking unstable ebuilds
 
-For the latest tagged release, you can unmask the packages in `/etc/portage/package.accept_keywords/cosmic-de` (or whatever file you prefer):
+For the latest tagged release, you can unmask the packages in `/etc/portage/package.accept_keywords/cosmic-base` (or whatever file you prefer):
 
 ```
-cosmic-de/*
+cosmic-base/*
 ```
 
 #### Unmasking live ebuilds
 
-To try out the latest commits from `master` branch, you can unmask the packages in `/etc/portage/package.accept_keywords/cosmic-de` (or whatever file you prefer):
+To try out the latest commits from `master` branch, you can unmask the packages in `/etc/portage/package.accept_keywords/cosmic-base` (or whatever file you prefer):
 
 ```
 # live ebuilds are masked via "missing" keywords
-cosmic-de/* **
+cosmic-base/* **
 ```
 
 **NOTE**: sometimes new files to install are added on master, and live ebuilds may lag behind a bit. Feel free to open an issue or a PR.

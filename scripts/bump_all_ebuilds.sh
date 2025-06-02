@@ -2,8 +2,8 @@
 
 # Get the parent folder, which is the overlay root
 __script_dir="$(dirname "$(dirname "$(realpath "$0")")")"
-# Compose the cosmic-de ebuild folder
-__cosmic_de_dir="${__script_dir}/cosmic-de"
+# Compose the cosmic-base ebuild folder
+__cosmic_de_dir="${__script_dir}/cosmic-base"
 
 function log() { echo >&2 "$*"; }
 function error() { log "ERROR: $*"; }
