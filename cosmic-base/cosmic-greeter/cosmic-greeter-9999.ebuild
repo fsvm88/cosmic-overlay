@@ -4,7 +4,7 @@
 EAPI=8
 
 EGIT_LFS=1
-LLVM_COMPAT=({18..19})
+LLVM_COMPAT=({18..20})
 LLVM_OPTIONAL=1
 inherit cosmic-de llvm-r1 pam systemd tmpfiles
 

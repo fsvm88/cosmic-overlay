@@ -3,7 +3,7 @@
 
 EAPI=8
 
-LLVM_COMPAT=({18..19})
+LLVM_COMPAT=({18..20})
 LLVM_OPTIONAL=1
 
 inherit cosmic-de desktop llvm-r1
