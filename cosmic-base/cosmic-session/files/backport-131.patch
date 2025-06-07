@@ -1,0 +1,75 @@
+From dc431b24d8f6b48aec66b4c3cb49147ee285185e Mon Sep 17 00:00:00 2001
+From: Pratham Patel <prathampatel@thefossguy.com>
+Date: Thu, 22 May 2025 13:30:53 +0530
+Subject: [PATCH 1/2] use `dbus-update-activation-environment` to
+ update/initialize environment variables
+
+The goal is to update the environment variables for the user's systemd
+session **and** the services listening on user's d-bus session.
+
+Until now, the variables were updated using the `import-environment`
+environment command of `systemctl`. But, it would only be executed if
+systemd was present on the host system. Leaving the variables on the
+d-bus side either uninitialized or with incorrect values.
+
+Therefore, instead of using `systemctl`, use the
+`dbus-update-activation-environment` command to initialize/update the
+environment variables for user's d-bus session but also for user's
+systemd session. This is done by passing the `--systemd` option.
+
+When systemd is not detected, the command doesn't fail, it simply
+doesn't update the variables for user's systemd session. And since a
+systemd user session doesn't exist, no harm no foul.
+---
+ data/start-cosmic | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/data/start-cosmic b/data/start-cosmic
+index 7e8ccbb..4f6c80a 100755
+--- a/data/start-cosmic
++++ b/data/start-cosmic
+@@ -38,9 +38,9 @@ export QT_AUTO_SCREEN_SCALE_FACTOR=1
+ export QT_ENABLE_HIGHDPI_SCALING=1
+ export DCONF_PROFILE=cosmic
+ 
+-if command -v systemctl >/dev/null; then
++if command -v dbus-update-activation-environment >/dev/null; then
+     # set environment variables for new units started by user service manager
+-    systemctl --user import-environment XDG_SESSION_TYPE XDG_CURRENT_DESKTOP DCONF_PROFILE
++    dbus-update-activation-environment --systemd XDG_SESSION_TYPE XDG_CURRENT_DESKTOP DCONF_PROFILE
+ fi
+ # Run cosmic-session
+ if [[ -z "${DBUS_SESSION_BUS_ADDRESS}" ]]; then
+
+From a361f6a5252df4cb60b7a4a42571b7045c3696e3 Mon Sep 17 00:00:00 2001
+From: Pratham Patel <prathampatel@thefossguy.com>
+Date: Thu, 22 May 2025 13:40:15 +0530
+Subject: [PATCH 2/2] update $WAYLAND_DISPLAY and $DISPLAY post login
+
+The $WAYLAND_DISPLAY and $DISPLAY are prone to change between `greetd`'s
+initialization and the user's login. Therefore, update these environment
+variables so systemd services and/or d-bus services use the correct
+values post login.
+---
+ data/start-cosmic | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/data/start-cosmic b/data/start-cosmic
+index 4f6c80a..d5b6a01 100755
+--- a/data/start-cosmic
++++ b/data/start-cosmic
+@@ -40,7 +40,13 @@ export DCONF_PROFILE=cosmic
+ 
+ if command -v dbus-update-activation-environment >/dev/null; then
+     # set environment variables for new units started by user service manager
+-    dbus-update-activation-environment --systemd XDG_SESSION_TYPE XDG_CURRENT_DESKTOP DCONF_PROFILE
++    dbus-update-activation-environment --systemd \
++        DCONF_PROFILE \
++        DISPLAY \
++        WAYLAND_DISPLAY \
++        XDG_CURRENT_DESKTOP \
++        XDG_SESSION_TYPE \
++        # EOF
+ fi
+ # Run cosmic-session
+ if [[ -z "${DBUS_SESSION_BUS_ADDRESS}" ]]; then
