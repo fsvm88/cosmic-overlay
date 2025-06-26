@@ -201,8 +201,10 @@ while IFS= read -r module_path; do
     echo "Processing submodule: ${module_path}"
     if [ -d "${module_path}" ]; then
         push_d "${module_path}"
-        tarball_path="${__temp_folder}/${module_path}-${gentoo_version}-crates.tar"
-        zst_path="${tarball_path}.zst"
+        tarball_path_crates="${__temp_folder}/${module_path}-${gentoo_version}-crates.tar"
+        zst_path_crates="${tarball_path_crates}.zst"
+        tarball_path_repo="${__temp_folder}/${module_path}-${gentoo_version}-repo.tar"
+        zst_path_repo="${tarball_path_repo}.zst"
         config_file="config.toml"
 
         # Pull LFS files if this is an LFS-enabled repository
@@ -213,22 +215,39 @@ while IFS= read -r module_path; do
             fi
         fi
 
-        # Create vendor directory and archive it (dry-run aware)
+        # Always package the full repository
         if [ $dry_run -eq 1 ]; then
-            echo "DRY-RUN: Would run: cargo vendor | head -n -0 >\"${config_file}\""
-            echo "DRY-RUN: Would run: tar -cf \"${tarball_path}\" vendor \"${config_file}\""
-            echo "DRY-RUN: Would run: zstd --long=31 -15 -T0 \"${tarball_path}\" -o \"${zst_path}\""
+            echo "DRY-RUN: Would run: tar -cf \"${tarball_path_repo}\" ."
+            echo "DRY-RUN: Would run: zstd --long=31 -15 -T0 \"${tarball_path_repo}\" -o \"${zst_path_repo}\""
         else
-            if cargo vendor | head -n -0 >"${config_file}" &&
-                tar -cf "${tarball_path}" vendor "${config_file}" &&
-                zstd --long=31 -15 -T0 "${tarball_path}" -o "${zst_path}"; then
-                rm -f "${tarball_path}" # Remove the uncompressed tarball
-                rm -rf vendor "${config_file}"
-                log "Created compressed tarball: ${zst_path}"
+            if tar -cf "${tarball_path_repo}" . &&
+                zstd --long=31 -15 -T0 "${tarball_path_repo}" -o "${zst_path_repo}"; then
+                rm -f "${tarball_path_repo}"
+                log "Created compressed tarball (full repo): ${zst_path_repo}"
             else
-                rm -f "${tarball_path}" "${zst_path}" # Cleanup on failure
-                rm -rf vendor "${config_file}"        # Clean vendor files on failure
-                errorExit 20 "Failed to create tarball for ${module_path}"
+                rm -f "${tarball_path_repo}" "${zst_path_repo}"
+                errorExit 22 "Failed to create full-repo tarball for ${module_path}"
+            fi
+        fi
+
+        # If Cargo.toml exists, also package the crates tarball
+        if [ -f "Cargo.toml" ]; then
+            if [ $dry_run -eq 1 ]; then
+                echo "DRY-RUN: Would run: cargo vendor | head -n -0 >\"${config_file}\""
+                echo "DRY-RUN: Would run: tar -cf \"${tarball_path_crates}\" vendor \"${config_file}\""
+                echo "DRY-RUN: Would run: zstd --long=31 -15 -T0 \"${tarball_path_crates}\" -o \"${zst_path_crates}\""
+            else
+                if cargo vendor | head -n -0 >"${config_file}" &&
+                    tar -cf "${tarball_path_crates}" vendor "${config_file}" &&
+                    zstd --long=31 -15 -T0 "${tarball_path_crates}" -o "${zst_path_crates}"; then
+                    rm -f "${tarball_path_crates}" # Remove the uncompressed tarball
+                    rm -rf vendor "${config_file}"
+                    log "Created compressed tarball: ${zst_path_crates}"
+                else
+                    rm -f "${tarball_path_crates}" "${zst_path_crates}" # Cleanup on failure
+                    rm -rf vendor "${config_file}"                      # Clean vendor files on failure
+                    errorExit 20 "Failed to create tarball for ${module_path}"
+                fi
             fi
         fi
         pop_d
@@ -243,20 +262,27 @@ gentoo_version="$(convert_version "${REQ_TAG}")"
 
 # Create GitHub release
 log "Creating GitHub release for tag ${gentoo_version}..."
+release_exists=0
+if gh release view "${gentoo_version}" --repo "${OVERLAY_URL}" &>/dev/null; then
+    log "Release ${gentoo_version} already exists, reusing."
+    release_exists=1
+fi
 if [ $dry_run -eq 1 ]; then
-    echo "DRY-RUN: Would run: gh release create \"${gentoo_version}\" --repo \"${OVERLAY_URL}\" --title \"${gentoo_version}\" --notes ..."
+    echo "DRY-RUN: Would run: gh release create \"${gentoo_version}\" --repo \"${OVERLAY_URL}\" --title \"${gentoo_version}\" --notes ... (unless it already exists)"
 else
-    if ! gh release create "${gentoo_version}" \
-        --repo "${OVERLAY_URL}" \
-        --title "${gentoo_version}" \
-        --notes "Script-generated vendored crates for COSMIC ${gentoo_version}"; then
-        errorExit 30 "Failed to create GitHub release"
+    if [ $release_exists -eq 0 ]; then
+        if ! gh release create "${gentoo_version}" \
+            --repo "${OVERLAY_URL}" \
+            --title "${gentoo_version}" \
+            --notes "Script-generated vendored crates for COSMIC ${gentoo_version}"; then
+            errorExit 30 "Failed to create GitHub release"
+        fi
     fi
 fi
 
-# Upload all generated tarballs
+# Upload all generated tarballs (both crates and repo)
 log "Uploading tarballs to release ${gentoo_version}..."
-find "${__temp_folder}" -name "*-crates.tar.zst" -type f | while read -r tarball; do
+find "${__temp_folder}" -type f \( -name "*-crates.tar.zst" -o -name "*-repo.tar.zst" \) | while read -r tarball; do
     if [ $dry_run -eq 1 ]; then
         echo "DRY-RUN: Would run: gh release upload \"${gentoo_version}\" \"${tarball}\" --repo \"${OVERLAY_URL}\""
     else
@@ -267,9 +293,9 @@ find "${__temp_folder}" -name "*-crates.tar.zst" -type f | while read -r tarball
     fi
 done
 
-# Copy tarballs to DISTDIR
+# Copy tarballs to DISTDIR (both crates and repo)
 log "Copying tarballs to DISTDIR (${DISTDIR})..."
-find "${__temp_folder}" -name "*-crates.tar.zst" -type f | while read -r tarball; do
+find "${__temp_folder}" -type f \( -name "*-crates.tar.zst" -o -name "*-repo.tar.zst" \) | while read -r tarball; do
     if ! cp "${tarball}" "${DISTDIR}/"; then
         errorExit 32 "Failed to copy ${tarball} to ${DISTDIR}"
     fi
