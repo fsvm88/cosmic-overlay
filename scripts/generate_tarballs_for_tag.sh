@@ -217,10 +217,10 @@ while IFS= read -r module_path; do
 
         # Always package the full repository
         if [ $dry_run -eq 1 ]; then
-            echo "DRY-RUN: Would run: tar -cf \"${tarball_path_repo}\" ."
+            echo "DRY-RUN: Would run: tar -cf \"${tarball_path_repo}\" \"../${module_path}\""
             echo "DRY-RUN: Would run: zstd --long=31 -15 -T0 \"${tarball_path_repo}\" -o \"${zst_path_repo}\""
         else
-            if tar -cf "${tarball_path_repo}" . &&
+            if tar -cf "${tarball_path_repo}" "../${module_path}" &&
                 zstd --long=31 -15 -T0 "${tarball_path_repo}" -o "${zst_path_repo}"; then
                 rm -f "${tarball_path_repo}"
                 log "Created compressed tarball (full repo): ${zst_path_repo}"
@@ -286,7 +286,7 @@ find "${__temp_folder}" -type f \( -name "*-crates.tar.zst" -o -name "*-repo.tar
     if [ $dry_run -eq 1 ]; then
         echo "DRY-RUN: Would run: gh release upload \"${gentoo_version}\" \"${tarball}\" --repo \"${OVERLAY_URL}\""
     else
-        if ! gh release upload "${gentoo_version}" "${tarball}" --repo "${OVERLAY_URL}"; then
+        if ! gh release upload "${gentoo_version}" "${tarball}" --repo "${OVERLAY_URL}" --clobber; then
             errorExit 31 "Failed to upload ${tarball} to release"
         fi
         log "Uploaded: $(basename "${tarball}")"
