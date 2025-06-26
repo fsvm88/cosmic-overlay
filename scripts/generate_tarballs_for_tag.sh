@@ -37,6 +37,8 @@ trap cleanup EXIT SIGINT SIGTERM
     errorExit 2 "GitHub CLI (gh) was not found in $PATH, you need gh installed to run this script"
 ! which zstd &>/dev/null &&
     errorExit 2 "zstd was not found in $PATH, you need zstd installed to run this script"
+! which git-lfs &>/dev/null &&
+    errorExit 2 "git-lfs was not found in $PATH, you need git-lfs installed to run this script"
 
 # Check if gh is authenticated and has required permissions
 if ! gh auth status &>/dev/null; then
@@ -98,11 +100,35 @@ function get_commit_hash() {
 }
 
 ################# MAIN ####################
-# Check if version argument is provided
-[ $# -ne 1 ] && errorExit 1 "Usage: $0 <version>"
+# Usage: $0 <version> [-rX] [package1 package2 ...]
+if [ $# -lt 1 ]; then
+    errorExit 1 "Usage: $0 <version> [-rX] [package1 package2 ...]"
+fi
+
 REQ_TAG="$1"
+shift
+
+# Check for optional -rX release bump
+release_bump=""
+if [[ "$1" =~ ^-r[0-9]+$ ]]; then
+    release_bump="$1"
+    shift
+fi
+
+# Remaining arguments are packages to process (if any)
+if [ $# -gt 0 ]; then
+    packages_to_process=("$@")
+else
+    packages_to_process=()
+fi
+
 # Convert tag to Gentoo version format once
-gentoo_version="$(convert_version "${REQ_TAG}")"
+base_gentoo_version="$(convert_version "${REQ_TAG}")"
+if [ -n "$release_bump" ]; then
+    gentoo_version="${base_gentoo_version}${release_bump}"
+else
+    gentoo_version="${base_gentoo_version}"
+fi
 
 # Check if the requested tag exists on remote
 git ls-remote --exit-code "${EPOCH_URL}" refs/tags/"${REQ_TAG}" &>/dev/null ||
@@ -133,6 +159,19 @@ distdir="${__temp_folder}/distdir"
 mkdir -p "${distdir}"
 push_d "${__temp_folder}/cosmic-epoch"
 while IFS= read -r module_path; do
+    # If packages_to_process is set, skip modules not in the list
+    if [ ${#packages_to_process[@]} -gt 0 ]; then
+        skip=1
+        for pkg in "${packages_to_process[@]}"; do
+            if [[ "${module_path}" == "${pkg}" ]]; then
+                skip=0
+                break
+            fi
+        done
+        if [ $skip -eq 1 ]; then
+            continue
+        fi
+    fi
     echo "Processing submodule: ${module_path}"
     if [ -d "${module_path}" ]; then
         push_d "${module_path}"
@@ -140,6 +179,14 @@ while IFS= read -r module_path; do
             tarball_path="${__temp_folder}/${module_path}-${gentoo_version}-crates.tar"
             zst_path="${tarball_path}.zst"
             config_file="config.toml"
+
+            # Pull LFS files if this is an LFS-enabled repository
+            if [ -f ".gitattributes" ] && grep -q "filter=lfs" .gitattributes; then
+                log "LFS repository detected, pulling LFS files..."
+                if ! git lfs pull; then
+                    errorExit 21 "Failed to pull LFS files for ${module_path}"
+                fi
+            fi
 
             # Create vendor directory and archive it
             if cargo vendor | head -n -0 >"${config_file}" &&
