@@ -32,8 +32,11 @@ src_unpack() {
 
 	for archive in ${A}; do
 		case "${archive}" in
-		*-crates.tar.zst|*-repo.tar.zst)
-			tar -x -I 'zstd --long=31' -C "${S}" -f "${archive}"
+		*-crates.tar.zst)
+			tar -x -I 'zstd --long=31' -C "${WORKDIR}" -f "${archive}"
+			;;
+		*-repo.tar.zst)
+			tar -x -I 'zstd --long=31' -C "${S}" -f "${archive}" --strip-components=1
 			;;
 		*)
 			tar -x -C "${S}" -f "${archive}" --strip-components=1
