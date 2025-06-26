@@ -23,6 +23,27 @@ BDEPEND="
 	media-gfx/imagemagick
 "
 
+src_unpack() {
+	debug-print-function ${FUNCNAME} "$@"
+
+	pushd "${DISTDIR}" >/dev/null || die
+
+	mkdir -p "${S}" || die
+
+	for archive in ${A}; do
+		case "${archive}" in
+		*-crates.tar.zst|*-repo.tar.zst)
+			tar -x -I 'zstd --long=31' -C "${S}" -f "${archive}"
+			;;
+		*)
+			tar -x -C "${S}" -f "${archive}" --strip-components=1
+			;;
+		esac
+	done
+
+	popd >/dev/null || die
+}
+
 src_install() {
 	insinto /usr/share/backgrounds/cosmic
 	doins original/*
