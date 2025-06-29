@@ -302,14 +302,14 @@ cosmic-de_pkg_preinst() {
 	xdg_pkg_preinst
 }
 
-# @FUNCTION: cosmic-de_pkg_preinst
+# @FUNCTION: cosmic-de_pkg_postinst
 # @DESCRIPTION:
 # See xdg eclass
 cosmic-de_pkg_postinst() {
 	xdg_pkg_postinst
 }
 
-# @FUNCTION: cosmic-de_pkg_preinst
+# @FUNCTION: cosmic-de_pkg_postrm
 # @DESCRIPTION:
 # See xdg eclass
 cosmic-de_pkg_postrm() {
