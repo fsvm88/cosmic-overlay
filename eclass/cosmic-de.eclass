@@ -155,6 +155,9 @@ _cosmic-de_src_unpack_tagged() {
 		*-crates.tar.zst)
 			tar -x -I 'zstd --long=31' -C "${WORKDIR}" -f "${archive}"
 			;;
+		*-repo.tar.zst)
+			tar -x -I 'zstd --long=31' -C "${S}" -f "${archive}" --strip-components=1
+			;;
 		*)
 			tar -x -C "${S}" -f "${archive}" --strip-components=1
 			;;

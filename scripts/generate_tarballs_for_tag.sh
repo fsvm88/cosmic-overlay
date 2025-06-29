@@ -37,6 +37,8 @@ trap cleanup EXIT SIGINT SIGTERM
     errorExit 2 "GitHub CLI (gh) was not found in $PATH, you need gh installed to run this script"
 ! which zstd &>/dev/null &&
     errorExit 2 "zstd was not found in $PATH, you need zstd installed to run this script"
+! which git-lfs &>/dev/null &&
+    errorExit 2 "git-lfs was not found in $PATH, you need git-lfs installed to run this script"
 
 # Check if gh is authenticated and has required permissions
 if ! gh auth status &>/dev/null; then
@@ -97,12 +99,62 @@ function get_commit_hash() {
     return 0
 }
 
-################# MAIN ####################
-# Check if version argument is provided
-[ $# -ne 1 ] && errorExit 1 "Usage: $0 <version>"
+function usage() {
+    echo "Usage: $0 [-n|--dry-run] <version> [-rX] [package1 package2 ...]"
+    echo "  -n, --dry-run   Only print the commands that would be run for tarball creation and GitHub upload."
+    echo "  <version>      The tag or version to use (e.g. epoch-1.0.0-alpha.5)"
+    echo "  -rX            Optional Gentoo release bump (e.g. -r1)"
+    echo "  [packages...]  Optional list of submodules to process (default: all)"
+}
+
+# Parse arguments, allowing -n anywhere
+args=()
+dry_run=0
+for arg in "$@"; do
+    case "$arg" in
+    -n | --dry-run)
+        dry_run=1
+        ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    *)
+        args+=("$arg")
+        ;;
+    esac
+done
+set -- "${args[@]}"
+
+if [ $# -lt 1 ]; then
+    usage
+    errorExit 1
+fi
+
 REQ_TAG="$1"
+shift
+
+# Check for optional -rX release bump
+release_bump=""
+if [[ "$1" =~ ^-r[0-9]+$ ]]; then
+    release_bump="$1"
+    shift
+fi
+
+# Remaining arguments are packages to process (if any)
+if [ $# -gt 0 ]; then
+    packages_to_process=("$@")
+else
+    packages_to_process=()
+fi
+
 # Convert tag to Gentoo version format once
-gentoo_version="$(convert_version "${REQ_TAG}")"
+base_gentoo_version="$(convert_version "${REQ_TAG}")"
+if [ -n "$release_bump" ]; then
+    gentoo_version="${base_gentoo_version}${release_bump}"
+else
+    gentoo_version="${base_gentoo_version}"
+fi
 
 # Check if the requested tag exists on remote
 git ls-remote --exit-code "${EPOCH_URL}" refs/tags/"${REQ_TAG}" &>/dev/null ||
@@ -120,7 +172,7 @@ push_d "${__temp_folder}"
 git clone --recurse-submodules ${EPOCH_URL} || errorExit 12 "could not clone git repo or submodules"
 push_d "cosmic-epoch"
 # Switch to the requested tag
-git switch -d "${1}" || errorExit 13 "could not switch to tag ${1}"
+git switch -d "${REQ_TAG}" || errorExit 13 "could not switch to tag ${REQ_TAG}"
 git submodule update --recursive --force || errorExit 14 "could not update submodules"
 # Generate list of modules for later querying
 __temp_submodule_hashes="${__temp_folder}/git.hashes"
@@ -133,28 +185,70 @@ distdir="${__temp_folder}/distdir"
 mkdir -p "${distdir}"
 push_d "${__temp_folder}/cosmic-epoch"
 while IFS= read -r module_path; do
+    # If packages_to_process is set, skip modules not in the list
+    if [ ${#packages_to_process[@]} -gt 0 ]; then
+        skip=1
+        for pkg in "${packages_to_process[@]}"; do
+            if [[ "${module_path}" == "${pkg}" ]]; then
+                skip=0
+                break
+            fi
+        done
+        if [ $skip -eq 1 ]; then
+            continue
+        fi
+    fi
     echo "Processing submodule: ${module_path}"
     if [ -d "${module_path}" ]; then
         push_d "${module_path}"
-        if [ -f "Cargo.toml" ]; then
-            tarball_path="${__temp_folder}/${module_path}-${gentoo_version}-crates.tar"
-            zst_path="${tarball_path}.zst"
-            config_file="config.toml"
+        tarball_path_crates="${__temp_folder}/${module_path}-${gentoo_version}-crates.tar"
+        zst_path_crates="${tarball_path_crates}.zst"
+        tarball_path_repo="${__temp_folder}/${module_path}-${gentoo_version}-repo.tar"
+        zst_path_repo="${tarball_path_repo}.zst"
+        config_file="config.toml"
 
-            # Create vendor directory and archive it
-            if cargo vendor | head -n -0 >"${config_file}" &&
-                tar -cf "${tarball_path}" vendor "${config_file}" &&
-                zstd --long=31 -15 -T0 "${tarball_path}" -o "${zst_path}"; then
-                rm -f "${tarball_path}" # Remove the uncompressed tarball
-                rm -rf vendor "${config_file}"
-                log "Created compressed tarball: ${zst_path}"
-            else
-                rm -f "${tarball_path}" "${zst_path}" # Cleanup on failure
-                rm -rf vendor "${config_file}"        # Clean vendor files on failure
-                errorExit 20 "Failed to create tarball for ${module_path}"
+        # Pull LFS files if this is an LFS-enabled repository
+        if [ -f ".gitattributes" ] && grep -q "filter=lfs" .gitattributes; then
+            log "LFS repository detected, pulling LFS files..."
+            if ! git lfs pull; then
+                errorExit 21 "Failed to pull LFS files for ${module_path}"
             fi
+        fi
+
+        # Always package the full repository
+        if [ $dry_run -eq 1 ]; then
+            echo "DRY-RUN: Would run: tar -cf \"${tarball_path_repo}\" \"../${module_path}\""
+            echo "DRY-RUN: Would run: zstd --long=31 -15 -T0 \"${tarball_path_repo}\" -o \"${zst_path_repo}\""
         else
-            log "Skipping ${module_path} - no Cargo.toml found"
+            if tar -cf "${tarball_path_repo}" "../${module_path}" &&
+                zstd --long=31 -15 -T0 "${tarball_path_repo}" -o "${zst_path_repo}"; then
+                rm -f "${tarball_path_repo}"
+                log "Created compressed tarball (full repo): ${zst_path_repo}"
+            else
+                rm -f "${tarball_path_repo}" "${zst_path_repo}"
+                errorExit 22 "Failed to create full-repo tarball for ${module_path}"
+            fi
+        fi
+
+        # If Cargo.toml exists, also package the crates tarball
+        if [ -f "Cargo.toml" ]; then
+            if [ $dry_run -eq 1 ]; then
+                echo "DRY-RUN: Would run: cargo vendor | head -n -0 >\"${config_file}\""
+                echo "DRY-RUN: Would run: tar -cf \"${tarball_path_crates}\" vendor \"${config_file}\""
+                echo "DRY-RUN: Would run: zstd --long=31 -15 -T0 \"${tarball_path_crates}\" -o \"${zst_path_crates}\""
+            else
+                if cargo vendor | head -n -0 >"${config_file}" &&
+                    tar -cf "${tarball_path_crates}" vendor "${config_file}" &&
+                    zstd --long=31 -15 -T0 "${tarball_path_crates}" -o "${zst_path_crates}"; then
+                    rm -f "${tarball_path_crates}" # Remove the uncompressed tarball
+                    rm -rf vendor "${config_file}"
+                    log "Created compressed tarball: ${zst_path_crates}"
+                else
+                    rm -f "${tarball_path_crates}" "${zst_path_crates}" # Cleanup on failure
+                    rm -rf vendor "${config_file}"                      # Clean vendor files on failure
+                    errorExit 20 "Failed to create tarball for ${module_path}"
+                fi
+            fi
         fi
         pop_d
     else
@@ -168,25 +262,40 @@ gentoo_version="$(convert_version "${REQ_TAG}")"
 
 # Create GitHub release
 log "Creating GitHub release for tag ${gentoo_version}..."
-if ! gh release create "${gentoo_version}" \
-    --repo "${OVERLAY_URL}" \
-    --title "${gentoo_version}" \
-    --notes "Script-generated vendored crates for COSMIC ${gentoo_version}"; then
-    errorExit 30 "Failed to create GitHub release"
+release_exists=0
+if gh release view "${gentoo_version}" --repo "${OVERLAY_URL}" &>/dev/null; then
+    log "Release ${gentoo_version} already exists, reusing."
+    release_exists=1
+fi
+if [ $dry_run -eq 1 ]; then
+    echo "DRY-RUN: Would run: gh release create \"${gentoo_version}\" --repo \"${OVERLAY_URL}\" --title \"${gentoo_version}\" --notes ... (unless it already exists)"
+else
+    if [ $release_exists -eq 0 ]; then
+        if ! gh release create "${gentoo_version}" \
+            --repo "${OVERLAY_URL}" \
+            --title "${gentoo_version}" \
+            --notes "Script-generated vendored crates for COSMIC ${gentoo_version}"; then
+            errorExit 30 "Failed to create GitHub release"
+        fi
+    fi
 fi
 
-# Upload all generated tarballs
+# Upload all generated tarballs (both crates and repo)
 log "Uploading tarballs to release ${gentoo_version}..."
-find "${__temp_folder}" -name "*-crates.tar.zst" -type f | while read -r tarball; do
-    if ! gh release upload "${gentoo_version}" "${tarball}" --repo "${OVERLAY_URL}"; then
-        errorExit 31 "Failed to upload ${tarball} to release"
+find "${__temp_folder}" -type f \( -name "*-crates.tar.zst" -o -name "*-repo.tar.zst" \) | while read -r tarball; do
+    if [ $dry_run -eq 1 ]; then
+        echo "DRY-RUN: Would run: gh release upload \"${gentoo_version}\" \"${tarball}\" --repo \"${OVERLAY_URL}\""
+    else
+        if ! gh release upload "${gentoo_version}" "${tarball}" --repo "${OVERLAY_URL}" --clobber; then
+            errorExit 31 "Failed to upload ${tarball} to release"
+        fi
+        log "Uploaded: $(basename "${tarball}")"
     fi
-    log "Uploaded: $(basename "${tarball}")"
 done
 
-# Copy tarballs to DISTDIR
+# Copy tarballs to DISTDIR (both crates and repo)
 log "Copying tarballs to DISTDIR (${DISTDIR})..."
-find "${__temp_folder}" -name "*-crates.tar.zst" -type f | while read -r tarball; do
+find "${__temp_folder}" -type f \( -name "*-crates.tar.zst" -o -name "*-repo.tar.zst" \) | while read -r tarball; do
     if ! cp "${tarball}" "${DISTDIR}/"; then
         errorExit 32 "Failed to copy ${tarball} to ${DISTDIR}"
     fi
