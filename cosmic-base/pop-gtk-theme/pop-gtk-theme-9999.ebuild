@@ -27,7 +27,6 @@ RDEPEND+="
 >=x11-libs/gdk-pixbuf-2.42.10-r1
 >=x11-libs/gtk+-2.24:2
 >=x11-libs/gtk+-3.24:3
->=x11-themes/gtk-engines-murrine-0.98.2-r3
 "
 
 src_configure() {
