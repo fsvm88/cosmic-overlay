@@ -55,7 +55,17 @@ for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
     [ ! -d "${pkg_dir}" ] && continue
     push_d "${pkg_dir}"
 
-    template_file="${pkg_dir}-9999.ebuild"
+    # Find the latest tagged ebuild (excluding 9999) using shell globs and array
+    candidates=()
+    for f in "${pkg_dir}"-*.ebuild; do
+        [[ "$f" == *-9999.ebuild ]] && continue
+        [ -e "$f" ] && candidates+=("$f")
+    done
+    if [ ${#candidates[@]} -gt 0 ]; then
+        template_file=$(printf '%s\n' "${candidates[@]}" | sort -V | tail -n1)
+    else
+        template_file="${pkg_dir}-9999.ebuild"
+    fi
     ebuild_file="${pkg_dir}-${VERSION}.ebuild"
 
     [ ! -f "${template_file}" ] &&
