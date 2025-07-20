@@ -5,7 +5,7 @@ Subject: [PATCH 1/2] fix: Call `is_systemd_used` only if the `systemd` feature
  is enabled
 
 In case `systemd` feature is disabled and `autostart` is enabled,
-procees with the autostart without calling `is_systemd_used`.
+proceed with the autostart without calling `is_systemd_used`.
 
 Fixes: #136
 ---
