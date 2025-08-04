@@ -16,6 +16,7 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
+#### TODO apt-config-icons{-hidpi,-large,-large-hidpi} - are these really required?
 RDEPEND+="
 	>=dev-libs/openssl-3.0.13-r2
 	>=sys-apps/flatpak-1.14.4-r3

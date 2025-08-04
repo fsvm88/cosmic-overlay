@@ -16,7 +16,7 @@ SLOT="0"
 KEYWORDS=""
 
 RDEPEND+="
-	~cosmic-base/pop-icon-theme-${PV}
+	>=cosmic-base/pop-icon-theme-3.5.1
 "
 
 src_unpack() {

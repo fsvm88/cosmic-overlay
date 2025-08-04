@@ -1,6 +1,9 @@
 # Copyright 2024 Fabio Scaccabarozzi
 # Distributed under the terms of the GNU General Public License v3
 
+# TODO: at some point, use properly tagged releases
+# for now it's too in flux, 9999 is easier
+
 EAPI=8
 
 inherit cosmic-de systemd
