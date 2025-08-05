@@ -12,9 +12,9 @@ LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
+inherit git-r3
 EGIT_CLONE_TYPE=mirror
 EGIT_LFS_CLONE_TYPE=mirror
-inherit git-r3
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_COMMIT="v3.5.1"
 
