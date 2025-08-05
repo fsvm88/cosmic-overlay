@@ -22,7 +22,7 @@ RDEPEND="!dev-ruby/sass"
 S="${WORKDIR}/${PN/-bin/}"
 
 src_install() {
-	mkdir -p "${ED}/usr/share/sass" || die "mkdir failed"
+	dodir /usr/share/sass || die "dodir failed"
 	cp -a *  "${ED}/usr/share/sass" || die "cp failed"
 	dosym "/usr/share/sass/sass" "/usr/bin/sass" || die "dosym failed"
 }
