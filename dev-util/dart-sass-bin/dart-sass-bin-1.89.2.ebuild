@@ -23,6 +23,7 @@ S="${WORKDIR}/${PN/-bin/}"
 
 src_install() {
 	dodir /usr/share/sass || die "dodir failed"
-	cp -a *  "${ED}/usr/share/sass" || die "cp failed"
+	insinto /usr/share/sass
+	doins -r ./* || die "doins failed"
 	dosym "/usr/share/sass/sass" "/usr/bin/sass" || die "dosym failed"
 }
