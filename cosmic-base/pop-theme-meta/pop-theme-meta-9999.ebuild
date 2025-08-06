@@ -12,6 +12,6 @@ KEYWORDS="~amd64"
 IUSE="gtk-theme"
 RDEPEND="
 ~cosmic-base/pop-fonts-${PV}
-~cosmic-base/pop-icon-theme-${PV}
+>=cosmic-base/pop-icon-theme-3.5.1
 gtk-theme? ( ~cosmic-base/pop-gtk-theme-${PV} )
 "

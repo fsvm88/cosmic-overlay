@@ -22,6 +22,8 @@ RDEPEND+="
 	media-sound/alsa-utils
 	mpris? ( >=media-sound/playerctl-2.3.1 )
 	>=sys-power/acpid-2.0.34-r1
+	>=x11-themes/adw-gtk3-6.2
+	~cosmic-base/pop-gtk-theme-${PV}
 "
 
 src_install() {

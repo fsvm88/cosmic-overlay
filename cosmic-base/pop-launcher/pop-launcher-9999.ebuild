@@ -1,6 +1,8 @@
 # Copyright 2024 Fabio Scaccabarozzi
 # Distributed under the terms of the GNU General Public License v3
 
+# TODO: at some point, use properly tagged releases
+# for now it's too in flux, 9999 is easier
 EAPI=8
 
 inherit cosmic-de
@@ -27,7 +29,7 @@ BDEPENDS+="
 "
 # most of these are used by the plugins
 RDEPEND+="
->=cosmic-base/pop-icon-theme-${PV}
+>=cosmic-base/pop-icon-theme-3.5.1
 sci-libs/libqalculate
 >=sys-apps/fd-9
 || (
