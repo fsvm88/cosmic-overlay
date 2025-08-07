@@ -237,7 +237,7 @@ cosmic-de_src_configure() {
 		export VERGEN_GIT_COMMIT_DATE VERGEN_GIT_SHA
 	fi
 	profile_name="release"
-	use debug && profile_name="debug"
+	use debug && profile_name="fastdebug"
 	use max-opt && profile_name="release-maximum-optimization"
 	# The final "${@}" is required to support src_configure overrides (currently cosmic-greeter)
 	cargo_src_configure \
