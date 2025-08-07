@@ -332,7 +332,9 @@ cosmic-de_install_metainfo() {
 cosmic-de_target_dir() {
 	# For other profiles, profile_name == tdir
 	local tdir="${profile_name}"
-	# Only for "dev" profile (the default for `cargo build`), we have to use "debug"
+	# In Cargo, the 'dev' profile (which is the default for `cargo build`) outputs build artifacts to the 'debug' directory.
+	# This mapping is non-obvious but is required to match Cargo's convention:
+	# https://doc.rust-lang.org/cargo/reference/profiles.html#built-in-profiles
 	use debug && tdir="debug"
 	echo "target/$tdir"
 }
