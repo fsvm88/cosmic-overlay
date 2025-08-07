@@ -334,5 +334,5 @@ cosmic-de_target_dir() {
 	local tdir="${profile_name}"
 	# Only for "dev" profile (the default for `cargo build`), we have to use "debug"
 	use debug && tdir="debug"
-	echo "$tdir"
+	echo "target/$tdir"
 }

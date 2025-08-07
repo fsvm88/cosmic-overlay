@@ -77,7 +77,7 @@ src_configure() {
 }
 
 src_install() {
-	dobin "target/$profile_name/$PN"
+	dobin "$(cosmic-de_target_dir)/$PN"
 
 	dobin data/start-cosmic
 

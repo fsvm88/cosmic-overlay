@@ -34,7 +34,7 @@ src_configure() {
 }
 
 src_install() {
-	dobin "target/$profile_name/$PN"
+	dobin "$(cosmic-de_target_dir)/$PN"
 
 	# Default keybindings
 	insinto /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1

@@ -18,7 +18,7 @@ KEYWORDS=""
 
 src_install() {
 	# One of the few where $PN does not apply (would be cosmic-applibrary)
-	dobin "target/$profile_name/cosmic-app-library"
+	dobin "$(cosmic-de_target_dir)/cosmic-app-library"
 
 	domenu data/com.system76.CosmicAppLibrary.desktop
 
