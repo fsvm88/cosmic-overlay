@@ -22,7 +22,7 @@ RDEPEND+="
 "
 
 src_install() {
-	dobin "target/$profile_name/$PN"
+	dobin "$(cosmic-de_target_dir)/$PN"
 
 	domenu res/com.system76.CosmicPlayer.desktop
 
