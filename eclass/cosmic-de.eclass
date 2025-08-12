@@ -237,7 +237,7 @@ cosmic-de_src_configure() {
 		export VERGEN_GIT_COMMIT_DATE VERGEN_GIT_SHA
 	fi
 	profile_name="release"
-	use debug && profile_name="debug"
+	use debug && profile_name="dev"
 	use max-opt && profile_name="release-maximum-optimization"
 	# The final "${@}" is required to support src_configure overrides (currently cosmic-greeter)
 	cargo_src_configure \
@@ -327,4 +327,14 @@ cosmic-de_install_metainfo() {
 		insinto /usr/share/metainfo
 		doins "$1"
 	)
+}
+
+cosmic-de_target_dir() {
+	# For other profiles, profile_name == tdir
+	local tdir="${profile_name}"
+	# In Cargo, the 'dev' profile (which is the default for `cargo build`) outputs build artifacts to the 'debug' directory.
+	# This mapping is non-obvious but is required to match Cargo's convention:
+	# https://doc.rust-lang.org/cargo/reference/profiles.html#built-in-profiles
+	use debug && tdir="debug"
+	echo "target/$tdir"
 }

@@ -28,7 +28,7 @@ RDEPEND+="
 "
 
 src_install() {
-	dobin "target/$profile_name/$PN"
+	dobin "$(cosmic-de_target_dir)/$PN"
 
 	insinto /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1/
 	newins data/system_actions.ron system_actions

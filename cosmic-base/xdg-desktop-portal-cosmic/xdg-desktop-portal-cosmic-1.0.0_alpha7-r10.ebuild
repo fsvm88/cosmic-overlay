@@ -49,7 +49,7 @@ src_configure() {
 
 src_install() {
 	exeinto /usr/libexec
-	doexe "target/$profile_name/$PN"
+	doexe "$(cosmic-de_target_dir)/$PN"
 
 	insinto /usr/share/dbus-1/services
 	doins data/org.freedesktop.impl.portal.desktop.cosmic.service

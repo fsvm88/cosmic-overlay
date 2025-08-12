@@ -50,7 +50,7 @@ _install_plugin() {
 }
 
 src_install() {
-	newbin "target/$profile_name/$PN-bin" "$PN"
+	newbin "$(cosmic-de_target_dir)/$PN-bin" "$PN"
 
 	_install_plugin "calc"
 	_install_plugin "cosmic_toplevel"

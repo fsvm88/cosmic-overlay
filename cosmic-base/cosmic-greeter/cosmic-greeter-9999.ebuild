@@ -43,7 +43,7 @@ src_configure() {
 }
 
 src_install() {
-	local binfile="target/$profile_name/$PN"
+	local binfile="$(cosmic-de_target_dir)/$PN"
 	dobin "$binfile"
 	dobin "$binfile-daemon"
 

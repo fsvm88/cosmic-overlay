@@ -32,8 +32,8 @@ src_compile() {
 }
 
 src_install() {
-	dobin "target/$profile_name/$PN"
-	dobin "target/$profile_name/$PN-applet"
+	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-de_target_dir)/$PN-applet"
 
 	domenu res/com.system76.CosmicFiles.desktop
 
