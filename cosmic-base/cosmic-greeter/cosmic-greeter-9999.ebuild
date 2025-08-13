@@ -46,6 +46,7 @@ src_install() {
 	local binfile="$(cosmic-de_target_dir)/$PN"
 	dobin "$binfile"
 	dobin "$binfile-daemon"
+	newbin "$PN-start.sh" "$PN-start"
 
 	insinto /usr/share/dbus-1/system.d
 	doins dbus/com.system76.CosmicGreeter.conf
@@ -65,4 +66,8 @@ src_install() {
 	systemd_dounit debian/cosmic-greeter.service
 
 	newtmpfiles "${FILESDIR}/systemd.tmpfiles" "${PN}.conf"
+}
+
+pkg_postinst() {
+	tmpfiles_process "${PN}.conf"
 }
