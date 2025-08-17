@@ -12,7 +12,7 @@ HOMEPAGE="https://github.com/pop-os/cosmic-epoch"
 LICENSE="CC-BY-SA-4.0 GPL-3 GPL-3+ MPL-2.0"
 
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 IUSE="+fonts +gnome-keyring +greeter store"
 
 RDEPEND="
@@ -38,7 +38,7 @@ greeter? ( ~cosmic-base/cosmic-greeter-${PV} )
 store? ( ~cosmic-base/cosmic-store-${PV} )
 ~cosmic-base/cosmic-term-${PV}
 ~cosmic-base/cosmic-workspaces-epoch-${PV}
-~cosmic-base/pop-launcher-${PV}
+~cosmic-base/pop-launcher-9999
 ~cosmic-base/pop-theme-meta-9999
 ~cosmic-base/xdg-desktop-portal-cosmic-${PV}
 fonts? (
