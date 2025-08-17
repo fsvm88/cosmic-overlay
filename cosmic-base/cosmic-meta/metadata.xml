@@ -8,6 +8,7 @@
   </maintainer>
   <use>
     <flag name="fonts">Pull in media-fonts/open-sans and media-fonts/noto to theme-sync GTK apps to COSMIC defaults.</flag>
+    <flag name="gnome-keyring">Enable support for storing passwords via gnome-keyring.</flag>
     <flag name="greeter">Enable cosmic-greeter dependency.</flag>
     <flag name="store">Enable cosmic-store dependency.</flag>
   </use>
