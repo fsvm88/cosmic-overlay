@@ -131,7 +131,13 @@ ebuild package-version.ebuild digest
 # Install for testing
 emerge package-name
 
-# Check for QA issues
+# Check for QA issues (modern)
+pkgcheck scan
+
+# Update manifests (modern)
+pkgdev manifest
+
+# Legacy QA checking
 repoman full
 ```
 
@@ -172,7 +178,7 @@ repoman full
 
 ### Before Committing
 
-1. Run `repoman full` to check QA
+1. Run `pkgcheck scan` to check QA issues
 2. Test build on clean system
 3. Verify runtime functionality
 4. Check for missing dependencies
@@ -189,16 +195,32 @@ repoman full
 
 ### Current Status
 
-- Manual testing and validation
-- Scripts for version bumping
-- No automated CI/CD (yet)
+- **GitHub Actions**: Automated QA pipeline using pkgcheck/pkgdev
+- **Weekly Schedule**: Runs every Sunday at 06:00 UTC
+- **PR Integration**: Comments with QA results on pull requests
+- **Reports**: Generated in HTML and Markdown formats
+- **GitHub Pages**: Public QA reports at `https://fsvm88.github.io/cosmic-overlay/qa-reports/`
+
+### QA Pipeline Features
+
+- Docker-based Gentoo environment
+- Full pkgcheck validation with multiple severity levels
+- pkgdev manifest integrity checks
+- Category-specific validation
+- Automated issue creation on failures
+- Artifact retention (30 days)
+
+### Workflows
+
+- **`qa-check.yml`**: Main QA validation pipeline
+- **`deploy-pages.yml`**: Deploy reports to GitHub Pages
 
 ### Future Improvements
 
-- Automated testing pipelines
-- Version bump automation
-- QA checks in CI
-- Manifest validation
+- Package build testing
+- Dependency graph validation
+- Performance metrics
+- Integration with overlay sync tools
 
 ## Special Considerations
 
