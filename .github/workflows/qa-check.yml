@@ -30,10 +30,35 @@ jobs:
           RUN emerge-webrsync
           RUN emerge --update --quiet @system
           RUN emerge --quiet pkgdev pkgcheck
-          RUN mkdir -p /var/db/repos
 
-          # Set up the overlay configuration
+          # Ensure repository directories exist
+          RUN mkdir -p /var/db/repos/cosmic-overlay
+
+          # Debug: Check where the Gentoo repository is located and what configs exist
+          RUN find /var/db/repos -name "profiles" -type d 2>/dev/null || true
+          RUN find /usr -name "portage" -type d 2>/dev/null || true
+          RUN ls -la /var/db/repos/ || true
+          RUN ls -la /etc/portage/repos.conf/ || echo "No repos.conf directory exists"
+          RUN cat /etc/portage/repos.conf/*.conf 2>/dev/null || echo "No repo config files found"
+
+          # Ensure Gentoo repository is in the expected location
+          RUN ls -la /var/db/repos/gentoo/ || echo "/var/db/repos/gentoo does not exist"
+          RUN ls -la /usr/portage/ || echo "/usr/portage does not exist"
+          RUN if [ -d /usr/portage ] && [ ! -d /var/db/repos/gentoo/profiles ]; then ln -sf /usr/portage /var/db/repos/gentoo; fi
+          RUN if [ ! -d /var/db/repos/gentoo ]; then mkdir -p /var/db/repos/gentoo; fi
+          RUN ls -la /var/db/repos/gentoo/ || echo "Still no /var/db/repos/gentoo after setup"
+
+          # Set up repository configurations
           RUN mkdir -p /etc/portage/repos.conf
+
+          # Configure basic Gentoo repository (this should work regardless of existing config)
+          RUN echo '[DEFAULT]' > /etc/portage/repos.conf/gentoo.conf
+          RUN echo 'main-repo = gentoo' >> /etc/portage/repos.conf/gentoo.conf
+          RUN echo '' >> /etc/portage/repos.conf/gentoo.conf
+          RUN echo '[gentoo]' >> /etc/portage/repos.conf/gentoo.conf
+          RUN echo 'location = /var/db/repos/gentoo' >> /etc/portage/repos.conf/gentoo.conf
+
+          # Configure overlay
           RUN echo '[cosmic-overlay]' > /etc/portage/repos.conf/cosmic-overlay.conf
           RUN echo 'location = /var/db/repos/cosmic-overlay' >> /etc/portage/repos.conf/cosmic-overlay.conf
           RUN echo 'sync-type = git' >> /etc/portage/repos.conf/cosmic-overlay.conf
