@@ -27,18 +27,18 @@ jobs:
           FROM gentoo/stage3:latest
 
           # Update Portage and install required tools
-          RUN emerge-webrsync && \
-              emerge --update --quiet @system && \
-              emerge --quiet dev-util/pkgdev app-portage/pkgcheck && \
-              mkdir -p /var/db/repos
+          RUN emerge-webrsync
+          RUN emerge --update --quiet @system
+          RUN emerge --quiet pkgdev pkgcheck
+          RUN mkdir -p /var/db/repos
 
           # Set up the overlay configuration
-          RUN mkdir -p /etc/portage/repos.conf && \
-              echo '[cosmic-overlay]' > /etc/portage/repos.conf/cosmic-overlay.conf && \
-              echo 'location = /var/db/repos/cosmic-overlay' >> /etc/portage/repos.conf/cosmic-overlay.conf && \
-              echo 'sync-type = git' >> /etc/portage/repos.conf/cosmic-overlay.conf && \
-              echo 'masters = gentoo' >> /etc/portage/repos.conf/cosmic-overlay.conf && \
-              echo 'auto-sync = no' >> /etc/portage/repos.conf/cosmic-overlay.conf
+          RUN mkdir -p /etc/portage/repos.conf
+          RUN echo '[cosmic-overlay]' > /etc/portage/repos.conf/cosmic-overlay.conf
+          RUN echo 'location = /var/db/repos/cosmic-overlay' >> /etc/portage/repos.conf/cosmic-overlay.conf
+          RUN echo 'sync-type = git' >> /etc/portage/repos.conf/cosmic-overlay.conf
+          RUN echo 'masters = gentoo' >> /etc/portage/repos.conf/cosmic-overlay.conf
+          RUN echo 'auto-sync = no' >> /etc/portage/repos.conf/cosmic-overlay.conf
 
           WORKDIR /var/db/repos/cosmic-overlay
           EOF

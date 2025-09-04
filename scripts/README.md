@@ -159,7 +159,7 @@ Centralized configuration for all QA tools:
 ### Common Issues
 
 - **Python not found:** Ensure Python 3.8+ is installed
-- **pkgcheck missing:** Install dev-python/pkgcheck for full functionality
+- **pkgcheck missing:** Install pkgcheck for full functionality
 - **Docker issues:** Check Docker daemon status and permissions
 - **Permission errors:** Ensure scripts are executable (`chmod +x`)
 

@@ -92,7 +92,7 @@ emerge-webrsync --quiet
 
 # Install required packages
 echo "Installing QA tools..."
-emerge -q dev-python/pkgcheck dev-python/pkgdev
+emerge -q pkgcheck pkgdev
 
 # Verify installations
 echo "Verifying tool installations..."
