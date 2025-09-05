@@ -106,18 +106,12 @@ jobs:
               exit $SCAN_EXIT
             '
 
-      - name: Upload HTML QA report
-        uses: actions/upload-artifact@v4
-        with:
-          name: cosmic-qa-html-report
-          path: qa-reports/index.html
-
       - name: Upload QA reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: qa-reports-${{ github.sha }}
-          path: reports/
+          path: qa-reports/
           retention-days: 30
 
       - name: Comment PR with QA results
