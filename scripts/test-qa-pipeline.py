@@ -306,9 +306,10 @@ echo "=== Pipeline test complete ==="
 
             return success
 
-        finally:
-            if cleanup:
-                self.cleanup_docker_files()
+                try:
+                    self.cleanup_docker_files()
+                except Exception as e:
+                    self._warn(f"Cleanup failed: {e}")
 
 
 def main():
