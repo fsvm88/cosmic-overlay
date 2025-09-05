@@ -307,7 +307,7 @@ class SimpleQAChecker:
                         f"ERROR: {ebuild.relative_to(self.overlay_root)}: Empty ebuild"
                     )
                     errors += 1
-                elif "EAPI=" not in content and 'EAPI"=' not in content:
+                elif "EAPI=" not in content:
                     issues.append(
                         f"WARN: {ebuild.relative_to(self.overlay_root)}: No EAPI specified"
                     )
