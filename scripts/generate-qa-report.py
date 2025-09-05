@@ -965,8 +965,6 @@ class QAReportGenerator:
         """Generate all report formats."""
         self._log("Starting QA report generation...")
 
-        os.chdir(self.reports_dir)
-
         # Generate both report formats
         self.generate_markdown_report("report.md")
         self.generate_markdown_report("summary.md")  # Compatibility alias
@@ -1028,6 +1026,7 @@ def main():
     args = parser.parse_args()
 
     generator = QAReportGenerator(args.overlay_root, args.reports_dir)
+    os.chdir(generator.reports_dir)
     generator.generate_all_reports()
 
 
