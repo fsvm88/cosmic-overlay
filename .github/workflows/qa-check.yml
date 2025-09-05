@@ -24,7 +24,7 @@ jobs:
         run: |
           # Create a custom Dockerfile for our QA environment
           cat > Dockerfile << 'EOF'
-          FROM gentoo/stage3:latest
+          FROM fsvm88/gentoo-docker-pkgdev-pkgcheck:latest
 
           # Update Portage and install required tools
           RUN emerge-webrsync
@@ -49,14 +49,7 @@ jobs:
           RUN ls -la /var/db/repos/gentoo/ || echo "Still no /var/db/repos/gentoo after setup"
 
           # Set up repository configurations
-          RUN mkdir -p /etc/portage/repos.conf
-
-          # Configure basic Gentoo repository (this should work regardless of existing config)
-          RUN echo '[DEFAULT]' > /etc/portage/repos.conf/gentoo.conf
-          RUN echo 'main-repo = gentoo' >> /etc/portage/repos.conf/gentoo.conf
-          RUN echo '' >> /etc/portage/repos.conf/gentoo.conf
-          RUN echo '[gentoo]' >> /etc/portage/repos.conf/gentoo.conf
-          RUN echo 'location = /var/db/repos/gentoo' >> /etc/portage/repos.conf/gentoo.conf
+          # Gentoo main repo is preconfigured in the image; no manual configuration needed
 
           # Configure overlay
           RUN echo '[cosmic-overlay]' > /etc/portage/repos.conf/cosmic-overlay.conf
