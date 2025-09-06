@@ -54,8 +54,29 @@ class SimpleQAChecker:
 
     def __init__(self, overlay_root, reports_dir, config=None):
         self.overlay_root = Path(overlay_root)
-        self.reports_dir = Path(reports_dir)
-        self.config = config
+        # Always use qa-reports subfolder from current working directory
+        self.reports_dir = Path.cwd() / "qa-reports"
+        # Search for pkgcheck.conf in order: script folder, parent folder, cwd, system default
+        if config:
+            self.config = Path(config)
+            self._log(f"Using config file: {self.config}")
+        else:
+            search_paths = [
+                Path(__file__).parent / "pkgcheck.conf",
+                Path(__file__).parent.parent / "pkgcheck.conf",
+                Path.cwd() / "pkgcheck.conf",
+                Path("/etc/pkgcheck.conf"),
+            ]
+            found = None
+            for conf_path in search_paths:
+                if conf_path.exists():
+                    found = conf_path
+                    break
+            self.config = found
+            if found:
+                self._log(f"Using config file: {found}")
+            else:
+                self._log("No pkgcheck.conf found; using pkgcheck defaults.")
         self.has_portage = shutil.which("emerge") is not None
         self.has_pkgcheck = shutil.which("pkgcheck") is not None
         self.has_pkgdev = shutil.which("pkgdev") is not None
@@ -63,48 +84,32 @@ class SimpleQAChecker:
     def _get_package_issues(self):
         """Parse package issues from QA output files."""
         issues = []
-        for filename, tool in [
-            ("pkgcheck-scan.txt", "pkgcheck"),
-            ("repoman-full.txt", "repoman"),
-        ]:
-            filepath = self.reports_dir / filename
-            if filepath.exists():
-                try:
-                    with open(filepath) as f:
-                        for line in f:
-                            line = line.strip()
-                            if not line:
-                                continue
-                            if tool == "pkgcheck":
-                                match = re.match(
-                                    r"^([^:]+):\s*(ERROR|WARNING|INFO|STYLE):\s*(.+)$",
-                                    line,
-                                )
-                                if match:
-                                    issues.append(
-                                        {
-                                            "package": match.group(1),
-                                            "level": match.group(2).lower(),
-                                            "message": match.group(3),
-                                            "tool": tool,
-                                        }
-                                    )
-                            elif tool == "repoman":
-                                match = re.match(
-                                    r"^([^:]+):\s*(ERROR|WARN):\s*(.+)$", line
-                                )
-                                if match:
-                                    issues.append(
-                                        {
-                                            "package": match.group(1),
-                                            "level": match.group(2).lower(),
-                                            "message": match.group(3),
-                                            "tool": tool,
-                                        }
-                                    )
-                    return issues
-                except IOError:
-                    continue
+        # Only parse pkgcheck-scan.txt for package issues
+        filename = "pkgcheck-scan.txt"
+        filepath = self.reports_dir / filename
+        if filepath.exists():
+            try:
+                with open(filepath) as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        match = re.match(
+                            r"^([^:]+):\s*(ERROR|WARNING|INFO|STYLE):\s*(.+)$",
+                            line,
+                        )
+                        if match:
+                            issues.append(
+                                {
+                                    "package": match.group(1),
+                                    "level": match.group(2).lower(),
+                                    "message": match.group(3),
+                                    "tool": "pkgcheck",
+                                }
+                            )
+                return issues
+            except IOError:
+                pass
         return issues
 
     # All other methods (check_requirements, generate_markdown_report, generate_html_report, etc.) should be indented and placed inside this class.
@@ -313,8 +318,7 @@ class SimpleQAChecker:
                 html_content += f"<tr><td><span class='package-name'>{self._escape_html(issue['package'])}</span></td><td><span class='{level_class}'>{issue['level'].upper()}</span></td><td class='message'>{self._escape_html(issue['message'])}</td><td>{issue['tool']}</td></tr>"
             html_content += """
             </tbody></table>"""
-        else:
-            html_content += "<p>No package-specific issues found.</p>"
+        # ...existing code...
         html_content += """
         <h3>QA Scan Output</h3>
         <div class='output-section'>"""
