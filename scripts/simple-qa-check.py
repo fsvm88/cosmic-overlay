@@ -494,6 +494,10 @@ This directory contains automatically generated QA reports for the COSMIC overla
             txt_output_file = self.reports_dir / "pkgcheck-scan.txt"
             with open(txt_output_file, "w") as f:
                 f.write(result_txt.stdout)
+            # Save raw pkgcheck output for debugging config usage
+            debug_output_file = self.reports_dir / "pkgcheck-debug.txt"
+            with open(debug_output_file, "w") as f:
+                f.write(result.stdout)
             # Parse results
             errors = warnings = 0
             try:
@@ -774,6 +778,11 @@ This directory contains automatically generated QA reports for the COSMIC overla
         return overall_success
 
 
+def ensure_reports_dir(reports_dir):
+    if not os.path.exists(reports_dir):
+        os.makedirs(reports_dir)
+
+
 def main():
     """Main function."""
     parser = argparse.ArgumentParser(description="Simple QA checker for COSMIC overlay")
@@ -793,6 +802,9 @@ def main():
     )
 
     args = parser.parse_args()
+
+    reports_dir = args.reports_dir
+    ensure_reports_dir(reports_dir)
 
     # Redirect stdout if quiet mode
     if args.quiet:
