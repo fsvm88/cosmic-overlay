@@ -48,62 +48,13 @@ jobs:
 
       - name: Run QA checks in container
         run: |
-          # Copy overlay to container and run checks
           docker run --rm \
             -v "$PWD":/var/db/repos/cosmic-overlay \
             -w /var/db/repos/cosmic-overlay \
             cosmic-qa \
             bash -c '
               set -e
-              
-              # Create reports directory
-              mkdir -p reports
-              
-              echo "Starting QA checks..."
-              echo "Overlay location: $(pwd)"
-              echo "Available categories:"
-              ls -la
-              
-              # Run pkgcheck scan using centralized configuration and capture output
-              echo "Running pkgcheck scan..." | tee reports/pkgcheck-scan.txt
-              if pkgcheck scan --config scripts/pkgcheck.conf --reporter=StrReporter >> reports/pkgcheck-scan.txt 2>&1; then
-                echo "✅ pkgcheck scan passed" | tee -a reports/pkgcheck-scan.txt
-                SCAN_EXIT=0
-              else
-                echo "❌ pkgcheck scan found issues" | tee -a reports/pkgcheck-scan.txt
-                SCAN_EXIT=1
-              fi
-              
-              # Generate JSON report for processing
-              echo "Generating JSON report..." >> reports/pkgcheck-scan.txt
-              pkgcheck scan --config scripts/pkgcheck.conf --reporter=JsonReporter > reports/pkgcheck-results.json 2>/dev/null || true
-              
-              # Check individual packages with pkgdev
-              echo "Running package checks..." > reports/package-checks.txt
-              for category in cosmic-base acct-group acct-user dev-util virtual x11-themes; do
-                if [ -d "$category" ]; then
-                  echo "=== Checking category: $category ===" >> reports/package-checks.txt
-                  for package in "$category"/*; do
-                    if [ -d "$package" ]; then
-                      echo "Checking: $package" >> reports/package-checks.txt
-                      cd "$package"
-                      if ls *.ebuild >/dev/null 2>&1; then
-                        # Update manifests using pkgdev
-                        pkgdev manifest 2>&1 | tee -a ../../reports/package-checks.txt || true
-                      fi
-                      cd - > /dev/null
-                    fi
-                  done
-                  echo "" >> reports/package-checks.txt
-                fi
-              done
-              
-              # Generate summary report
-              echo "Generating reports..."
-              python3 ./scripts/generate-qa-report.py
-              
-              echo "QA checks completed!"
-              exit $SCAN_EXIT
+              python3 scripts/simple-qa-check.py --overlay-root . --reports-dir qa-reports
             '
 
       - name: Upload QA reports
