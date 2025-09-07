@@ -14,20 +14,20 @@ import re
 import sys
 import argparse
 from pathlib import Path
+from typing import List, Dict, Any, Tuple, Optional
 import subprocess
 from datetime import datetime
 import io
-from typing import Tuple
 import fnmatch
 
 
 class SimpleQAChecker:
-    def _escape_html(self, text):
+    def _escape_html(self, text: str) -> str:
         import html
 
         return html.escape(text)
 
-    def _get_commit_sha(self):
+    def _get_commit_sha(self) -> Optional[str]:
         try:
             result = subprocess.run(
                 ["git", "rev-parse", "HEAD"],
@@ -41,73 +41,80 @@ class SimpleQAChecker:
             pass
         return None
 
-    def _success(self, message):
+    def _success(self, message: str) -> None:
         print(f"[SUCCESS] {message}")
 
-    def _warn(self, message):
+    def _warn(self, message: str) -> None:
         print(f"[WARN] {message}")
 
-    def _error(self, message):
+    def _error(self, message: str) -> None:
         print(f"[ERROR] {message}")
 
-    def _log(self, message):
+    def _log(self, message: str) -> None:
         print(f"[QA] {message}")
 
-    def __init__(self, overlay_root, reports_dir, config=None):
-        self.overlay_root = Path(overlay_root)
+    def __init__(
+        self, overlay_root: str, reports_dir: str, config: Optional[str] = None
+    ) -> None:
+        self.overlay_root: Path = Path(overlay_root)
         # Always use qa-reports subfolder from current working directory
-        self.reports_dir = Path.cwd() / "qa-reports"
+        self.reports_dir: Path = Path.cwd() / "qa-reports"
         # Search for pkgcheck.conf in order: script folder, parent folder, cwd, system default
-        if config:
-            self.config = Path(config)
-            self._log(f"Using config file: {self.config}")
-        else:
-            search_paths = [
-                Path(__file__).parent / "pkgcheck.conf",
-                Path(__file__).parent.parent / "pkgcheck.conf",
-                Path.cwd() / "pkgcheck.conf",
-                Path("/etc/pkgcheck.conf"),
-            ]
-            found = None
-            for conf_path in search_paths:
-                if conf_path.exists():
-                    found = conf_path
-                    break
-            self.config = found
-            if found:
-                self._log(f"Using config file: {found}")
-            else:
-                self._log("No pkgcheck.conf found; using pkgcheck defaults.")
-        self.has_portage = shutil.which("emerge") is not None
-        self.has_pkgcheck = shutil.which("pkgcheck") is not None
-        self.has_pkgdev = shutil.which("pkgdev") is not None
+        self.config: Optional[Path] = self._find_config(config)
+        self.has_portage: bool = self._which("emerge")
+        self.has_pkgcheck: bool = self._which("pkgcheck")
+        self.has_pkgdev: bool = self._which("pkgdev")
 
-    def parse_qaignore(self, ignore_path):
-        """Parse .qaignore file and return ignore rules."""
-        rules = []
-        if not os.path.exists(ignore_path):
+    def _find_config(self, config: Optional[str]) -> Optional[Path]:
+        if config:
+            return Path(config)
+        search_paths: List[Path] = [
+            Path(__file__).parent / "pkgcheck.conf",
+            Path(__file__).parent.parent / "pkgcheck.conf",
+            Path.cwd() / "pkgcheck.conf",
+            Path("/etc/pkgcheck.conf"),
+        ]
+        for conf_path in search_paths:
+            if conf_path.exists():
+                return conf_path
+        return None
+
+    def _which(self, tool: str) -> bool:
+        for path in os.environ.get("PATH", "").split(os.pathsep):
+            if os.access(os.path.join(path, tool), os.X_OK):
+                return True
+        return False
+
+    def parse_qaignore(self, ignore_path: Path) -> List[Dict[str, Optional[str]]]:
+        rules: List[Dict[str, Optional[str]]] = []
+        if not ignore_path.exists():
             return rules
         with open(ignore_path) as f:
             for line in f:
                 line = line.strip()
                 if not line or line.startswith("#"):
                     continue
-                parts = line.split()
+                parts: List[str] = line.split()
                 if len(parts) < 2:
                     continue
                 atom_ver, check = parts[0], parts[1]
-                if ":" in atom_ver:
-                    atom, ver = atom_ver.split(":", 1)
-                else:
-                    atom, ver = atom_ver, None
+                atom, ver = (
+                    (atom_ver.split(":", 1) + [None])[:2]
+                    if ":" in atom_ver
+                    else (atom_ver, None)
+                )
                 rules.append({"atom": atom, "ver": ver, "check": check})
         return rules
 
-    def should_ignore(self, atom, ver, check, rules):
-        import fnmatch
-
+    def should_ignore(
+        self,
+        atom: str,
+        ver: Optional[str],
+        check: str,
+        rules: List[Dict[str, Optional[str]]],
+    ) -> bool:
         for rule in rules:
-            if not fnmatch.fnmatch(atom, rule["atom"]):
+            if not self._fnmatch(atom, rule["atom"]):
                 continue
             if rule["ver"] and rule["ver"] != ver:
                 continue
@@ -116,31 +123,18 @@ class SimpleQAChecker:
             return True
         return False
 
-    def filter_issues_with_qaignore(self, issues):
-        ignore_path = Path.cwd() / ".qaignore"
-        if ignore_path.exists():
-            self._log(f"Using .qaignore file: {ignore_path}")
-        else:
-            self._log("No .qaignore file found; no selective QA suppression applied.")
-        rules = self.parse_qaignore(ignore_path)
-        filtered = []
-        for issue in issues:
-            atom = issue.get("package", "")
-            ver = None
-            # Try to extract version from atom if present
-            if "-" in atom:
-                pkg_parts = atom.split("-")
-                if len(pkg_parts) > 1 and pkg_parts[-1][0].isdigit():
-                    ver = pkg_parts[-1]
-                    atom = "-".join(pkg_parts[:-1])
-            check = issue.get("check", "")
-            if not self.should_ignore(atom, ver, check, rules):
-                filtered.append(issue)
-        return filtered
+    def _fnmatch(self, value: str, pattern: Optional[str]) -> bool:
+        if pattern is None:
+            return False
+        if pattern == "*":
+            return True
+        if pattern.endswith("*"):
+            return value.startswith(pattern[:-1])
+        return value == pattern
 
-    def _get_package_issues(self):
+    def _get_package_issues(self) -> List[Dict[str, str]]:
         """Parse package issues from QA output files and filter with .qaignore."""
-        issues = []
+        issues: List[Dict[str, str]] = []
         # Only parse pkgcheck-scan.txt for package issues
         filename = "pkgcheck-scan.txt"
         filepath = self.reports_dir / filename
@@ -176,6 +170,20 @@ class SimpleQAChecker:
                 pass
         return issues
 
+    def filter_issues_with_qaignore(
+        self, issues: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        ignore_path: Path = Path.cwd() / ".qaignore"
+        rules: List[Dict[str, Optional[str]]] = self.parse_qaignore(ignore_path)
+        filtered: List[Dict[str, Any]] = []
+        for issue in issues:
+            atom: str = issue.get("atom", "")
+            ver: Optional[str] = issue.get("version")
+            check: str = issue.get("check", "")
+            if not self.should_ignore(atom, ver, check, rules):
+                filtered.append(issue)
+        return filtered
+
     def check_requirements(self) -> bool:
         """Check if required tools are available."""
         self._log("Checking requirements...")
@@ -183,7 +191,7 @@ class SimpleQAChecker:
         # Check basic tools
         basic_tools = ["find", "grep", "awk", "sed"]
         for tool in basic_tools:
-            if not shutil.which(tool):
+            if not self._which(tool):
                 self._error(f"Missing required tool: {tool}")
                 return False
 
@@ -191,18 +199,18 @@ class SimpleQAChecker:
         if self.has_portage:
             self._success("Portage tools available")
         else:
-            self._warn("Portage tools not available - some checks may be limited")
+            self._log("Portage tools not available - some checks may be limited")
 
         # Check pkgcheck and pkgdev
         if self.has_pkgcheck and self.has_pkgdev:
             self._success("pkgcheck and pkgdev available")
         else:
-            self._warn("pkgcheck/pkgdev not available - using basic validation only")
+            self._log("pkgcheck/pkgdev not available - using basic validation only")
 
         # All checks passed
         return True
 
-    def generate_markdown_report(self):
+    def generate_markdown_report(self) -> None:
         output_path = self.reports_dir / "report.md"
         commit_sha = self._get_commit_sha()
         commit_sha_short = commit_sha[:8] if commit_sha else "unknown"
@@ -307,7 +315,7 @@ class SimpleQAChecker:
             f.write(content)
         self._log(f"Markdown report generated: {output_path}")
 
-    def generate_html_report(self):
+    def generate_html_report(self) -> None:
         output_path = self.reports_dir / "index.html"
         commit_sha = self._get_commit_sha()
         commit_sha_short = commit_sha[:8] if commit_sha else "unknown"
@@ -408,7 +416,7 @@ class SimpleQAChecker:
         <h3>QA Scan Output</h3>
         <div class='output-section'>"""
         scan_json_path = self.reports_dir / "pkgcheck-scan.json"
-        rows = []
+        rows: List[Tuple[str, str, str, str, str, str]] = []
         if scan_json_path.exists():
             with open(scan_json_path) as f:
                 scan_lines = f.readlines()
@@ -436,7 +444,7 @@ class SimpleQAChecker:
         # Filter rows using .qaignore rules
         ignore_path = Path.cwd() / ".qaignore"
         rules = self.parse_qaignore(ignore_path)
-        filtered_rows = []
+        filtered_rows: List[Tuple[str, str, str, str, str, str]] = []
         for cat, pkg, ver, level, check, msg in rows:
             atom = f"{cat}/{pkg}"
             if not self.should_ignore(atom, ver, check, rules):
@@ -505,7 +513,7 @@ class SimpleQAChecker:
             f.write(html_content)
         self._log(f"HTML report generated: {output_path}")
 
-    def generate_reports_readme(self):
+    def generate_reports_readme(self) -> None:
         report_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
         readme_content = f"""# QA Reports
 
@@ -528,22 +536,21 @@ This directory contains automatically generated QA reports for the COSMIC overla
         """Validate basic overlay structure."""
         self._log("Checking overlay structure...")
         # Check for essential files
-        essential_files = ["metadata/layout.conf", "profiles/repo_name"]
-        missing_files = []
-        for file_path in essential_files:
-            if not (self.overlay_root / file_path).exists():
-                missing_files.append(file_path)
+        essential_files: List[str] = ["metadata/layout.conf", "profiles/repo_name"]
+        missing_files: List[str] = [
+            f for f in essential_files if not (self.overlay_root / f).exists()
+        ]
         if missing_files:
             self._error(f"Missing essential overlay files: {', '.join(missing_files)}")
             return False
         # Check for ebuilds
-        ebuilds = list(self.overlay_root.glob("**/*.ebuild"))
+        ebuilds: List[Path] = list(self.overlay_root.glob("**/*.ebuild"))
         if not ebuilds:
             self._error("No ebuilds found in overlay")
             return False
         self._success(f"Found {len(ebuilds)} ebuilds in overlay")
         # Check for categories
-        categories = [
+        categories: List[str] = [
             d.name
             for d in self.overlay_root.iterdir()
             if d.is_dir()
@@ -660,60 +667,65 @@ This directory contains automatically generated QA reports for the COSMIC overla
             self._error(f"Unexpected error running pkgdev manifest: {e}")
             return False
 
-    def get_qa_results(self):
+    def get_qa_results(
+        self,
+    ) -> Tuple[int, int, int, int, int, str, int, int, int, int, int]:
         """Parse QA results and return counts, including ignored counts."""
-        total_issues = errors = warnings = info = style = 0
-        ignored_errors = ignored_warnings = ignored_info = ignored_style = 0
-        qa_tool = "basic"
-        pkgcheck_json = self.reports_dir / "pkgcheck-scan.json"
-        all_results = []
+        total_issues: int = 0
+        errors: int = 0
+        warnings: int = 0
+        info: int = 0
+        style: int = 0
+        ignored_errors: int = 0
+        ignored_warnings: int = 0
+        ignored_info: int = 0
+        ignored_style: int = 0
+        qa_tool: str = "basic"
+        pkgcheck_json: Path = self.reports_dir / "pkgcheck-scan.json"
+        all_results: List[Dict[str, Any]] = []
         if pkgcheck_json.exists():
-            try:
-                with open(pkgcheck_json) as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line:
+            with open(pkgcheck_json) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entry: Dict[str, Any] = eval(line, {}, {})
+                    except Exception:
+                        continue
+                    for cat, pkgs in entry.items():
+                        if not isinstance(pkgs, dict):
                             continue
-                        try:
-                            entry = json.loads(line)
-                        except Exception:
-                            continue
-                        # Walk nested structure
-                        for cat, pkgs in entry.items():
-                            if not isinstance(pkgs, dict):
+                        for pkg, vers in pkgs.items():
+                            if not isinstance(vers, dict):
                                 continue
-                            for pkg, vers in pkgs.items():
-                                if not isinstance(vers, dict):
+                            for ver, levels in vers.items():
+                                if not isinstance(levels, dict):
                                     continue
-                                for ver, levels in vers.items():
-                                    if not isinstance(levels, dict):
+                                for level_key, checks in levels.items():
+                                    level: str = level_key.lstrip("_")
+                                    if not isinstance(checks, dict):
                                         continue
-                                    for level_key, checks in levels.items():
-                                        # level_key: _error, _warning, _info, _style
-                                        level = level_key.lstrip("_")
-                                        if not isinstance(checks, dict):
-                                            continue
-                                        for check, msg in checks.items():
-                                            all_results.append(
-                                                {
-                                                    "atom": f"{cat}/{pkg}",
-                                                    "version": ver,
-                                                    "check": check,
-                                                    "level": level,
-                                                    "message": msg,
-                                                }
-                                            )
-            except IOError:
-                pass
-        # Apply .qaignore filtering
-        ignore_path = Path.cwd() / ".qaignore"
-        rules = self.parse_qaignore(ignore_path)
+                                    for check, msg in checks.items():
+                                        all_results.append(
+                                            {
+                                                "atom": f"{cat}/{pkg}",
+                                                "version": ver,
+                                                "check": check,
+                                                "level": level,
+                                                "message": msg,
+                                            }
+                                        )
+        ignore_path: Path = Path.cwd() / ".qaignore"
+        rules: List[Dict[str, Optional[str]]] = self.parse_qaignore(ignore_path)
         for result in all_results:
-            atom = result["atom"]
-            ver = result["version"]
-            check = result["check"]
-            level = result["level"].lower()
-            ignored = self.should_ignore(atom, ver, check, rules)
+            atom, ver, check, level = (
+                result["atom"],
+                result["version"],
+                result["check"],
+                result["level"].lower(),
+            )
+            ignored: bool = self.should_ignore(atom, ver, check, rules)
             if level == "error":
                 if ignored:
                     ignored_errors += 1
@@ -821,13 +833,30 @@ This directory contains automatically generated QA reports for the COSMIC overla
 
         return overall_success
 
+    def run_basic_checks(self) -> Tuple[bool, int, int]:
+        """Run basic QA checks (find, grep, awk, sed) and return results."""
+        self._log("Running basic checks...")
+        errors = warnings = 0
+        # Example basic check: find ebuilds with missing SRC_URI
+        try:
+            for ebuild in self.overlay_root.glob("**/*.ebuild"):
+                with open(ebuild) as f:
+                    content = f.read()
+                if "SRC_URI=" not in content:
+                    errors += 1
+                    self._error(f"Missing SRC_URI in {ebuild}")
+        except Exception as e:
+            self._error(f"Error running basic checks: {e}")
+            return False, 0, 0
+        return True, errors, warnings
 
-def ensure_reports_dir(reports_dir):
+
+def ensure_reports_dir(reports_dir: str) -> None:
     if not os.path.exists(reports_dir):
         os.makedirs(reports_dir)
 
 
-def main():
+def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(description="Simple QA checker for COSMIC overlay")
     parser.add_argument(
@@ -847,7 +876,7 @@ def main():
 
     args = parser.parse_args()
 
-    reports_dir = args.reports_dir
+    reports_dir: str = str(args.reports_dir)
     ensure_reports_dir(reports_dir)
 
     # Redirect stdout if quiet mode
@@ -858,8 +887,10 @@ def main():
         sys.stdout = io.StringIO()
 
     try:
-        checker = SimpleQAChecker(args.overlay_root, args.reports_dir, args.config)
-        success = checker.run_full_qa_check()
+        checker: SimpleQAChecker = SimpleQAChecker(
+            str(args.overlay_root), reports_dir, args.config
+        )
+        success: bool = checker.run_full_qa_check()
 
         # Restore stdout and print final result
         if args.quiet:
