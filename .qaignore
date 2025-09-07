@@ -27,9 +27,13 @@
 # Ignore qa-reports folder
 qa-reports *
 
+# PotentialStable
 acct-group/cosmic-greeter PotentialStable
 acct-user/cosmic-greeter PotentialStable
+virtual/notification-daemon PotentialStable
 
-cosmic-base/pop-appstream-data VCSVersionVisible
-
-cosmic-base/pop-fonts VCSVersionVisible
+# VisibleVcsPkg
+cosmic-base/pop-appstream-data VisibleVcsPkg
+cosmic-base/pop-fonts VisibleVcsPkg
+cosmic-base/pop-gtk-theme VisibleVcsPkg
+cosmic-base/pop-icon-theme VisibleVcsPkg

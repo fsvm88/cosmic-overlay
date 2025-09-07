@@ -125,7 +125,7 @@ if [[ "${PV}" == *9999* ]] ||
 	# every time a new version hits the repo. Old/deleted refs are purged in this mode.
 	#
 	# Related https://github.com/fsvm88/cosmic-overlay/issues/23
-	EGIT_CLONE_TYPE=mirror
+	EGIT_MIN_CLONE_TYPE=mirror
 	EGIT_LFS_CLONE_TYPE=mirror
 	inherit git-r3
 fi
