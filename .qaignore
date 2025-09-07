@@ -1,0 +1,35 @@
+# COSMIC Overlay QA Ignore File
+# Lines starting with # are comments
+# Syntax:
+#   <atom>[:<version>] <check>
+#   <atom> can be category/package or just category
+#   <version> is optional, pins ignore to specific version
+#   <check> is the pkgcheck check name (e.g. PotentialStable, VCSVersionVisible, *)
+# Examples:
+# Ignore PotentialStable for a whole category:
+###### cosmic-base PotentialStable
+
+# Ignore VCSVersionVisible for a specific package:
+###### cosmic-base/pop-appstream-data VCSVersionVisible
+
+# Ignore all checks for a specific version:
+###### cosmic-base/pop-appstream-data:9999 *
+
+# Ignore PotentialStable for multiple categories:
+###### acct-group PotentialStable
+###### acct-user PotentialStable
+
+# Ignore StyleCheck for a package:
+###### cosmic-base/cosmic-wallpapers StyleCheck
+
+#####################
+###### Actual ignores
+# Ignore qa-reports folder
+qa-reports *
+
+acct-group/cosmic-greeter PotentialStable
+acct-user/cosmic-greeter PotentialStable
+
+cosmic-base/pop-appstream-data VCSVersionVisible
+
+cosmic-base/pop-fonts VCSVersionVisible

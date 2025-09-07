@@ -18,6 +18,7 @@ import subprocess
 from datetime import datetime
 import io
 from typing import Tuple
+import fnmatch
 
 
 class SimpleQAChecker:
@@ -81,8 +82,64 @@ class SimpleQAChecker:
         self.has_pkgcheck = shutil.which("pkgcheck") is not None
         self.has_pkgdev = shutil.which("pkgdev") is not None
 
+    def parse_qaignore(self, ignore_path):
+        """Parse .qaignore file and return ignore rules."""
+        rules = []
+        if not os.path.exists(ignore_path):
+            return rules
+        with open(ignore_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = line.split()
+                if len(parts) < 2:
+                    continue
+                atom_ver, check = parts[0], parts[1]
+                if ":" in atom_ver:
+                    atom, ver = atom_ver.split(":", 1)
+                else:
+                    atom, ver = atom_ver, None
+                rules.append({"atom": atom, "ver": ver, "check": check})
+        return rules
+
+    def should_ignore(self, atom, ver, check, rules):
+        import fnmatch
+
+        for rule in rules:
+            if not fnmatch.fnmatch(atom, rule["atom"]):
+                continue
+            if rule["ver"] and rule["ver"] != ver:
+                continue
+            if rule["check"] != "*" and rule["check"] != check:
+                continue
+            return True
+        return False
+
+    def filter_issues_with_qaignore(self, issues):
+        ignore_path = Path.cwd() / ".qaignore"
+        if ignore_path.exists():
+            self._log(f"Using .qaignore file: {ignore_path}")
+        else:
+            self._log("No .qaignore file found; no selective QA suppression applied.")
+        rules = self.parse_qaignore(ignore_path)
+        filtered = []
+        for issue in issues:
+            atom = issue.get("package", "")
+            ver = None
+            # Try to extract version from atom if present
+            if "-" in atom:
+                pkg_parts = atom.split("-")
+                if len(pkg_parts) > 1 and pkg_parts[-1][0].isdigit():
+                    ver = pkg_parts[-1]
+                    atom = "-".join(pkg_parts[:-1])
+            check = issue.get("check", "")
+            if not self.should_ignore(atom, ver, check, rules):
+                filtered.append(issue)
+        return filtered
+
     def _get_package_issues(self):
-        """Parse package issues from QA output files."""
+        """Parse package issues from QA output files and filter with .qaignore."""
         issues = []
         # Only parse pkgcheck-scan.txt for package issues
         filename = "pkgcheck-scan.txt"
@@ -99,20 +156,25 @@ class SimpleQAChecker:
                             line,
                         )
                         if match:
+                            # Try to extract check name from message
+                            msg = match.group(3)
+                            check_match = re.match(r"([A-Za-z0-9_]+):", msg)
+                            check = check_match.group(1) if check_match else ""
                             issues.append(
                                 {
                                     "package": match.group(1),
                                     "level": match.group(2).lower(),
-                                    "message": match.group(3),
+                                    "message": msg,
                                     "tool": "pkgcheck",
+                                    "check": check,
                                 }
                             )
+                # Filter issues using .qaignore
+                issues = self.filter_issues_with_qaignore(issues)
                 return issues
             except IOError:
                 pass
         return issues
-
-    # All other methods (check_requirements, generate_markdown_report, generate_html_report, etc.) should be indented and placed inside this class.
 
     def check_requirements(self) -> bool:
         """Check if required tools are available."""
@@ -318,7 +380,6 @@ class SimpleQAChecker:
                 html_content += f"<tr><td><span class='package-name'>{self._escape_html(issue['package'])}</span></td><td><span class='{level_class}'>{issue['level'].upper()}</span></td><td class='message'>{self._escape_html(issue['message'])}</td><td>{issue['tool']}</td></tr>"
             html_content += """
             </tbody></table>"""
-        # ...existing code...
         html_content += """
         <h3>QA Scan Output</h3>
         <div class='output-section'>"""
@@ -348,9 +409,17 @@ class SimpleQAChecker:
                                     continue
                                 for check, msg in checks.items():
                                     rows.append((cat, pkg, ver, level[1:], check, msg))
-        if rows:
+        # Filter rows using .qaignore rules
+        ignore_path = Path.cwd() / ".qaignore"
+        rules = self.parse_qaignore(ignore_path)
+        filtered_rows = []
+        for cat, pkg, ver, level, check, msg in rows:
+            atom = f"{cat}/{pkg}"
+            if not self.should_ignore(atom, ver, check, rules):
+                filtered_rows.append((cat, pkg, ver, level, check, msg))
+        if filtered_rows:
             html_content += "<table class='issues-table'><thead><tr><th>Category</th><th>Package</th><th>Version</th><th>Level</th><th>Check</th><th>Message</th></tr></thead><tbody>"
-            for cat, pkg, ver, level, check, msg in rows:
+            for cat, pkg, ver, level, check, msg in filtered_rows:
                 html_content += f"<tr><td>{self._escape_html(cat)}</td><td>{self._escape_html(pkg)}</td><td>{self._escape_html(ver)}</td><td class='level-{level}'>{level.capitalize()}</td><td>{self._escape_html(check)}</td><td class='message'>{self._escape_html(msg)}</td></tr>"
             html_content += "</tbody></table>"
         else:
