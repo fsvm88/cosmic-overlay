@@ -41,17 +41,17 @@ class SimpleQAChecker:
             pass
         return None
 
-    def _success(self, message: str) -> None:
-        print(f"[SUCCESS] {message}")
-
-    def _warn(self, message: str) -> None:
-        print(f"[WARN] {message}")
-
-    def _error(self, message: str) -> None:
-        print(f"[ERROR] {message}")
+    def _msg(self, message: str, prefix: str = "QA") -> None:
+        print(f"[{prefix}] {message}")
 
     def _log(self, message: str) -> None:
-        print(f"[QA] {message}")
+        self._msg(message, "QA")
+
+    def _error(self, message: str) -> None:
+        self._msg(message, "ERROR")
+
+    def _success(self, message: str) -> None:
+        self._msg(message, "SUCCESS")
 
     def __init__(
         self, overlay_root: str, reports_dir: str, config: Optional[str] = None
@@ -620,7 +620,7 @@ This directory contains automatically generated QA reports for the COSMIC overla
                     f"pkgcheck completed: {errors} errors, {warnings} warnings"
                 )
             else:
-                self._warn(
+                self._log(
                     f"pkgcheck completed with issues: {errors} errors, {warnings} warnings"
                 )
             return success, errors, warnings
@@ -635,7 +635,7 @@ This directory contains automatically generated QA reports for the COSMIC overla
         """Run pkgdev manifest to check manifest integrity."""
         self._log("Checking manifest integrity...")
         if not self.has_pkgdev:
-            self._warn("pkgdev not available - skipping manifest check")
+            self._log("pkgdev not available - skipping manifest check")
             return True
         try:
             cmd = ["pkgdev", "manifest", str(self.overlay_root)]
@@ -656,7 +656,7 @@ This directory contains automatically generated QA reports for the COSMIC overla
                 self._success("Manifest check passed")
                 return True
             else:
-                self._warn(
+                self._log(
                     f"Manifest check found issues (exit code: {result.returncode})"
                 )
                 return False
