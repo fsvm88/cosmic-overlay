@@ -17,7 +17,8 @@ EGIT_BRANCH=master
 
 IUSE+=" mpris"
 
-# app-misc/geoclue was dropped thanks to https://github.com/pop-os/cosmic-settings-daemon/commit/f609f7d342bf5fb87ecc3779b8173d3bcd013417
+# app-misc/geoclue was dropped thanks to
+# https://github.com/pop-os/cosmic-settings-daemon/commit/f609f7d342bf5fb87ecc3779b8173d3bcd013417
 RDEPEND+="
 	media-sound/alsa-utils
 	mpris? ( >=media-sound/playerctl-2.3.1 )

@@ -3,19 +3,18 @@
 
 EAPI=8
 
-EGIT_LFS=1
-# Look for COSMIC_GIT_UNPACK variable in cosmic-de.eclass.
-# TL;DR: this costs some additional DISTDIR space,
-# but is the only way to re-use the same DISTDIR for multiple ebuilds.
-EGIT_CLONE_TYPE=mirror
-EGIT_LFS_CLONE_TYPE=mirror
-
 DESCRIPTION="Wallpapers for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-wallpapers"
 
+EGIT_LFS=1
+inherit git-r3
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
-inherit git-r3
+# Look for COSMIC_GIT_UNPACK variable in cosmic-de.eclass.
+# TL;DR: this costs some additional DISTDIR space,
+# but is the only way to re-use the same DISTDIR for multiple ebuilds.
+EGIT_MIN_CLONE_TYPE=mirror
+EGIT_LFS_CLONE_TYPE=mirror
 
 BDEPEND="
 	media-gfx/imagemagick

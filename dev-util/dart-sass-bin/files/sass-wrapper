@@ -1,0 +1,5 @@
+#!/bin/sh
+
+DART_SASS_DIR="$(dirname "$(readlink -f "$0")")/../lib64/dart-sass"
+
+exec "${DART_SASS_DIR}/dart" "${DART_SASS_DIR}/sass.snapshot" "$@"
