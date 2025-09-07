@@ -89,21 +89,3 @@ jobs:
             } catch (error) {
               console.log('Error posting PR comment:', error.message);
             }
-
-      - name: Notify on failure
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GH_PAT }}
-          script: |
-            try {
-              await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: `🚨 QA Check Failed - ${new Date().toISOString().split('T')[0]}`,
-                body: `QA checks failed for commit \`${context.sha.substring(0, 7)}\`.\n\n**Details:**\n- Workflow: ${context.workflow}\n- Run: ${context.runNumber}\n- Branch: ${context.ref}\n\nPlease check the [workflow run](${context.payload.repository.html_url}/actions/runs/${context.runId}) for details.`,
-                labels: ['qa-failure', 'automated', 'bug']
-              });
-            } catch (error) {
-              console.log('Error creating issue:', error.message);
-            }
