@@ -208,7 +208,19 @@ class SimpleQAChecker:
         commit_sha_short = commit_sha[:8] if commit_sha else "unknown"
         workflow = os.environ.get("GITHUB_WORKFLOW", "Manual")
         report_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
-        total_issues, errors, warnings, info, style, qa_tool = self.get_qa_results()
+        (
+            total_issues,
+            errors,
+            warnings,
+            info,
+            style,
+            qa_tool,
+            ignored_errors,
+            ignored_warnings,
+            ignored_info,
+            ignored_style,
+            ignored_total,
+        ) = self.get_qa_results()
         content = f"""# 🚀 COSMIC Overlay QA Report
 
 **Generated:** {report_date}  
@@ -220,11 +232,11 @@ class SimpleQAChecker:
 
 ### 📊 Summary
 
-- **Total Issues:** {total_issues}
-- **Errors:** {errors}
-- **Warnings:** {warnings}"""
-        if style > 0:
-            content += f"\n- **Info:** {info}\n- **Style:** {style}"
+- **Total Issues:** {total_issues} [{ignored_total} ignored]
+- **Errors:** {errors} [{ignored_errors}]
+- **Warnings:** {warnings} [{ignored_warnings}]"""
+        if style > 0 or ignored_info > 0 or ignored_style > 0:
+            content += f"\n- **Info:** {info} [{ignored_info}]\n- **Style:** {style} [{ignored_style}]"
         content += """
 
 ---
@@ -301,7 +313,19 @@ class SimpleQAChecker:
         commit_sha_short = commit_sha[:8] if commit_sha else "unknown"
         workflow = os.environ.get("GITHUB_WORKFLOW", "Manual")
         report_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
-        total_issues, errors, warnings, info, style, qa_tool = self.get_qa_results()
+        (
+            total_issues,
+            errors,
+            warnings,
+            info,
+            style,
+            qa_tool,
+            ignored_errors,
+            ignored_warnings,
+            ignored_info,
+            ignored_style,
+            ignored_total,
+        ) = self.get_qa_results()
         package_issues = self._get_package_issues()
         status_text = (
             "FAILED" if errors > 0 else "WARNINGS" if warnings > 0 else "PASSED"
@@ -637,148 +661,94 @@ This directory contains automatically generated QA reports for the COSMIC overla
             return False
 
     def get_qa_results(self):
-        """Parse QA results and return counts."""
+        """Parse QA results and return counts, including ignored counts."""
         total_issues = errors = warnings = info = style = 0
+        ignored_errors = ignored_warnings = ignored_info = ignored_style = 0
         qa_tool = "basic"
         pkgcheck_json = self.reports_dir / "pkgcheck-scan.json"
+        all_results = []
         if pkgcheck_json.exists():
             try:
                 with open(pkgcheck_json) as f:
-                    content = f.read().strip()
-                if content:
-                    try:
-                        data = json.loads(content)
-                        if isinstance(data, list):
-                            for result in data:
-                                level = result.get("level", "").lower()
-                                if level == "error":
-                                    errors += 1
-                                elif level == "warning":
-                                    warnings += 1
-                                elif level == "info":
-                                    info += 1
-                                elif level == "style":
-                                    style += 1
-                    except json.JSONDecodeError:
-                        for line_num, line in enumerate(content.splitlines(), 1):
-                            if line.strip():
-                                try:
-                                    result = json.loads(line)
-                                    if isinstance(result, dict):
-                                        for category_data in result.values():
-                                            if isinstance(category_data, dict):
-                                                for (
-                                                    package_data
-                                                ) in category_data.values():
-                                                    if isinstance(package_data, dict):
-                                                        for (
-                                                            version_data
-                                                        ) in package_data.values():
-                                                            if isinstance(
-                                                                version_data, dict
-                                                            ):
-                                                                for (
-                                                                    level_key,
-                                                                    checks,
-                                                                ) in (
-                                                                    version_data.items()
-                                                                ):
-                                                                    level = level_key.lstrip(
-                                                                        "_"
-                                                                    )
-                                                                    if level == "error":
-                                                                        errors += (
-                                                                            len(checks)
-                                                                            if isinstance(
-                                                                                checks,
-                                                                                dict,
-                                                                            )
-                                                                            else 1
-                                                                        )
-                                                                    elif (
-                                                                        level
-                                                                        == "warning"
-                                                                    ):
-                                                                        warnings += (
-                                                                            len(checks)
-                                                                            if isinstance(
-                                                                                checks,
-                                                                                dict,
-                                                                            )
-                                                                            else 1
-                                                                        )
-                                                                    elif (
-                                                                        level == "info"
-                                                                    ):
-                                                                        info += (
-                                                                            len(checks)
-                                                                            if isinstance(
-                                                                                checks,
-                                                                                dict,
-                                                                            )
-                                                                            else 1
-                                                                        )
-                                                                    elif (
-                                                                        level == "style"
-                                                                    ):
-                                                                        style += (
-                                                                            len(checks)
-                                                                            if isinstance(
-                                                                                checks,
-                                                                                dict,
-                                                                            )
-                                                                            else 1
-                                                                        )
-                                except json.JSONDecodeError:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            entry = json.loads(line)
+                        except Exception:
+                            continue
+                        # Walk nested structure
+                        for cat, pkgs in entry.items():
+                            if not isinstance(pkgs, dict):
+                                continue
+                            for pkg, vers in pkgs.items():
+                                if not isinstance(vers, dict):
                                     continue
-                                except Exception as e:
-                                    self._log(
-                                        f"Warning: Error parsing JSON line {line_num}: {e}"
-                                    )
-                                    continue
-                total_issues = errors + warnings + info + style
-                qa_tool = "pkgcheck"
-                return total_issues, errors, warnings, info, style, qa_tool
+                                for ver, levels in vers.items():
+                                    if not isinstance(levels, dict):
+                                        continue
+                                    for level_key, checks in levels.items():
+                                        # level_key: _error, _warning, _info, _style
+                                        level = level_key.lstrip("_")
+                                        if not isinstance(checks, dict):
+                                            continue
+                                        for check, msg in checks.items():
+                                            all_results.append(
+                                                {
+                                                    "atom": f"{cat}/{pkg}",
+                                                    "version": ver,
+                                                    "check": check,
+                                                    "level": level,
+                                                    "message": msg,
+                                                }
+                                            )
             except IOError:
                 pass
-        pkgcheck_txt = self.reports_dir / "pkgcheck-scan.txt"
-        if pkgcheck_txt.exists():
-            try:
-                with open(pkgcheck_txt) as f:
-                    content = f.read()
-                errors = len(re.findall(r"\bERROR\b", content))
-                warnings = len(re.findall(r"\bWARNING\b", content))
-                info = len(re.findall(r"\bINFO\b", content))
-                style = len(re.findall(r"\bSTYLE\b", content))
-                total_issues = errors + warnings + info + style
-                qa_tool = "pkgcheck"
-                return total_issues, errors, warnings, info, style, qa_tool
-            except IOError:
-                pass
-        repoman_txt = self.reports_dir / "repoman-full.txt"
-        if repoman_txt.exists():
-            try:
-                with open(repoman_txt) as f:
-                    content = f.read()
-                errors = len(re.findall(r"\bERROR\b", content))
-                warnings = len(re.findall(r"\bWARN\b", content))
-                total_issues = errors + warnings
-                qa_tool = "repoman"
-                return total_issues, errors, warnings, info, style, qa_tool
-            except IOError:
-                pass
-        basic_qa = self.reports_dir / "basic-qa.txt"
-        if basic_qa.exists():
-            try:
-                with open(basic_qa) as f:
-                    content = f.read()
-                errors = len(re.findall(r"\bERROR\b", content))
-                warnings = len(re.findall(r"\bWARN\b", content))
-                total_issues = errors + warnings
-                return total_issues, errors, warnings, info, style, qa_tool
-            except IOError:
-                pass
-        return total_issues, errors, warnings, info, style, qa_tool
+        # Apply .qaignore filtering
+        ignore_path = Path.cwd() / ".qaignore"
+        rules = self.parse_qaignore(ignore_path)
+        for result in all_results:
+            atom = result["atom"]
+            ver = result["version"]
+            check = result["check"]
+            level = result["level"].lower()
+            ignored = self.should_ignore(atom, ver, check, rules)
+            if level == "error":
+                if ignored:
+                    ignored_errors += 1
+                else:
+                    errors += 1
+            elif level == "warning":
+                if ignored:
+                    ignored_warnings += 1
+                else:
+                    warnings += 1
+            elif level == "info":
+                if ignored:
+                    ignored_info += 1
+                else:
+                    info += 1
+            elif level == "style":
+                if ignored:
+                    ignored_style += 1
+                else:
+                    style += 1
+        total_issues = errors + warnings + info + style
+        ignored_total = ignored_errors + ignored_warnings + ignored_info + ignored_style
+        return (
+            total_issues,
+            errors,
+            warnings,
+            info,
+            style,
+            qa_tool,
+            ignored_errors,
+            ignored_warnings,
+            ignored_info,
+            ignored_style,
+            ignored_total,
+        )
 
     def run_full_qa_check(self) -> bool:
         """Run complete QA check suite."""
@@ -820,29 +790,34 @@ This directory contains automatically generated QA reports for the COSMIC overla
         self.generate_reports_readme()
         self._success("Reports generated successfully")
         # Print summary to stdout
-        total_issues, errors, warnings, info, style, qa_tool = self.get_qa_results()
+        (
+            total_issues,
+            errors,
+            warnings,
+            info,
+            style,
+            qa_tool,
+            ignored_errors,
+            ignored_warnings,
+            ignored_info,
+            ignored_style,
+            ignored_total,
+        ) = self.get_qa_results()
         print()
         print("📊 QA Report Summary:")
         print(f"   Tool: {qa_tool}")
-        print(f"   Total Issues: {total_issues}")
-        print(f"   Errors: {errors}")
-        print(f"   Warnings: {warnings}")
-        if style > 0:
-            print(f"   Info: {info}")
-            print(f"   Style: {style}")
+        print(f"   Total Issues: {total_issues} [{ignored_total} ignored]")
+        print(f"   Errors: {errors} [{ignored_errors}]")
+        print(f"   Warnings: {warnings} [{ignored_warnings}]")
+        if style > 0 or ignored_info > 0 or ignored_style > 0:
+            print(f"   Info: {info} [{ignored_info}]")
+            print(f"   Style: {style} [{ignored_style}]")
         print(f"   Reports: {self.reports_dir}")
         print()
 
-        # Summary
-        self._log("=== QA Check Summary ===")
-        if overall_success:
-            self._success(f"QA check completed successfully")
-        else:
-            self._warn(f"QA check completed with issues")
-
-        self._log(f"Total errors: {total_errors}")
-        self._log(f"Total warnings: {total_warnings}")
-        self._log(f"Reports saved to: {self.reports_dir}")
+        # Remove '=== QA Check Summary ===' section if present
+        # The summary is already provided above as 'QA Report Summary:'
+        # ...
 
         return overall_success
 
