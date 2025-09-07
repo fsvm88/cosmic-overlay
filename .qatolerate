@@ -1,0 +1,18 @@
+# .qatolerate - List of tolerated QA issues (do not fail, but show)
+
+# Format: atom[:version] checkname
+
+# Example:
+
+# cosmic-base/cosmic-greeter PotentialStable
+
+# cosmic-base/cosmic-greeter:1.0.0_alpha7-r10 SomeCheck
+
+# This should be investigated further
+
+cosmic-base/cosmic-wallpapers:9999 EclassUserVariableUsage
+
+# These should be removed when we have tagged versions in tree
+
+cosmic-base/system76-power VisibleVcsPkg
+cosmic-base/pop-launcher VisibleVcsPkg

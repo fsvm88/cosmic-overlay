@@ -132,6 +132,67 @@ class SimpleQAChecker:
             return value.startswith(pattern[:-1])
         return value == pattern
 
+    def parse_qatolerate(self, tolerate_path: Path) -> List[Dict[str, Optional[str]]]:
+        rules: List[Dict[str, Optional[str]]] = []
+        if not tolerate_path.exists():
+            return rules
+        with open(tolerate_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts: List[str] = line.split()
+                if len(parts) < 2:
+                    continue
+                atom_ver, check = parts[0], parts[1]
+                atom, ver = (
+                    (atom_ver.split(":", 1) + [None])[:2]
+                    if ":" in atom_ver
+                    else (atom_ver, None)
+                )
+                rules.append({"atom": atom, "ver": ver, "check": check})
+        return rules
+
+    def should_tolerate(
+        self,
+        atom: str,
+        ver: Optional[str],
+        check: str,
+        rules: List[Dict[str, Optional[str]]],
+    ) -> bool:
+        for rule in rules:
+            if not self._fnmatch(atom, rule["atom"]):
+                continue
+            if rule["ver"] and rule["ver"] != ver:
+                continue
+            if rule["check"] != "*" and rule["check"] != check:
+                continue
+            return True
+        return False
+
+    def filter_issues_with_qaignore_and_qatolerate(
+        self, issues: List[Dict[str, Any]]
+    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        ignore_path: Path = Path.cwd() / ".qaignore"
+        tolerate_path: Path = Path.cwd() / ".qatolerate"
+        ignore_rules: List[Dict[str, Optional[str]]] = self.parse_qaignore(ignore_path)
+        tolerate_rules: List[Dict[str, Optional[str]]] = self.parse_qatolerate(
+            tolerate_path
+        )
+        filtered: List[Dict[str, Any]] = []
+        tolerated: List[Dict[str, Any]] = []
+        for issue in issues:
+            atom: str = issue.get("atom", "")
+            ver: Optional[str] = issue.get("version")
+            check: str = issue.get("check", "")
+            if self.should_ignore(atom, ver, check, ignore_rules):
+                continue
+            if self.should_tolerate(atom, ver, check, tolerate_rules):
+                tolerated.append(issue)
+            else:
+                filtered.append(issue)
+        return filtered, tolerated
+
     def _get_package_issues(self) -> List[Dict[str, str]]:
         """Parse package issues from QA output files and filter with .qaignore."""
         issues: List[Dict[str, str]] = []
@@ -161,28 +222,22 @@ class SimpleQAChecker:
                                     "message": msg,
                                     "tool": "pkgcheck",
                                     "check": check,
+                                    "atom": match.group(1),
+                                    "version": None,
                                 }
                             )
-                # Filter issues using .qaignore
-                issues = self.filter_issues_with_qaignore(issues)
-                return issues
+                filtered, tolerated = self.filter_issues_with_qaignore_and_qatolerate(
+                    issues
+                )
+                # Return both, but mark tolerated issues
+                for issue in tolerated:
+                    issue["tolerated"] = True
+                for issue in filtered:
+                    issue["tolerated"] = False
+                return filtered + tolerated
             except IOError:
                 pass
         return issues
-
-    def filter_issues_with_qaignore(
-        self, issues: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
-        ignore_path: Path = Path.cwd() / ".qaignore"
-        rules: List[Dict[str, Optional[str]]] = self.parse_qaignore(ignore_path)
-        filtered: List[Dict[str, Any]] = []
-        for issue in issues:
-            atom: str = issue.get("atom", "")
-            ver: Optional[str] = issue.get("version")
-            check: str = issue.get("check", "")
-            if not self.should_ignore(atom, ver, check, rules):
-                filtered.append(issue)
-        return filtered
 
     def check_requirements(self) -> bool:
         """Check if required tools are available."""
@@ -228,6 +283,11 @@ class SimpleQAChecker:
             ignored_info,
             ignored_style,
             ignored_total,
+            tolerated_errors,
+            tolerated_warnings,
+            tolerated_info,
+            tolerated_style,
+            tolerated_total,
         ) = self.get_qa_results()
         content = f"""# 🚀 COSMIC Overlay QA Report
 
@@ -240,11 +300,17 @@ class SimpleQAChecker:
 
 ### 📊 Summary
 
-- **Total Issues:** {total_issues} [{ignored_total} ignored]
-- **Errors:** {errors} [{ignored_errors}]
-- **Warnings:** {warnings} [{ignored_warnings}]"""
-        if style > 0 or ignored_info > 0 or ignored_style > 0:
-            content += f"\n- **Info:** {info} [{ignored_info}]\n- **Style:** {style} [{ignored_style}]"
+- **Total Issues:** {total_issues} [{ignored_total} ignored, {tolerated_total} tolerated]
+- **Errors:** {errors} [{ignored_errors} ignored, {tolerated_errors} tolerated]
+- **Warnings:** {warnings} [{ignored_warnings} ignored, {tolerated_warnings} tolerated]"""
+        if (
+            style > 0
+            or ignored_info > 0
+            or ignored_style > 0
+            or tolerated_info > 0
+            or tolerated_style > 0
+        ):
+            content += f"\n- **Info:** {info} [{ignored_info} ignored, {tolerated_info} tolerated]\n- **Style:** {style} [{ignored_style} ignored, {tolerated_style} tolerated]"
         content += """
 
 ---
@@ -333,6 +399,11 @@ class SimpleQAChecker:
             ignored_info,
             ignored_style,
             ignored_total,
+            tolerated_errors,
+            tolerated_warnings,
+            tolerated_info,
+            tolerated_style,
+            tolerated_total,
         ) = self.get_qa_results()
         package_issues = self._get_package_issues()
         status_text = (
@@ -400,6 +471,7 @@ class SimpleQAChecker:
             <strong>Errors:</strong> {errors} &nbsp;|
             <strong>Warnings:</strong> {warnings}
             {f'| <strong>Info:</strong> {info} | <strong>Style:</strong> {style}' if style > 0 else ''}
+            <br><span style='font-size:0.9em;'>[{ignored_total} ignored, {tolerated_total} tolerated]</span>
         </div>
         <h2>📋 Detailed Results</h2>"""
         if package_issues:
@@ -680,6 +752,10 @@ This directory contains automatically generated QA reports for the COSMIC overla
         ignored_warnings: int = 0
         ignored_info: int = 0
         ignored_style: int = 0
+        tolerated_errors: int = 0
+        tolerated_warnings: int = 0
+        tolerated_info: int = 0
+        tolerated_style: int = 0
         qa_tool: str = "basic"
         pkgcheck_json: Path = self.reports_dir / "pkgcheck-scan.json"
         all_results: List[Dict[str, Any]] = []
@@ -717,7 +793,11 @@ This directory contains automatically generated QA reports for the COSMIC overla
                                             }
                                         )
         ignore_path: Path = Path.cwd() / ".qaignore"
-        rules: List[Dict[str, Optional[str]]] = self.parse_qaignore(ignore_path)
+        tolerate_path: Path = Path.cwd() / ".qatolerate"
+        ignore_rules: List[Dict[str, Optional[str]]] = self.parse_qaignore(ignore_path)
+        tolerate_rules: List[Dict[str, Optional[str]]] = self.parse_qatolerate(
+            tolerate_path
+        )
         for result in all_results:
             atom, ver, check, level = (
                 result["atom"],
@@ -725,29 +805,42 @@ This directory contains automatically generated QA reports for the COSMIC overla
                 result["check"],
                 result["level"].lower(),
             )
-            ignored: bool = self.should_ignore(atom, ver, check, rules)
+            ignored: bool = self.should_ignore(atom, ver, check, ignore_rules)
+            tolerated: bool = self.should_tolerate(atom, ver, check, tolerate_rules)
             if level == "error":
                 if ignored:
                     ignored_errors += 1
+                elif tolerated:
+                    tolerated_errors += 1
                 else:
                     errors += 1
             elif level == "warning":
                 if ignored:
                     ignored_warnings += 1
+                elif tolerated:
+                    tolerated_warnings += 1
                 else:
                     warnings += 1
             elif level == "info":
                 if ignored:
                     ignored_info += 1
+                elif tolerated:
+                    tolerated_info += 1
                 else:
                     info += 1
             elif level == "style":
                 if ignored:
                     ignored_style += 1
+                elif tolerated:
+                    tolerated_style += 1
                 else:
                     style += 1
         total_issues = errors + warnings + info + style
         ignored_total = ignored_errors + ignored_warnings + ignored_info + ignored_style
+        tolerated_total = (
+            tolerated_errors + tolerated_warnings + tolerated_info + tolerated_style
+        )
+        # Only errors/warnings not ignored/tolerated cause failure
         return (
             total_issues,
             errors,
@@ -760,6 +853,11 @@ This directory contains automatically generated QA reports for the COSMIC overla
             ignored_info,
             ignored_style,
             ignored_total,
+            tolerated_errors,
+            tolerated_warnings,
+            tolerated_info,
+            tolerated_style,
+            tolerated_total,
         )
 
     def run_full_qa_check(self) -> bool:
@@ -814,24 +912,41 @@ This directory contains automatically generated QA reports for the COSMIC overla
             ignored_info,
             ignored_style,
             ignored_total,
+            tolerated_errors,
+            tolerated_warnings,
+            tolerated_info,
+            tolerated_style,
+            tolerated_total,
         ) = self.get_qa_results()
         print()
         print("📊 QA Report Summary:")
         print(f"   Tool: {qa_tool}")
-        print(f"   Total Issues: {total_issues} [{ignored_total} ignored]")
-        print(f"   Errors: {errors} [{ignored_errors}]")
-        print(f"   Warnings: {warnings} [{ignored_warnings}]")
-        if style > 0 or ignored_info > 0 or ignored_style > 0:
-            print(f"   Info: {info} [{ignored_info}]")
-            print(f"   Style: {style} [{ignored_style}]")
+        print(
+            f"   Total Issues: {total_issues} [{ignored_total} ignored, {tolerated_total} tolerated]"
+        )
+        print(
+            f"   Errors: {errors} [{ignored_errors} ignored, {tolerated_errors} tolerated]"
+        )
+        print(
+            f"   Warnings: {warnings} [{ignored_warnings} ignored, {tolerated_warnings} tolerated]"
+        )
+        if (
+            style > 0
+            or ignored_info > 0
+            or ignored_style > 0
+            or tolerated_info > 0
+            or tolerated_style > 0
+        ):
+            print(
+                f"   Info: {info} [{ignored_info} ignored, {tolerated_info} tolerated]"
+            )
+            print(
+                f"   Style: {style} [{ignored_style} ignored, {tolerated_style} tolerated]"
+            )
         print(f"   Reports: {self.reports_dir}")
         print()
-
-        # Remove '=== QA Check Summary ===' section if present
-        # The summary is already provided above as 'QA Report Summary:'
-        # ...
-
-        return overall_success
+        # Only fail if errors/warnings not ignored/tolerated
+        return errors == 0 and warnings == 0
 
     def run_basic_checks(self) -> Tuple[bool, int, int]:
         """Run basic QA checks (find, grep, awk, sed) and return results."""
