@@ -201,35 +201,39 @@ while IFS= read -r module_path; do
     echo "Processing submodule: ${module_path}"
     if [ -d "${module_path}" ]; then
         push_d "${module_path}"
-        tarball_path="${__temp_folder}/${module_path}-${gentoo_version}-crates.tar"
-        zst_path="${tarball_path}.zst"
-        config_file="config.toml"
+        if [ -f "Cargo.toml" ]; then
+            tarball_path="${__temp_folder}/${module_path}-${gentoo_version}-crates.tar"
+            zst_path="${tarball_path}.zst"
+            config_file="config.toml"
 
-        # Pull LFS files if this is an LFS-enabled repository
-        if [ -f ".gitattributes" ] && grep -q "filter=lfs" .gitattributes; then
-            log "LFS repository detected, pulling LFS files..."
-            if ! git lfs pull; then
-                errorExit 21 "Failed to pull LFS files for ${module_path}"
+            # Pull LFS files if this is an LFS-enabled repository
+            if [ -f ".gitattributes" ] && grep -q "filter=lfs" .gitattributes; then
+                log "LFS repository detected, pulling LFS files..."
+                if ! git lfs pull; then
+                    errorExit 21 "Failed to pull LFS files for ${module_path}"
+                fi
             fi
-        fi
 
-        # Create vendor directory and archive it (dry-run aware)
-        if [ $dry_run -eq 1 ]; then
-            echo "DRY-RUN: Would run: cargo vendor | head -n -0 >\"${config_file}\""
-            echo "DRY-RUN: Would run: tar -cf \"${tarball_path}\" vendor \"${config_file}\""
-            echo "DRY-RUN: Would run: zstd --long=31 -15 -T0 \"${tarball_path}\" -o \"${zst_path}\""
-        else
-            if cargo vendor | head -n -0 >"${config_file}" &&
-                tar -cf "${tarball_path}" vendor "${config_file}" &&
-                zstd --long=31 -15 -T0 "${tarball_path}" -o "${zst_path}"; then
-                rm -f "${tarball_path}" # Remove the uncompressed tarball
-                rm -rf vendor "${config_file}"
-                log "Created compressed tarball: ${zst_path}"
+            # Create vendor directory and archive it (dry-run aware)
+            if [ $dry_run -eq 1 ]; then
+                echo "DRY-RUN: Would run: cargo vendor | head -n -0 >\"${config_file}\""
+                echo "DRY-RUN: Would run: tar -cf \"${tarball_path}\" vendor \"${config_file}\""
+                echo "DRY-RUN: Would run: zstd --long=31 -15 -T0 \"${tarball_path}\" -o \"${zst_path}\""
             else
-                rm -f "${tarball_path}" "${zst_path}" # Cleanup on failure
-                rm -rf vendor "${config_file}"        # Clean vendor files on failure
-                errorExit 20 "Failed to create tarball for ${module_path}"
+                if cargo vendor | head -n -0 >"${config_file}" &&
+                    tar -cf "${tarball_path}" vendor "${config_file}" &&
+                    zstd --long=31 -15 -T0 "${tarball_path}" -o "${zst_path}"; then
+                    rm -f "${tarball_path}" # Remove the uncompressed tarball
+                    rm -rf vendor "${config_file}"
+                    log "Created compressed tarball: ${zst_path}"
+                else
+                    rm -f "${tarball_path}" "${zst_path}" # Cleanup on failure
+                    rm -rf vendor "${config_file}"        # Clean vendor files on failure
+                    errorExit 20 "Failed to create tarball for ${module_path}"
+                fi
             fi
+        else
+            log "Skipping ${module_path} - no Cargo.toml found"
         fi
         pop_d
     else
