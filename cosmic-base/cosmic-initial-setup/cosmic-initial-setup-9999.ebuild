@@ -16,3 +16,8 @@ EGIT_BRANCH=master
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
+
+RDEPEND+="
+	~cosmic-base/pop-appstream-data-9999
+	~cosmic-base/cosmic-icons-${PV}
+"

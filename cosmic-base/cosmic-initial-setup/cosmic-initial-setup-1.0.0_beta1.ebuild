@@ -19,3 +19,8 @@ SRC_URI="
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
+
+RDEPEND+="
+	~cosmic-base/pop-appstream-data-9999
+	~cosmic-base/cosmic-icons-${PV}
+"
