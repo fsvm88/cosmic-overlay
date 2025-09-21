@@ -11,7 +11,7 @@ inherit cosmic-de llvm-r1
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
 
-MY_PV="epoch-1.0.0-alpha.7"
+MY_PV="epoch-1.0.0-beta.1"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
