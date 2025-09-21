@@ -39,6 +39,7 @@ RDEPEND+="
 	~cosmic-base/pop-fonts-${PV}
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
+	>=media-fonts/open-sans-1-r1
 	>=sys-power/switcheroo-control-2.6-r2
 	>=x11-base/xwayland-23.2.6
 	accessibility? ( >=app-accessibility/orca-46.2-r1 )
