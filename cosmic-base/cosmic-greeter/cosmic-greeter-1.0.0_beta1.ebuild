@@ -6,8 +6,6 @@ EAPI=8
 LLVM_COMPAT=({18..20})
 LLVM_OPTIONAL=1
 
-COSMIC_GIT_UNPACK=1
-
 inherit cosmic-de llvm-r1 pam systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
@@ -56,6 +54,7 @@ src_install() {
 	local binfile="$(cosmic-de_target_dir)/$PN"
 	dobin "$binfile"
 	dobin "$binfile-daemon"
+	newbin "$PN-start.sh" "$PN-start"
 
 	insinto /usr/share/dbus-1/system.d
 	doins dbus/com.system76.CosmicGreeter.conf
@@ -75,4 +74,8 @@ src_install() {
 	systemd_dounit debian/cosmic-greeter.service
 
 	newtmpfiles "${FILESDIR}/systemd.tmpfiles" "${PN}.conf"
+}
+
+pkg_postinst() {
+	tmpfiles_process "${PN}.conf"
 }

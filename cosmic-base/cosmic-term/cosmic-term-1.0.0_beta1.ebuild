@@ -3,8 +3,6 @@
 
 EAPI=8
 
-COSMIC_GIT_UNPACK=1
-
 inherit cosmic-de desktop
 
 DESCRIPTION="terminal emulator (built using alacritty_terminal) from COSMIC DE"

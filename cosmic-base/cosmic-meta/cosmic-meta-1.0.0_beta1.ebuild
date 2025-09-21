@@ -38,8 +38,8 @@ greeter? ( ~cosmic-base/cosmic-greeter-${PV} )
 store? ( ~cosmic-base/cosmic-store-${PV} )
 ~cosmic-base/cosmic-term-${PV}
 ~cosmic-base/cosmic-workspaces-epoch-${PV}
-~cosmic-base/pop-launcher-1.0.0_beta1
-~cosmic-base/pop-theme-meta-1.0.0_beta1
+~cosmic-base/pop-launcher-9999
+~cosmic-base/pop-theme-meta-9999
 ~cosmic-base/xdg-desktop-portal-cosmic-${PV}
 fonts? (
 	media-fonts/open-sans:0

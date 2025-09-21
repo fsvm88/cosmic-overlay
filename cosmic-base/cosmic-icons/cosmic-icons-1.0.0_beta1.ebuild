@@ -20,7 +20,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND+="
-	~cosmic-base/pop-icon-theme-1.0.0_beta1
+	>=cosmic-base/pop-icon-theme-3.5.1
 "
 
 src_install() {

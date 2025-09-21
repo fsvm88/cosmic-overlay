@@ -3,8 +3,6 @@
 
 EAPI=8
 
-COSMIC_GIT_UNPACK=1
-
 inherit cosmic-de desktop
 
 DESCRIPTION="app store from COSMIC DE"
@@ -25,7 +23,7 @@ KEYWORDS="~amd64"
 RDEPEND+="
 	>=dev-libs/openssl-3.0.13-r2
 	>=sys-apps/flatpak-1.14.4-r3
-	~cosmic-base/pop-appstream-data-1.0.0_beta1
+	~cosmic-base/pop-appstream-data-9999
 	~cosmic-base/cosmic-icons-${PV}
 "
 
