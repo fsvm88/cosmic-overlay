@@ -34,4 +34,7 @@ src_install() {
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*
+
+	insinto /usr/share/thumbnailers
+	doins res/com.system76.CosmicPlayer.thumbnailer
 }
