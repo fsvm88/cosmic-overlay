@@ -30,6 +30,7 @@ qa-reports *
 # PotentialStable
 acct-group/cosmic-greeter PotentialStable
 acct-user/cosmic-greeter PotentialStable
+acct-user/cosmic-initial-setup PotentialStable
 virtual/notification-daemon PotentialStable
 
 # VisibleVcsPkg
