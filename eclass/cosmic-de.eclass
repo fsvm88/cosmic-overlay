@@ -73,6 +73,7 @@ RDEPEND="
 >=dev-libs/libinput-1.25.0
 >=dev-libs/wayland-1.22
 >=gui-libs/gtk-4.12.5
+>=media-fonts/open-sans-1-r1
 >=media-libs/graphene-1.10.8
 >=media-libs/gstreamer-1.22.11
 >=media-libs/libglvnd-1.7.0
