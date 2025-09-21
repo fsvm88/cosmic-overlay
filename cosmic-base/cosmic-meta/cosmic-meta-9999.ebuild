@@ -25,6 +25,7 @@ RDEPEND="
 greeter? ( ~cosmic-base/cosmic-greeter-${PV} )
 ~cosmic-base/cosmic-icons-${PV}
 ~cosmic-base/cosmic-idle-${PV}
+~cosmic-base/cosmic-initial-setup-${PV}
 ~cosmic-base/cosmic-launcher-${PV}
 ~cosmic-base/cosmic-notifications-${PV}
 ~cosmic-base/cosmic-osd-${PV}
