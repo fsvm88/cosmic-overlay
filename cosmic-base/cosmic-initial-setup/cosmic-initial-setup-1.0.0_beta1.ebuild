@@ -21,6 +21,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND+="
+	acct-user/cosmic-initial-setup
 	~cosmic-base/pop-appstream-data-9999
 	~cosmic-base/cosmic-icons-${PV}
 "
