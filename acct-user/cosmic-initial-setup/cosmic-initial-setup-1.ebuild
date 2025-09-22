@@ -7,7 +7,7 @@ inherit acct-user
 
 DESCRIPTION="User for COSMIC Initial Setup"
 ACCT_USER_ID=601
-ACCT_USER_GROUPS=( 65533 ) # nogroup
+ACCT_USER_GROUPS=( cosmic-initial-setup )
 ACCT_USER_HOME=/run/cosmic-initial-setup
 ACCT_USER_SHELL=/bin/bash
 
