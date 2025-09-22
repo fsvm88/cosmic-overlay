@@ -18,7 +18,7 @@ SRC_URI="
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 
 src_install() {
 	# One of the few where $PN does not apply (would be cosmic-applibrary)

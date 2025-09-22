@@ -17,7 +17,7 @@ S="${WORKDIR}/${MY_P}"
 # use cargo-license for a more accurate license picture
 LICENSE="CC-BY-SA-4.0"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 
 RDEPEND+="
 	>=cosmic-base/pop-icon-theme-3.5.1

@@ -21,7 +21,7 @@ SRC_URI="
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 IUSE+=" +networkmanager openvpn"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"

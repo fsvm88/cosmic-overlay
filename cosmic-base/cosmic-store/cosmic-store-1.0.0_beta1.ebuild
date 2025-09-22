@@ -18,7 +18,7 @@ SRC_URI="
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 
 RDEPEND+="
 	>=dev-libs/openssl-3.0.13-r2

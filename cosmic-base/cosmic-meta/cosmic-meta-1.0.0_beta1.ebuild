@@ -12,7 +12,7 @@ HOMEPAGE="https://github.com/pop-os/cosmic-epoch"
 LICENSE="CC-BY-SA-4.0 GPL-3 GPL-3+ MPL-2.0"
 
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 IUSE="+fonts +gnome-keyring +greeter store"
 
 RDEPEND="

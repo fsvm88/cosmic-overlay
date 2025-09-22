@@ -18,7 +18,7 @@ SRC_URI="
 # use cargo-license for a more accurate license picture
 LICENSE="MPL-2.0"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 
 src_install() {
 	dobin "$(cosmic-de_target_dir)/$PN"

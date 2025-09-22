@@ -18,7 +18,7 @@ SRC_URI="
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 
 RDEPEND+="
 	>=media-libs/libpulse-17.0
