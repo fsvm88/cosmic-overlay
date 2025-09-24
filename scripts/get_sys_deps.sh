@@ -61,7 +61,7 @@ rg submodule .gitmodules | rg '"[A-Za-z0-9-].*"' -o | sed 's:"::g' | sort -u | w
             -e '^dirs-sys$' \
             -e '^drm-sys$' | while read -r crate; do
         case "$crate" in
-        "dirs-sys" | "drm-sys" | "inotify-sys" | "linux-raw-sys")
+        "dirs-sys" | "drm-sys" | "inotify-sys" | "libbz2-rs-sys" | "linux-raw-sys")
             # these crates are normally raw bindings to the linux APIs
             # they do not bind to a system lib (except for inotify-sys, which uses *libc of course)
             ;;
