@@ -44,8 +44,8 @@ pkg_setup() {
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Apr 15 12:09:18 2025 -0400'
-	export VERGEN_GIT_SHA=9e22418e53055cbec2e75a5b2e048b6e9dff3a61
+	export VERGEN_GIT_COMMIT_DATE='Sun Sep 21 06:37:33 2025 -0600'
+	export VERGEN_GIT_SHA=aa0f1cc53aec0e8d7923b3b5544bfa3c008e4804
 
 	cosmic-de_src_configure --all
 }
