@@ -21,7 +21,6 @@ IUSE="+icons gnome-shell gnome-shell-gresource +gtk4 +sounds +sessions +default 
 BDEPEND+="
 >=dev-build/meson-1.3.2
 >=dev-lang/sassc-3.6.2
-gtk4? ( gui-libs/gtk:4[wayland] )
 "
 RDEPEND+="
 >=dev-libs/glib-2.78.3
