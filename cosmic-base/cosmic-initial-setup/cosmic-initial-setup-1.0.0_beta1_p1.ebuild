@@ -3,8 +3,6 @@
 
 EAPI=8
 
-COSMIC_GIT_UNPACK=1
-
 inherit cosmic-de
 
 DESCRIPTION="initial setup program for COSMIC DE"
@@ -24,6 +22,6 @@ KEYWORDS="~amd64"
 
 RDEPEND+="
 	acct-user/cosmic-initial-setup
-	~cosmic-base/pop-appstream-data-1.0.0_beta1_p1
+	~cosmic-base/pop-appstream-data-9999
 	~cosmic-base/cosmic-icons-${PV}
 "

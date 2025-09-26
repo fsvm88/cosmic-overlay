@@ -3,8 +3,6 @@
 
 EAPI=8
 
-COSMIC_GIT_UNPACK=1
-
 inherit cosmic-de desktop
 
 DESCRIPTION="display background service for COSMIC DE"

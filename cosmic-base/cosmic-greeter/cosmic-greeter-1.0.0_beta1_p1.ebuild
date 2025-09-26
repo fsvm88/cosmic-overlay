@@ -6,8 +6,6 @@ EAPI=8
 LLVM_COMPAT=({18..20})
 LLVM_OPTIONAL=1
 
-COSMIC_GIT_UNPACK=1
-
 inherit cosmic-de llvm-r1 pam systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"

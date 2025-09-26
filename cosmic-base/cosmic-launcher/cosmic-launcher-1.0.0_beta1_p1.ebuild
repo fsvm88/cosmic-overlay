@@ -3,8 +3,6 @@
 
 EAPI=8
 
-COSMIC_GIT_UNPACK=1
-
 inherit cosmic-de desktop
 
 DESCRIPTION="launcher for COSMIC DE"
@@ -26,7 +24,7 @@ BDEPEND+="
 	>=dev-util/intltool-0.51.0-r3
 "
 RDEPEND+="
-	~cosmic-base/pop-launcher-1.0.0_beta1_p1
+	~cosmic-base/pop-launcher-9999
 "
 
 src_install() {
