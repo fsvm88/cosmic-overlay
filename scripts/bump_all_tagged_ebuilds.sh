@@ -27,6 +27,7 @@ trap cleanup EXIT SIGINT SIGTERM
 
 # Convert cosmic version to Gentoo version format
 # Example: epoch-1.0.0-alpha.5 → 1.0.0_alpha5
+# Example: epoch-1.0.0-beta.1.1 → 1.0.0_beta1_p1
 function convert_version() {
     local ver="$1"
     # Remove epoch- prefix if present
@@ -35,7 +36,20 @@ function convert_version() {
     ver="${ver/-alpha/_alpha}"
     ver="${ver/-beta/_beta}"
     ver="${ver/-rc/_rc}"
-    # Remove dots only in alpha/beta/rc version numbers
+    
+    # Handle minor release versions (patch versions) first
+    # Match patterns like _alpha.X.Y or _beta.X.Y and convert to _alphaX_pY or _betaX_pY
+    if [[ "$ver" =~ (_alpha)\.([0-9]+)\.([0-9]+) ]]; then
+        ver="${ver/${BASH_REMATCH[0]}/${BASH_REMATCH[1]}${BASH_REMATCH[2]}_p${BASH_REMATCH[3]}}"
+    fi
+    if [[ "$ver" =~ (_beta)\.([0-9]+)\.([0-9]+) ]]; then
+        ver="${ver/${BASH_REMATCH[0]}/${BASH_REMATCH[1]}${BASH_REMATCH[2]}_p${BASH_REMATCH[3]}}"
+    fi
+    if [[ "$ver" =~ (_rc)\.([0-9]+)\.([0-9]+) ]]; then
+        ver="${ver/${BASH_REMATCH[0]}/${BASH_REMATCH[1]}${BASH_REMATCH[2]}_p${BASH_REMATCH[3]}}"
+    fi
+    
+    # Remove dots only in alpha/beta/rc version numbers (for cases without minor versions)
     ver="${ver/_alpha./_alpha}"
     ver="${ver/_beta./_beta}"
     ver="${ver/_rc./_rc}"
@@ -76,13 +90,14 @@ for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
             errorExit 5 "could not create ${ebuild_file} from template"
         log "Created new ebuild ${ebuild_file} from template"
 
-        # Update version, remove live ebuild settings, set KEYWORDS, and update git ref
+        # Update version, remove live ebuild settings, set KEYWORDS, update git ref, and update MY_PV
         sed -i \
             -e "s:9999:${VERSION}:" \
             -e 's:KEYWORDS=.*:KEYWORDS="~amd64":' \
             -e '/^inherit.*live.*/d' \
             -e '/PROPERTIES=/d' \
             -e '/EGIT_BRANCH=/c\EGIT_COMMIT="'"${ORIGINAL_VERSION}"'"' \
+            -e 's:^MY_PV=.*:MY_PV="'"${ORIGINAL_VERSION}"'":' \
             "${ebuild_file}" ||
             errorExit 120 "${ebuild_file}: could not update version"
 

@@ -70,6 +70,7 @@ fi
 
 # Convert cosmic version to Gentoo version format
 # Example: epoch-1.0.0-alpha.5 → 1.0.0_alpha5
+# Example: epoch-1.0.0-beta.1.1 → 1.0.0_beta1_p1
 function convert_version() {
     local ver="$1"
     # Remove epoch- prefix if present
@@ -78,7 +79,20 @@ function convert_version() {
     ver="${ver/-alpha/_alpha}"
     ver="${ver/-beta/_beta}"
     ver="${ver/-rc/_rc}"
-    # Remove dots only in alpha/beta/rc version numbers
+    
+    # Handle minor release versions (patch versions) first
+    # Match patterns like _alpha.X.Y or _beta.X.Y and convert to _alphaX_pY or _betaX_pY
+    if [[ "$ver" =~ (_alpha)\.([0-9]+)\.([0-9]+) ]]; then
+        ver="${ver/${BASH_REMATCH[0]}/${BASH_REMATCH[1]}${BASH_REMATCH[2]}_p${BASH_REMATCH[3]}}"
+    fi
+    if [[ "$ver" =~ (_beta)\.([0-9]+)\.([0-9]+) ]]; then
+        ver="${ver/${BASH_REMATCH[0]}/${BASH_REMATCH[1]}${BASH_REMATCH[2]}_p${BASH_REMATCH[3]}}"
+    fi
+    if [[ "$ver" =~ (_rc)\.([0-9]+)\.([0-9]+) ]]; then
+        ver="${ver/${BASH_REMATCH[0]}/${BASH_REMATCH[1]}${BASH_REMATCH[2]}_p${BASH_REMATCH[3]}}"
+    fi
+    
+    # Remove dots only in alpha/beta/rc version numbers (for cases without minor versions)
     ver="${ver/_alpha./_alpha}"
     ver="${ver/_beta./_beta}"
     ver="${ver/_rc./_rc}"
@@ -241,9 +255,6 @@ while IFS= read -r module_path; do
     fi
 done < <(awk '{ print $3; }' "${__temp_submodule_hashes}")
 pop_d
-
-# Convert tag to Gentoo version for release
-gentoo_version="$(convert_version "${REQ_TAG}")"
 
 # Create GitHub release
 log "Creating GitHub release for tag ${gentoo_version}..."
