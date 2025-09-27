@@ -1,0 +1,44 @@
+diff '--color=auto' -Nuar pop-gtk-theme-9999.orig/gtk/src/dark/meson.build pop-gtk-theme-9999/gtk/src/dark/meson.build
+--- pop-gtk-theme-9999.orig/gtk/src/dark/meson.build	2025-09-26 22:53:27.863284707 +0100
++++ pop-gtk-theme-9999/gtk/src/dark/meson.build	2025-09-26 22:54:48.582275308 +0100
+@@ -8,6 +8,4 @@
+                configuration : conf_data,
+                install_dir: theme_dir)
+ 
+-subdir('gtk-2.0')
+-subdir('gtk-3.0')
+ subdir('gtk-4.0')
+diff '--color=auto' -Nuar pop-gtk-theme-9999.orig/gtk/src/light/meson.build pop-gtk-theme-9999/gtk/src/light/meson.build
+--- pop-gtk-theme-9999.orig/gtk/src/light/meson.build	2025-09-26 22:53:27.946684116 +0100
++++ pop-gtk-theme-9999/gtk/src/light/meson.build	2025-09-26 22:55:02.008210506 +0100
+@@ -8,6 +8,4 @@
+                configuration : conf_data,
+                install_dir: theme_dir)
+ 
+-subdir('gtk-2.0')
+-subdir('gtk-3.0')
+ subdir('gtk-4.0')
+diff '--color=auto' -Nuar pop-gtk-theme-9999.orig/meson.build pop-gtk-theme-9999/meson.build
+--- pop-gtk-theme-9999.orig/meson.build	2025-09-26 22:53:27.994684772 +0100
++++ pop-gtk-theme-9999/meson.build	2025-09-26 22:55:22.514485893 +0100
+@@ -8,7 +8,7 @@
+         subdir('gnome-shell')
+ endif
+ 
+-if get_option('gtk')
++if get_option('gtk4')
+         subdir('gtk')
+ endif
+ 
+diff '--color=auto' -Nuar pop-gtk-theme-9999.orig/meson_options.txt pop-gtk-theme-9999/meson_options.txt
+--- pop-gtk-theme-9999.orig/meson_options.txt	2025-09-26 23:01:33.278159170 +0100
++++ pop-gtk-theme-9999/meson_options.txt	2025-09-26 23:02:06.292176041 +0100
+@@ -1,7 +1,7 @@
+ option('icons', type: 'boolean', value: false, description:'build icons component')
+ option('gnome-shell', type: 'boolean', value: true, description:'build gnome-shell component')
+ option('gnome-shell-gresource', type: 'boolean', value: false, description: 'build gnome-shell component in gresources')
+-option('gtk', type: 'boolean', value: true, description:'build gtk component')
++option('gtk4', type: 'boolean', value: true, description:'build gtk4 component')
+ option('sounds', type: 'boolean', value: true, description:'build sounds component')
+ option('sessions', type: 'boolean', value: false, description:'build sessions component')
+ option('communitheme_compat', type: 'boolean', value: false, description:'build communitheme-compact')

@@ -11,7 +11,7 @@
     <flag name="default">Build Pop gtk default variant.</flag>
     <flag name="gnome-shell">Build gnome-shell component.</flag>
     <flag name="gnome-shell-gresource">Build gnome-shell component in gresources.</flag>
-    <flag name="gtk">Build gtk component.</flag>
+    <flag name="gtk4">Build gtk4 component.</flag>
     <flag name="icons">Build icon components.</flag>
     <flag name="light">Build Pop gtk light variant.</flag>
     <flag name="sessions">Build sessions component.</flag>

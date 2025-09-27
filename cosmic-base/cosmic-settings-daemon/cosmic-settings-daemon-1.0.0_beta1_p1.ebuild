@@ -7,14 +7,17 @@ inherit cosmic-de
 
 DESCRIPTION="settings daemon for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings-daemon"
+
+MY_PV="epoch-1.0.0-beta.1.1"
+
+SRC_URI="
+	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
+	https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${P}-crates.tar.zst
+	"
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS=""
-
-EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
-
+KEYWORDS="~amd64"
 IUSE+=" mpris"
 
 RDEPEND+="
