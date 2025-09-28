@@ -9,8 +9,14 @@ DESCRIPTION="The reference implementation of Sass, written in Dart."
 HOMEPAGE="https://sass-lang.com/dart-sass"
 
 SRC_URI="
-	amd64? ( https://github.com/sass/dart-sass/releases/download/${PV}/${P/-bin/}-linux-x64.tar.gz )
-	arm64? ( https://github.com/sass/dart-sass/releases/download/${PV}/${P/-bin/}-linux-arm64.tar.gz )
+	amd64? (
+		elibc_glibc? ( https://github.com/sass/dart-sass/releases/download/${PV}/${P/-bin/}-linux-x64.tar.gz )
+		elibc_musl? ( https://github.com/sass/dart-sass/releases/download/${PV}/${P/-bin/}-linux-x64-musl.tar.gz )
+	)
+	arm64? (
+		elibc_glibc? ( https://github.com/sass/dart-sass/releases/download/${PV}/${P/-bin/}-linux-arm64.tar.gz )
+		elibc_musl? ( https://github.com/sass/dart-sass/releases/download/${PV}/${P/-bin/}-linux-arm64-musl.tar.gz )
+	)
 "
 
 S="${WORKDIR}/${PN/-bin/}"
