@@ -5,7 +5,7 @@ EAPI=8
 
 PYTHON_COMPAT=( python3_{10..13} )
 
-inherit python-any-r1
+inherit check-reqs multiprocessing python-any-r1
 
 DESCRIPTION="Google's Dart programming language SDK"
 HOMEPAGE="https://dart.dev https://github.com/dart-lang/sdk"
@@ -17,7 +17,7 @@ LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64"
 
-IUSE="analyzer debug doc test"
+IUSE="debug doc test"
 
 RESTRICT="network-sandbox test"  # Requires network access during unpack/compile
 
@@ -35,7 +35,19 @@ DEPEND="${RDEPEND}"
 
 S="${WORKDIR}/dart-sdk"
 
+dart_check_reqs() {
+	local CHECKREQS_DISK_BUILD=15G
+	local CHECKREQS_DISK_USR=600M
+	local CHECKREQS_MEMORY=16G
+	check-reqs_${EBUILD_PHASE_FUNC}
+}
+
+pkg_pretend() {
+	dart_check_reqs
+}
+
 pkg_setup() {
+	dart_check_reqs
 	python-any-r1_pkg_setup
 }
 
@@ -64,18 +76,12 @@ src_unpack() {
 	# Sync dependencies
 	einfo "Syncing dependencies..."
 	gclient sync || die "Failed to sync dependencies"
-
-	# Move sdk contents to expected location
-	cd .. || die
-	if [[ -d sdk ]]; then
-		mv sdk/* . || die "Failed to move SDK contents"
-		rmdir sdk || die "Failed to remove empty sdk directory"
-	fi
 }
 
 src_compile() {
 	# Set up depot_tools PATH
 	export PATH="${S}/depot_tools:${PATH}"
+	cd "${S}/sdk" || die "Failed to pushd to sdk directory"
 
 	local build_mode="release"
 	use debug && build_mode="debug"
@@ -97,22 +103,21 @@ src_compile() {
 	use test && targets+=( "run_ffi_unit_tests" )
 
 	einfo "Building Dart SDK with: ${build_args[*]} ${targets[*]}"
-	./tools/build.py "${build_args[@]}" "${targets[@]}" \
+	./tools/build.py -j$(get_makeopts_jobs) "${build_args[@]}" "${targets[@]}" \
 		|| die "Failed to build Dart SDK"
 }
 
 src_test() {
-	if use test; then
-		# Set up depot_tools PATH
-		export PATH="${S}/depot_tools:${PATH}"
+	# Set up depot_tools PATH
+	export PATH="${S}/depot_tools:${PATH}"
+	cd "${S}/sdk" || die "Failed to pushd to sdk directory"
 
-		local build_mode="release"
-		use debug && build_mode="debug"
+	local build_mode="release"
+	use debug && build_mode="debug"
 
-		einfo "Running Dart SDK tests..."
-		./tools/test.py --mode="${build_mode}" --runtime=vm corelib \
-			|| die "Tests failed"
-	fi
+	einfo "Running Dart SDK tests..."
+	./tools/test.py --mode="${build_mode}" --runtime=vm corelib \
+		|| die "Tests failed"
 }
 
 src_install() {
@@ -126,42 +131,19 @@ src_install() {
 		*) die "Unsupported architecture: ${ARCH}" ;;
 	esac
 
-	local sdk_dir="out/${build_mode^}${arch}/dart-sdk"
+	local out_dir="sdk/out/${build_mode^}${arch}/dart-sdk"
 
-	if [[ ! -d "${sdk_dir}" ]]; then
-		die "Built SDK not found at ${sdk_dir}"
-	fi
-
-	# Install the entire SDK to /usr/lib64/dart-sdk
-	local install_dir="/usr/lib64/dart-sdk"
+	# Install the entire SDK
+	local install_dir="/usr/$(get_libdir)/dart"
 	insinto "${install_dir}"
-	doins -r "${sdk_dir}"/*
+	doins -r "${out_dir}"/*
 
-	# Make binaries executable
-	local bin_dir="${ED}${install_dir}/bin"
-	if [[ -d "${bin_dir}" ]]; then
-		fperms +x "${install_dir}"/bin/*
-	fi
-
-	# Create symlinks in /usr/bin for main executables
-	local binaries=( dart )
-	use analyzer && binaries+=( dartanalyzer )
-
-	for binary in "${binaries[@]}"; do
-		if [[ -f "${bin_dir}/${binary}" ]]; then
-			dosym "../../lib64/dart-sdk/bin/${binary}" "/usr/bin/${binary}"
-		fi
+	for onebin in dart dartaotruntime utils/gen_snapshot utils/wasm-opt; do
+		fperms a+x "${install_dir}/bin/$onebin"
 	done
 
-	# Install documentation if requested
-	if use doc; then
-		local doc_files=( README.md LICENSE CHANGELOG.md )
-		for doc_file in "${doc_files[@]}"; do
-			if [[ -f "${sdk_dir}/${doc_file}" ]]; then
-				dodoc "${sdk_dir}/${doc_file}"
-			fi
-		done
-	fi
+	dodoc "${out_dir}"/README
+	dodoc "${out_dir}"/LICENSE
 
 	# Set up environment
 	dodir /etc/env.d
@@ -172,12 +154,9 @@ src_install() {
 }
 
 pkg_postinst() {
-	elog "Dart SDK has been installed to /usr/lib64/dart-sdk"
+	elog "Dart SDK has been installed to /usr/$(get_libdir)/dart"
 	elog ""
 	elog "The 'dart' command is available in your PATH."
-	if use analyzer; then
-		elog "The 'dartanalyzer' command is also available."
-	fi
 	elog ""
 	elog "You may want to run 'env-update && source /etc/profile' to update your environment."
 	elog ""
