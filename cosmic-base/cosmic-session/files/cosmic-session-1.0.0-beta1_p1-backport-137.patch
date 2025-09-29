@@ -1,0 +1,103 @@
+From 28b23fdc635d4de5e168a00379e23f43fbe95a02 Mon Sep 17 00:00:00 2001
+From: Michal R <vad.sol@proton.me>
+Date: Sun, 28 Sep 2025 19:25:28 +0200
+Subject: [PATCH 1/2] fix: Allow to build with `autostart` and without
+ `systemd` feature
+
+Before this change, import of `systemd::is_systemd_used` was hidden
+behind `cfg(feature = "systemd")` predicate. But that function is
+expected to be present in the autostart block even if `systemd` feature
+is disabled.
+
+Fix that by importing `is_systemd_used` unconditionally.
+
+Provide an implementation of `is_systemd_used` for
+`cfg(not(feature = "systemd"))` which just returns `false`.
+
+Fixes: #136
+---
+ src/main.rs    | 3 ++-
+ src/systemd.rs | 5 +++++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/main.rs b/src/main.rs
+index a6716af..c26a01f 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -30,8 +30,9 @@ use std::{
+ 	os::fd::{AsRawFd, OwnedFd},
+ 	sync::Arc,
+ };
++use systemd::is_systemd_used;
+ #[cfg(feature = "systemd")]
+-use systemd::{get_systemd_env, is_systemd_used, spawn_scope};
++use systemd::{get_systemd_env, spawn_scope};
+ use tokio::{
+ 	net::UnixStream,
+ 	sync::{
+diff --git a/src/systemd.rs b/src/systemd.rs
+index 6cbfa02..e0b656c 100644
+--- a/src/systemd.rs
++++ b/src/systemd.rs
+@@ -52,10 +52,15 @@ pub fn stop_systemd_target() {
+ 
+ /// Determine if systemd is used as the init system. This should work on all
+ /// linux distributions.
++#[cfg(feature = "systemd")]
+ pub fn is_systemd_used() -> &'static bool {
+ 	static IS_SYSTEMD_USED: OnceLock<bool> = OnceLock::new();
+ 	IS_SYSTEMD_USED.get_or_init(|| Path::new("/run/systemd/system").exists())
+ }
++#[cfg(not(feature = "systemd"))]
++pub fn is_systemd_used() -> &'static bool {
++	&false
++}
+ 
+ #[cfg(feature = "systemd")]
+ pub async fn get_systemd_env() -> Result<Vec<EnvVar>, zbus::Error> {
+
+From 4d4ef0dd337b0ac9c1a9e7ec4c6b89d910c96f8d Mon Sep 17 00:00:00 2001
+From: Michal R <vad.sol@proton.me>
+Date: Sun, 28 Sep 2025 19:30:26 +0200
+Subject: [PATCH 2/2] ci: Build and test with all feature combinations
+
+---
+ .github/workflows/test.yml | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+ create mode 100644 .github/workflows/test.yml
+
+diff --git a/.github/workflows/test.yml b/.github/workflows/test.yml
+new file mode 100644
+index 0000000..b7bc5df
+--- /dev/null
++++ b/.github/workflows/test.yml
+@@ -0,0 +1,29 @@
++name: test
++
++on:
++  push:
++    branches:
++      - master
++
++  pull_request:
++    branches:
++      - master
++
++jobs:
++  test:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++      - uses: dtolnay/rust-toolchain@stable
++      - uses: taiki-e/install-action@cargo-hack
++
++      - name: Check
++        run: cargo hack check --feature-powerset
++
++      - name: Build
++        run: cargo hack build --feature-powerset
++
++      - name: Test
++        env:
++          RUST_BACKTRACE: full
++        run: cargo hack test --feature-powerset
