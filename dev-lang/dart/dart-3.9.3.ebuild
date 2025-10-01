@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..13} )
+PYTHON_COMPAT=( python3_{10..14} )
 
 inherit check-reqs multiprocessing python-any-r1
 
@@ -11,7 +11,9 @@ DESCRIPTION="Google's Dart programming language SDK"
 HOMEPAGE="https://dart.dev https://github.com/dart-lang/sdk"
 
 # No source URI as we use depot_tools to fetch source
-SRC_URI=""
+#SRC_URI=""
+
+S="${WORKDIR}/dart-sdk"
 
 LICENSE="BSD"
 SLOT="0"
@@ -28,12 +30,6 @@ BDEPEND="
 	net-misc/curl
 	app-arch/xz-utils
 "
-
-# Runtime dependencies
-RDEPEND=""
-DEPEND="${RDEPEND}"
-
-S="${WORKDIR}/dart-sdk"
 
 dart_check_reqs() {
 	local CHECKREQS_DISK_BUILD=15G

@@ -43,3 +43,8 @@ cosmic-base/pop-icon-theme VisibleVcsPkg
 # ExcessiveLineLength
 # We have 1 sed line that replaces one file path with another
 cosmic-base/cosmic-osd ExcessiveLineLength
+
+# UnknownRestrict
+# RESTRICT=network-sandbox exists, somehow pkgcheck complains
+dev-lang/dart UnknownRestrict
+dev-util/dart-sass UnknownRestrict
