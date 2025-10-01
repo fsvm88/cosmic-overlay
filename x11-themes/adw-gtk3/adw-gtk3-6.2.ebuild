@@ -17,5 +17,8 @@ KEYWORDS="amd64 arm64"
 # as to why dart-sass-bin is required
 # dev-ruby/sass has been deprecated upstream at least for a few years now
 # and adw-gtk3 >= 5.10 does not build with it
-BDEPEND=">=dev-util/dart-sass-bin-1.89.2"
+BDEPEND="|| (
+	>=dev-util/dart-sass-bin-1.89.2
+	>=dev-util/dart-sass-1.93.2
+)"
 RDEPEND=">=gui-libs/gtk-4.16.0:4"
