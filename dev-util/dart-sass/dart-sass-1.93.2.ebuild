@@ -19,8 +19,10 @@ SLOT="0"
 KEYWORDS="~amd64 ~arm64"
 
 IUSE="doc"
-# Fetches extra stuff to build, tests don't work
-RESTRICT="network-sandbox"
+# network-sandbox: extra stuff to build
+# strip: the executable built is standalone,
+#			so it contains a copy of the runtime, which means the debug ID and folder is the same
+RESTRICT="network-sandbox strip"
 
 # dart-sass is the successor to dev-ruby/sass
 # has been deprecated and unsupported for a few years upstream now
@@ -30,8 +32,6 @@ RDEPEND="
 	!dev-ruby/sass
 	!dev-util/dart-sass-bin
 "
-
-DEPEND=""
 
 BDEPEND="
 	>=dev-lang/dart-3.0.0
