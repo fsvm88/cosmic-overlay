@@ -20,7 +20,6 @@
 		app development.
 	</longdescription>
 	<use>
-		<flag name="analyzer">Install the Dart analyzer tool for static analysis</flag>
 		<flag name="debug">Build debug version of the SDK with additional debugging information</flag>
 		<flag name="doc">Install additional documentation files</flag>
 		<flag name="test">Enable building and running of unit tests during emerge</flag>

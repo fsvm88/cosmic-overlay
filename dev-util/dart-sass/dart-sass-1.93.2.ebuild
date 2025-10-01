@@ -47,7 +47,8 @@ src_unpack() {
 	dart pub get
 
 	einfo "Fetching sass specification for protocol buffers..."
-	git clone --depth 1 https://github.com/sass/sass.git "${WORKDIR}/sass-spec" || die "Failed to clone sass specification"
+	git clone --depth 1 https://github.com/sass/sass.git "${WORKDIR}/sass-spec" || \
+		die "Failed to clone sass specification"
 }
 
 src_compile() {
@@ -57,7 +58,7 @@ src_compile() {
 	popd || die "Failed to return to main directory"
 
 	einfo "Building protocol buffers..."
-	# Set the sass specification path and use the grinder task 
+	# Set the sass specification path and use the grinder task
 	# which knows how to handle the protocol buffer generation
 	export SASS_SPEC_PATH="${WORKDIR}/sass-spec"
 	PATH="${S}:${PATH}" dart run grinder protobuf || die "Failed to build protocol buffers"

@@ -39,3 +39,8 @@ cosmic-base/pop-appstream-data VisibleVcsPkg
 cosmic-base/pop-fonts VisibleVcsPkg
 cosmic-base/pop-gtk-theme VisibleVcsPkg
 cosmic-base/pop-icon-theme VisibleVcsPkg
+
+# UnknownRestrict
+# RESTRICT=network-sandbox exists, somehow pkgcheck complains
+dev-lang/dart UnknownRestrict
+dev-util/dart-sass UnknownRestrict
