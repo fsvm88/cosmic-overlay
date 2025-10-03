@@ -43,4 +43,5 @@ cosmic-base/pop-icon-theme VisibleVcsPkg
 # UnknownRestrict
 # RESTRICT=network-sandbox exists, somehow pkgcheck complains
 dev-lang/dart UnknownRestrict
+dev-util/buf UnknownRestrict
 dev-util/dart-sass UnknownRestrict
