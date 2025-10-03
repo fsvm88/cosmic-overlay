@@ -15,8 +15,6 @@ LICENSE="Apache-2.0"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64"
 
-IUSE=""
-
 # Go modules are vendored or fetched during build
 # Tests fail
 RESTRICT="network-sandbox test"
@@ -26,7 +24,7 @@ BDEPEND=">=dev-lang/go-1.20"
 src_unpack() {
 	default
 	cd "${S}" || die
-	
+
 	# Fetch Go dependencies
 	einfo "Fetching Go dependencies..."
 	go mod download -x || die "Failed to download Go modules"
@@ -39,7 +37,7 @@ src_compile() {
 
 src_install() {
 	dobin buf
-	
+
 	# Install documentation
 	dodoc README.md
 	if [[ -f LICENSE ]]; then
