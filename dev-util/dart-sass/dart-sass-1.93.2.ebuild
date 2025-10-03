@@ -6,10 +6,8 @@ EAPI=8
 DESCRIPTION="The reference implementation of Sass, written in Dart (built from source)"
 HOMEPAGE="https://sass-lang.com/dart-sass https://github.com/sass/dart-sass"
 
-BUF_VERSION="v1.57.2"
 SRC_URI="
 	https://github.com/sass/dart-sass/archive/refs/tags/${PV}.tar.gz -> ${P}.tar.gz
-	https://github.com/bufbuild/buf/archive/refs/tags/${BUF_VERSION}.tar.gz -> buf-${BUF_VERSION}.tar.gz
 "
 
 S="${WORKDIR}/${P}"
@@ -21,7 +19,8 @@ KEYWORDS="~amd64 ~arm64"
 IUSE="doc"
 # network-sandbox: extra stuff to build
 # strip: the executable built is standalone,
-#			so it contains a copy of the runtime, which means the debug ID and folder is the same
+#			so it contains a copy of the runtime,
+#			which means the debug ID and folder is the same
 RESTRICT="network-sandbox strip"
 
 # dart-sass is the successor to dev-ruby/sass
@@ -35,7 +34,7 @@ RDEPEND="
 
 BDEPEND="
 	>=dev-lang/dart-3.0.0
-	>=dev-lang/go-1.20
+	>=dev-util/buf-1.20
 	dev-vcs/git
 "
 
@@ -52,16 +51,11 @@ src_unpack() {
 }
 
 src_compile() {
-	einfo "Building buf CLI tool..."
-	pushd "${WORKDIR}/buf-${BUF_VERSION#v}" || die "Failed to enter buf directory"
-	go build -o "${S}/buf" ./cmd/buf || die "Failed to build buf"
-	popd || die "Failed to return to main directory"
-
 	einfo "Building protocol buffers..."
 	# Set the sass specification path and use the grinder task
 	# which knows how to handle the protocol buffer generation
 	export SASS_SPEC_PATH="${WORKDIR}/sass-spec"
-	PATH="${S}:${PATH}" dart run grinder protobuf || die "Failed to build protocol buffers"
+	dart run grinder protobuf || die "Failed to build protocol buffers"
 
 	einfo "Compiling dart-sass to native executable..."
 	dart compile exe bin/sass.dart -o sass || die "Failed to compile dart-sass"
