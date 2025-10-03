@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>fsvm88@gmail.com</email>
+		<name>Fabio Scaccabarozzi</name>
+	</maintainer>
+	<longdescription lang="en">
+		buf is a tool for working with Protocol Buffers. It provides a modern
+		replacement for protoc with built-in linting, breaking change detection,
+		code generation, and more. buf makes working with Protocol Buffers simpler
+		and more reliable.
+	</longdescription>
+	<upstream>
+		<remote-id type="github">bufbuild/buf</remote-id>
+	</upstream>
+</pkgmetadata>
