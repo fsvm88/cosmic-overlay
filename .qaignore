@@ -39,3 +39,7 @@ cosmic-base/pop-appstream-data VisibleVcsPkg
 cosmic-base/pop-fonts VisibleVcsPkg
 cosmic-base/pop-gtk-theme VisibleVcsPkg
 cosmic-base/pop-icon-theme VisibleVcsPkg
+
+# ExcessiveLineLength
+# We have 1 sed line that replaces one file path with another
+cosmic-base/cosmic-osd ExcessiveLineLength
