@@ -49,7 +49,7 @@ RDEPEND+="
 "
 
 src_prepare() {
-	use elogind && epatch "${FILESDIR}/no_journald-systemctl.patch"
+	use elogind && eapply "${FILESDIR}/no_journald-systemctl.patch"
 	cosmic-de_src_prepare
 
 	# patch for dconf profile as done in justfile upstream
