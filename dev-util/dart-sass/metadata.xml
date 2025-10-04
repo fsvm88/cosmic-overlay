@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>fsvm88@gmail.com</email>
+		<name>Fabio Scaccabarozzi</name>
+	</maintainer>
+	<longdescription lang="en">
+		Dart Sass is the primary implementation of Sass, written in Dart.
+		
+		This package builds dart-sass from source using the Dart SDK, providing:
+		- The sass command-line tool compiled to a native executable
+		- Full Sass/SCSS language support with latest features
+		- Superior performance compared to the deprecated Ruby implementation
+		
+		This is the reference implementation and the actively maintained version
+		of Sass. It has replaced the deprecated Ruby implementation (dev-ruby/sass)
+		and provides better performance and more up-to-date language features.
+	</longdescription>
+	<use>
+		<flag name="doc">Install additional documentation files (README, CHANGELOG, etc.)</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">sass/dart-sass</remote-id>
+		<bugs-to>https://github.com/sass/dart-sass/issues</bugs-to>
+		<doc>https://sass-lang.com/documentation</doc>
+		<changelog>https://github.com/sass/dart-sass/blob/main/CHANGELOG.md</changelog>
+	</upstream>
+</pkgmetadata>
