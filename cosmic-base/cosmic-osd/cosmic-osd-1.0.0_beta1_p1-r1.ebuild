@@ -22,7 +22,6 @@ KEYWORDS="~amd64"
 
 RDEPEND+="
 	>=media-libs/libpulse-17.0
-	>=sys-auth/polkit-123-r1
 	>=virtual/libudev-251-r2
 "
 
