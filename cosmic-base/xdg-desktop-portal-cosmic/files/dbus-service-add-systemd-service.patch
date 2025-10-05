@@ -1,0 +1,8 @@
+diff '--color=auto' -Nuar xdg-desktop-portal-cosmic-1.0.0_beta1_p1.orig/data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in xdg-desktop-portal-cosmic-1.0.0_beta1_p1/data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
+--- xdg-desktop-portal-cosmic-1.0.0_beta1_p1.orig/data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in	2025-10-05 18:46:51.323128970 +0100
++++ xdg-desktop-portal-cosmic-1.0.0_beta1_p1/data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in	2025-10-05 18:47:31.184011785 +0100
+@@ -1,3 +1,4 @@
+ [D-BUS Service]
+ Name=org.freedesktop.impl.portal.desktop.cosmic
+ Exec=LIBEXECDIR/xdg-desktop-portal-cosmic
++SystemdService=xdg-desktop-portal-cosmic.service
