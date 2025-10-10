@@ -14,6 +14,10 @@ SLOT="0"
 KEYWORDS=""
 IUSE+=" accessibility +greeter cups"
 
+PATCHES=(
+	"${FILESDIR}"/cosmic-session-1.0.0-beta1_p1-backport-137.patch
+)
+
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
 
