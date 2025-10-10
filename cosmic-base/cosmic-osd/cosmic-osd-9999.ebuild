@@ -21,6 +21,11 @@ RDEPEND+="
 	>=virtual/libudev-251-r2
 "
 
+src_prepare() {
+	sed -i 's|.unwrap_or("/usr/libexec/polkit-agent-helper-1")|.unwrap_or("/usr/lib/polkit-1/polkit-agent-helper-1")|' src/subscriptions/polkit_agent_helper.rs
+	cosmic-de_src_prepare
+}
+
 src_install() {
 	dobin "$(cosmic-de_target_dir)/$PN"
 }
