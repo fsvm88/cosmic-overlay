@@ -1,0 +1,75 @@
+From f09d02cc7f7fef6acaca3814a6984960415bc69b Mon Sep 17 00:00:00 2001
+From: Ian Douglas Scott <idscott@system76.com>
+Date: Tue, 30 Sep 2025 16:58:37 -0700
+Subject: [PATCH] Do not start `xdg-desktop-portal-cosmic`; so socket
+ activation can
+
+https://github.com/pop-os/xdg-desktop-portal-cosmic/pull/176
+---
+ Justfile    |  3 +--
+ src/main.rs | 24 ------------------------
+ 2 files changed, 1 insertion(+), 26 deletions(-)
+
+diff --git a/Justfile b/Justfile
+index f215178..a5f107a 100644
+--- a/Justfile
++++ b/Justfile
+@@ -9,7 +9,6 @@ target := if debug == '1' { 'debug' } else { 'release' }
+ vendor_args := if vendor == '1' { '--frozen --offline' } else { '' }
+ debug_args := if debug == '1' { '' } else { '--release' }
+ cargo_args := vendor_args + ' ' + debug_args
+-xdp_cosmic := '/usr/libexec/xdg-desktop-portal-cosmic'
+ orca := '/usr/bin/orca'
+ cosmic_dconf_profile := prefix + '/share/dconf/profile/cosmic'
+ 
+@@ -21,7 +20,7 @@ applicationdir := rootdir / prefix + '/share/applications'
+ all: _extract_vendor build
+ 
+ build:
+-        XDP_COSMIC={{xdp_cosmic}} ORCA={{orca}} cargo build {{cargo_args}}
++        ORCA={{orca}} cargo build {{cargo_args}}
+ 
+ # Installs files into the system
+ install:
+diff --git a/src/main.rs b/src/main.rs
+index a6716af..c2e32fb 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -46,7 +46,6 @@ use tracing::{Instrument, metadata::LevelFilter};
+ use tracing_subscriber::{EnvFilter, fmt, prelude::*};
+ 
+ use crate::notifications::notifications_process;
+-const XDP_COSMIC: Option<&'static str> = option_env!("XDP_COSMIC");
+ #[cfg(feature = "autostart")]
+ const AUTOSTART_DIR: &'static str = "autostart";
+ #[cfg(feature = "autostart")]
+@@ -427,29 +426,6 @@ async fn start(
+ 	)
+ 	.await;
+ 
+-	if env::var("XDG_CURRENT_DESKTOP").as_deref() == Ok("COSMIC") {
+-		let span = info_span!(parent: None, "xdg-desktop-portal-cosmic");
+-		let mut sockets = Vec::with_capacity(1);
+-		let extra_env = Vec::with_capacity(1);
+-		let portal_extras =
+-			if let Ok((mut env, fd)) = create_privileged_socket(&mut sockets, &extra_env) {
+-				let mut env = env.remove(0);
+-				env.0 = "PORTAL_WAYLAND_SOCKET".to_string();
+-				vec![(fd, env, sockets.remove(0))]
+-			} else {
+-				Vec::new()
+-			};
+-		start_component(
+-			XDP_COSMIC.unwrap_or("/usr/libexec/xdg-desktop-portal-cosmic"),
+-			span,
+-			&process_manager,
+-			&env_vars,
+-			&socket_tx,
+-			portal_extras,
+-		)
+-		.await;
+-	}
+-
+ 	#[cfg(feature = "autostart")]
+ 	if !*is_systemd_used() {
+ 		info!("looking for autostart folders");

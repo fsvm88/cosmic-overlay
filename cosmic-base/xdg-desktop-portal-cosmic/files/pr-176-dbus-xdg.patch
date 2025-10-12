@@ -1,0 +1,145 @@
+From c4e28abe6698f35d3ca5295fba6793d9dbbd72c3 Mon Sep 17 00:00:00 2001
+From: Ian Douglas Scott <idscott@system76.com>
+Date: Fri, 26 Sep 2025 14:22:24 -0700
+Subject: [PATCH 1/2] Ignore `PORTAL_WAYLAND_SOCKET` env var; use normal
+ Wayland socket
+
+If we want to socket-active `xdg-desktop-portal-cosmic`, and are
+allowing Wayland clients without special privileges (as long as they
+aren't sandboxed) to use the necessary protocols, this no longer is
+useful.
+---
+ src/app.rs         |  2 +-
+ src/wayland/mod.rs | 42 +-----------------------------------------
+ 2 files changed, 2 insertions(+), 42 deletions(-)
+
+diff --git a/src/app.rs b/src/app.rs
+index 010e0e0..35dc77b 100644
+--- a/src/app.rs
++++ b/src/app.rs
+@@ -100,7 +100,7 @@ impl cosmic::Application for CosmicPortal {
+             config,
+         }: Self::Flags,
+     ) -> (Self, cosmic::iced::Task<cosmic::Action<Self::Message>>) {
+-        let wayland_conn = crate::wayland::connect_to_wayland();
++        let wayland_conn = wayland_client::Connection::connect_to_env().unwrap();
+         let wayland_helper = crate::wayland::WaylandHelper::new(wayland_conn);
+         (
+             Self {
+diff --git a/src/wayland/mod.rs b/src/wayland/mod.rs
+index bb68d01..3f1b255 100644
+--- a/src/wayland/mod.rs
++++ b/src/wayland/mod.rs
+@@ -18,15 +18,9 @@ use futures::{
+     channel::oneshot,
+     stream::{FuturesOrdered, Stream, StreamExt},
+ };
+-use rustix::fd::{FromRawFd, RawFd};
+ use std::{
+     collections::HashMap,
+-    env,
+-    os::{
+-        fd::{AsFd, OwnedFd},
+-        unix::net::UnixStream,
+-    },
+-    process,
++    os::fd::{AsFd, OwnedFd},
+     sync::{Arc, Condvar, Mutex, Weak},
+     thread,
+ };
+@@ -724,40 +718,6 @@ impl Dispatch<wl_buffer::WlBuffer, ()> for AppData {
+     }
+ }
+ 
+-fn portal_wayland_socket() -> Option<UnixStream> {
+-    let fd = std::env::var("PORTAL_WAYLAND_SOCKET")
+-        .ok()?
+-        .parse::<RawFd>()
+-        .ok()?;
+-    unsafe {
+-        env::remove_var("PORTAL_WAYLAND_SOCKET");
+-    }
+-    let fd = unsafe { OwnedFd::from_raw_fd(fd) };
+-    // set the CLOEXEC flag on this FD
+-    let mut flags = rustix::io::fcntl_getfd(&fd).ok()?;
+-    flags.insert(rustix::io::FdFlags::CLOEXEC);
+-    if let Err(err) = rustix::io::fcntl_setfd(&fd, flags) {
+-        drop(fd);
+-        log::error!("Failed to set CLOEXEC on portal socket: {}", err);
+-        return None;
+-    }
+-    Some(UnixStream::from(fd))
+-}
+-
+-// Connect to wayland and start task reading events from socket
+-pub fn connect_to_wayland() -> wayland_client::Connection {
+-    if let Some(portal_socket) = portal_wayland_socket() {
+-        wayland_client::Connection::from_socket(portal_socket).unwrap_or_else(|err| {
+-            log::error!("{}", err);
+-            process::exit(1)
+-        })
+-    } else {
+-        // Useful fallback for testing and debugging, without `COSMIC_ENABLE_WAYLAND_SECURITY`
+-        log::warn!("Failed to find `PORTAL_WAYLAND_SOCKET`; trying default Wayland display");
+-        wayland_client::Connection::connect_to_env().unwrap()
+-    }
+-}
+-
+ struct SessionData {
+     session: Weak<SessionInner>,
+     session_data: ScreencopySessionData,
+
+From 42e66377c65b553488735b28ffccd070d4d0c25a Mon Sep 17 00:00:00 2001
+From: Ian Douglas Scott <idscott@system76.com>
+Date: Mon, 16 Jun 2025 18:54:46 -0700
+Subject: [PATCH 2/2] WIP Use DBus socket activation
+
+---
+ Makefile                                                   | 5 ++++-
+ .../org.freedesktop.impl.portal.desktop.cosmic.service.in} | 2 +-
+ data/org.freedesktop.impl.portal.desktop.cosmic.service.in | 7 +++++++
+ 3 files changed, 12 insertions(+), 2 deletions(-)
+ rename data/{org.freedesktop.impl.portal.desktop.cosmic.service => dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in} (60%)
+ create mode 100644 data/org.freedesktop.impl.portal.desktop.cosmic.service.in
+
+diff --git a/Makefile b/Makefile
+index 7932ee1..70de8b5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -36,7 +36,10 @@ $(BIN): Cargo.toml Cargo.lock src/main.rs vendor-check
+ 
+ install:
+ 	install -Dm0755 $(CARGO_TARGET_DIR)/$(TARGET)/$(BIN) $(DESTDIR)$(libexecdir)/$(BIN)
+-	install -Dm0644 data/$(DBUS_NAME).service $(DESTDIR)$(datadir)/dbus-1/services/$(DBUS_NAME).service
++	sed "s|LIBEXECDIR|$(libexecdir)|" data/dbus-1/$(DBUS_NAME).service.in > data/dbus-1/$(DBUS_NAME).service
++	install -Dm0644 data/dbus-1/$(DBUS_NAME).service $(DESTDIR)$(datadir)/dbus-1/services/$(DBUS_NAME).service
++	sed "s|LIBEXECDIR|$(libexecdir)|" data/$(DBUS_NAME).service.in > data/$(DBUS_NAME).service
++	install -Dm0644 data/$(DBUS_NAME).service $(DESTDIR)$(libdir)/systemd/user/$(DBUS_NAME).service
+ 	install -Dm0644 data/cosmic.portal $(DESTDIR)$(datadir)/xdg-desktop-portal/portals/cosmic.portal
+ 	install -Dm0644 data/cosmic-portals.conf $(DESTDIR)$(datadir)/xdg-desktop-portal/cosmic-portals.conf
+ 	find 'data'/'icons' -type f -exec echo {} \; \
+diff --git a/data/org.freedesktop.impl.portal.desktop.cosmic.service b/data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
+similarity index 60%
+rename from data/org.freedesktop.impl.portal.desktop.cosmic.service
+rename to data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
+index a8ee79d..8413deb 100644
+--- a/data/org.freedesktop.impl.portal.desktop.cosmic.service
++++ b/data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
+@@ -1,3 +1,3 @@
+ [D-BUS Service]
+ Name=org.freedesktop.impl.portal.desktop.cosmic
+-Exec=/bin/false
++Exec=LIBEXECDIR/xdg-desktop-portal-cosmic
+diff --git a/data/org.freedesktop.impl.portal.desktop.cosmic.service.in b/data/org.freedesktop.impl.portal.desktop.cosmic.service.in
+new file mode 100644
+index 0000000..5a83ac5
+--- /dev/null
++++ b/data/org.freedesktop.impl.portal.desktop.cosmic.service.in
+@@ -0,0 +1,7 @@
++[Unit]
++Description=Portal service (COSMIC implementation)
++
++[Service]
++Type=dbus
++BusName=org.freedesktop.impl.portal.desktop.cosmic
++ExecStart=LIBEXECDIR/xdg-desktop-portal-cosmic

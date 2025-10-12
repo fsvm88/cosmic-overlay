@@ -1,0 +1,11 @@
+diff '--color=auto' -Nuar cosmic-comp-1.0.0_beta1_p1.orig/src/main.rs cosmic-comp-1.0.0_beta1_p1/src/main.rs
+--- cosmic-comp-1.0.0_beta1_p1.orig/src/main.rs	2025-09-22 17:07:10.000000000 +0100
++++ cosmic-comp-1.0.0_beta1_p1/src/main.rs	2025-10-05 23:19:36.654663118 +0100
+@@ -60,7 +60,6 @@
+             if let state::BackendData::Kms(_) = &self.backend {
+                 #[cfg(feature = "systemd")]
+                 systemd::ready(&self.common);
+-                #[cfg(not(feature = "systemd"))]
+                 if let Err(err) = dbus::ready(&self.common) {
+                     error!(?err, "Failed to update the D-Bus activation environment");
+                 }
