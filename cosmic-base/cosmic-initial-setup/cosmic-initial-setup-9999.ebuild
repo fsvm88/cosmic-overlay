@@ -22,3 +22,24 @@ RDEPEND+="
 	~cosmic-base/pop-appstream-data-9999
 	~cosmic-base/cosmic-icons-${PV}
 "
+
+src_install() {
+	dobin "$(cosmic-de_target_dir)/$PN"
+
+	domenu res/*.desktop
+
+	insinto /etc/xdg/autostart
+	newins res/com.system76.CosmicInitialSetup.Autostart.desktop com.system76.CosmicInitialSetup.desktop
+
+	insinto /usr/share/icons/hicolor/scalable/apps/
+	newins res/icon.svg com.system76.CosmicInitialSetup.svg
+
+	insinto /usr/share/polkit-1/rules.d
+	doins res/20-cosmic-initial-setup.rules
+
+	insinto /usr/share/cosmic-layouts
+	doins -r res/layouts/*
+
+	insinto /usr/share/cosmic-themes
+	doins res/themes/*
+}
