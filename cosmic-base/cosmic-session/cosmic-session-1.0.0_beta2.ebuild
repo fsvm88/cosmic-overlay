@@ -44,7 +44,7 @@ RDEPEND+="
 	~cosmic-base/cosmic-wallpapers-${PV}
 	~cosmic-base/cosmic-workspaces-epoch-${PV}
 	~cosmic-base/xdg-desktop-portal-cosmic-${PV}
-	~cosmic-base/pop-fonts-1.0.0_beta2
+	~cosmic-base/pop-fonts-9999
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
 	>=sys-power/switcheroo-control-2.6-r2
