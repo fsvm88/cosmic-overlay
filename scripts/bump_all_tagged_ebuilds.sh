@@ -101,12 +101,12 @@ for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
             "${ebuild_file}" ||
             errorExit 120 "${ebuild_file}: could not update version"
 
-        # Ensure COSMIC_GIT_UNPACK is set
-        if ! grep -q "COSMIC_GIT_UNPACK=" "${ebuild_file}"; then
+        # Ensure COSMIC_GIT_UNPACK is NOT set for tagged releases (they use SRC_URI)
+        if grep -q "^COSMIC_GIT_UNPACK=" "${ebuild_file}"; then
             sed -i \
-                -e '/^inherit cosmic-de/i COSMIC_GIT_UNPACK=1\n' \
+                -e '/^COSMIC_GIT_UNPACK=/d' \
                 "${ebuild_file}" ||
-                errorExit 124 "${ebuild_file}: could not add COSMIC_GIT_UNPACK"
+                errorExit 124 "${ebuild_file}: could not remove COSMIC_GIT_UNPACK"
         fi
 
         ebuild "${ebuild_file}" digest ||
