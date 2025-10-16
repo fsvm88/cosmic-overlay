@@ -22,8 +22,8 @@ KEYWORDS="~amd64"
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Wed Sep 24 14:23:14 2025 -0600'
-	export VERGEN_GIT_SHA=942cfc4f27f7e9d57ac09c576be75ff9458a4e67
+	export VERGEN_GIT_COMMIT_DATE='Tue Oct 14 11:20:25 2025 -0600'
+	export VERGEN_GIT_SHA=bc124c67a9abcd5fba55dad51b5ee4dc4c864ade
 
 	cosmic-de_src_configure
 }
