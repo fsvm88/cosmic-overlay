@@ -8,7 +8,7 @@ inherit cosmic-de desktop systemd
 DESCRIPTION="sessions manager for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-session"
 
-MY_PV="epoch-1.0.0-beta.1.1"
+MY_PV="epoch-1.0.0-beta.2"
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
 	https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${P}-crates.tar.zst
@@ -22,6 +22,7 @@ IUSE+=" accessibility +greeter cups"
 
 PATCHES=(
 	"${FILESDIR}"/cosmic-session-1.0.0-beta1_p1-backport-137.patch
+	"${FILESDIR}"/pr-150.patch
 )
 
 RDEPEND+="

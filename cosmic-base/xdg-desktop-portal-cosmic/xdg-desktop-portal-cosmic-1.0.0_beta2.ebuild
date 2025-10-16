@@ -6,12 +6,12 @@ EAPI=8
 LLVM_COMPAT=({18..20})
 LLVM_OPTIONAL=1
 
-inherit cosmic-de llvm-r1
+inherit cosmic-de llvm-r1 systemd
 
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
 
-MY_PV="epoch-1.0.0-beta.1.1"
+MY_PV="epoch-1.0.0-beta.2"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -24,6 +24,11 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
+
+PATCHES=(
+	"${FILESDIR}/pr-176-dbus-xdg.patch"
+	"${FILESDIR}/dbus-service-add-systemd-service.patch"
+)
 
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
@@ -39,10 +44,19 @@ pkg_setup() {
 	llvm-r1_pkg_setup
 }
 
+src_prepare() {
+	cosmic-de_src_prepare
+
+	sed \
+		-i 's|LIBEXECDIR|/usr/libexec|' \
+		data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
+		data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
+}
+
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Fri Sep 19 11:35:41 2025 -0600'
-	export VERGEN_GIT_SHA=2477a1b39806fd0eb6831e38f0a32a81abb1a806
+	export VERGEN_GIT_COMMIT_DATE='Tue Oct 14 11:20:35 2025 -0600'
+	export VERGEN_GIT_SHA=43572e69e20e3b5c12380d5c39e10ae1cbcef392
 
 	cosmic-de_src_configure
 }
@@ -51,8 +65,12 @@ src_install() {
 	exeinto /usr/libexec
 	doexe "$(cosmic-de_target_dir)/$PN"
 
+	systemd_newuserunit data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
+			xdg-desktop-portal-cosmic.service
+
 	insinto /usr/share/dbus-1/services
-	doins data/org.freedesktop.impl.portal.desktop.cosmic.service
+	newins data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in \
+			org.freedesktop.impl.portal.desktop.cosmic.service
 
 	insinto /usr/share/xdg-desktop-portal/portals
 	doins data/cosmic.portal

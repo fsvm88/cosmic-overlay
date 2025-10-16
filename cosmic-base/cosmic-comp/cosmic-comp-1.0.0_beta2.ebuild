@@ -8,7 +8,7 @@ inherit cosmic-de
 DESCRIPTION="compositor for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-comp"
 
-MY_PV="epoch-1.0.0-beta.1.1"
+MY_PV="epoch-1.0.0-beta.2"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -19,6 +19,10 @@ SRC_URI="
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
+
+PATCHES=(
+	"${FILESDIR}/update-dbus-also-on-systemd-systems.patch"
+)
 
 RDEPEND+="
 	>=media-libs/fontconfig-2.14.2-r3
