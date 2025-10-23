@@ -219,7 +219,7 @@ function update_package_state() {
     local phases_json="[]"
     if [[ -n "$phase" ]]; then
         # Read existing phases and append new one
-        phases_json=$(jq -r ".packages.\"${pkg}\".phases // []" "${STATE_FILE}" 2>/dev/null || echo "[]")
+        phases_json=$(jq ".packages.\"${pkg}\".phases // []" "${STATE_FILE}" 2>/dev/null || echo "[]")
         phases_json=$(echo "$phases_json" | jq ". + [\"${phase}\"] | unique")
     fi
     
