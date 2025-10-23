@@ -444,10 +444,30 @@ function phase_tarball() {
         return 0
     fi
     
-    log_info "[${pkg}] Running cargo vendor..."
+    # Create temporary CARGO_HOME for this package to avoid conflicts
+    local temp_cargo_home
+    temp_cargo_home=$(mktemp -d -t "cargo-home-${pkg}-XXXXXX")
+    log_verbose "[${pkg}] Using temporary CARGO_HOME: ${temp_cargo_home}"
+    
+    # Export CARGO_HOME for cargo vendor
+    export CARGO_HOME="${temp_cargo_home}"
+    
+    log_info "[${pkg}] Running cargo vendor with isolated CARGO_HOME..."
     local config_file="config.toml"
+    local vendor_failed=0
+    
     if ! cargo vendor 2>&1 | head -n -0 > "${config_file}"; then
         log_error "[${pkg}] cargo vendor failed"
+        vendor_failed=1
+    fi
+    
+    # Clean up temporary CARGO_HOME immediately after vendor
+    log_verbose "[${pkg}] Cleaning up temporary CARGO_HOME: ${temp_cargo_home}"
+    rm -rf "${temp_cargo_home}"
+    unset CARGO_HOME
+    
+    # Check if vendor failed
+    if [[ $vendor_failed -eq 1 ]]; then
         pop_d
         return 1
     fi
