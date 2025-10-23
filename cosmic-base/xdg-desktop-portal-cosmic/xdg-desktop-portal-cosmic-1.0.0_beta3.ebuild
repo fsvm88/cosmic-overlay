@@ -25,11 +25,9 @@ KEYWORDS="~amd64"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 
-# PATCHES commented out during bump due to patch failure - needs manual review
-# PATCHES=(
-# 	"${FILESDIR}/pr-176-dbus-xdg.patch"
-# 	"${FILESDIR}/dbus-service-add-systemd-service.patch"
-# )
+PATCHES=(
+	"${FILESDIR}/xdg-desktop-portal-1.0.0_beta3-add-SystemdService-directive.patch"
+)
 
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
@@ -49,7 +47,7 @@ src_prepare() {
 	cosmic-de_src_prepare
 
 	sed \
-		-i 's|LIBEXECDIR|/usr/libexec|' \
+		-i 's|@libexecdir@/|/usr/libexec/|' \
 		data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
 		data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
 }

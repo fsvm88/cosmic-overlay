@@ -20,11 +20,6 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-# PATCHES commented out during bump due to patch failure - needs manual review
-# PATCHES=(
-# 	"${FILESDIR}/update-dbus-also-on-systemd-systems.patch"
-# )
-
 RDEPEND+="
 	>=media-libs/fontconfig-2.14.2-r3
 	>=media-libs/mesa-24.0.4

@@ -20,6 +20,10 @@ KEYWORDS=""
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 
+PATCHES=(
+	"${FILESDIR}/xdg-desktop-portal-1.0.0_beta3-add-SystemdService-directive.patch"
+)
+
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
 	>=media-video/pipewire-1.0.3
@@ -29,9 +33,27 @@ RDEPEND+="
 	')
 "
 
+
 pkg_setup() {
 	rust_pkg_setup
 	llvm-r1_pkg_setup
+}
+
+src_prepare() {
+	cosmic-de_src_prepare
+
+	sed \
+		-i 's|@libexecdir@/|/usr/libexec/|' \
+		data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
+		data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
+}
+
+src_configure() {
+	# Required for some crates to build properly due to build.rs scripts
+	export VERGEN_GIT_COMMIT_DATE='Fri Oct 17 11:58:46 2025 -0700'
+	export VERGEN_GIT_SHA=56da80f1b4bb8ae84dc4aee50c191bcd6b2ec118
+
+	cosmic-de_src_configure
 }
 
 src_install() {
