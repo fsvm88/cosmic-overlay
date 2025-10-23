@@ -26,7 +26,7 @@ RDEPEND+="
 "
 
 src_prepare() {
-	sed -i 's|.unwrap_or("/usr/libexec/polkit-agent-helper-1")|.unwrap_or("/usr/lib/polkit-1/polkit-agent-helper-1")|' src/subscriptions/polkit_agent_helper.rs
+	sed -i 's|.unwrap_or("/usr/libexec/polkit-agent-helper-1")|.unwrap_or("/usr/lib/polkit-1/polkit-agent-helper-1")|' src/subscriptions/polkit_agent_helper.rs || die 'Failed to patch polkit path'
 	cosmic-de_src_prepare
 }
 
