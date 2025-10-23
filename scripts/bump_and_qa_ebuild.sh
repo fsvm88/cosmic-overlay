@@ -590,6 +590,39 @@ function phase_bump() {
         sed -i '/^COSMIC_GIT_UNPACK=/d' "${ebuild_file}"
     fi
     
+    # Update VERGEN variables if present
+    if grep -q "VERGEN_GIT" "${ebuild_file}"; then
+        log_info "[${pkg}] Updating VERGEN variables..."
+        
+        # Get git information from the submodule
+        local submodule_path="${pkg}"
+        if [[ ! -d "${TEMP_DIR}/cosmic-epoch/${pkg}" ]]; then
+            if [[ "$pkg" == "xdg-desktop-portal-cosmic" ]] && [[ -d "${TEMP_DIR}/cosmic-epoch/xdg-desktop-portal-cosmic" ]]; then
+                submodule_path="xdg-desktop-portal-cosmic"
+            fi
+        fi
+        
+        if [[ -d "${TEMP_DIR}/cosmic-epoch/${submodule_path}" ]]; then
+            push_d "${TEMP_DIR}/cosmic-epoch/${submodule_path}"
+            
+            local commit_date=$(git log -1 --format=%cd)
+            local commit_sha=$(git rev-parse HEAD)
+            
+            pop_d
+            
+            log_verbose "[${pkg}] VERGEN_GIT_COMMIT_DATE='${commit_date}'"
+            log_verbose "[${pkg}] VERGEN_GIT_SHA=${commit_sha}"
+            
+            # Update the variables in the ebuild
+            sed -i \
+                -e "s|^\texport VERGEN_GIT_COMMIT_DATE=.*|\texport VERGEN_GIT_COMMIT_DATE='${commit_date}'|" \
+                -e "s|^\texport VERGEN_GIT_SHA=.*|\texport VERGEN_GIT_SHA=${commit_sha}|" \
+                "${ebuild_file}"
+        else
+            log_warning "[${pkg}] Submodule not found, cannot update VERGEN variables"
+        fi
+    fi
+    
     # Verify SRC_URI exists
     if ! grep -q "SRC_URI=" "${ebuild_file}"; then
         log_error "[${pkg}] No SRC_URI found in ebuild"
