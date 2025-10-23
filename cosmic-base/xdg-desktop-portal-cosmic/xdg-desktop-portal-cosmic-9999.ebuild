@@ -45,7 +45,8 @@ src_prepare() {
 	sed \
 		-i 's|@libexecdir@/|/usr/libexec/|' \
 		data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
-		data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
+		data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in \
+		|| die "sed failed in src_prepare"
 }
 
 src_configure() {
