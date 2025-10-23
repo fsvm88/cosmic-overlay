@@ -425,11 +425,10 @@ function phase_tarball() {
     local tarball_zst="${tarball_name}.zst"
     local tarball_path="${TEMP_DIR}/${tarball_zst}"
     
-    # Check if tarball already exists
+    # Remove existing tarball if present (force regeneration)
     if [[ -f "${DISTDIR}/${tarball_zst}" ]]; then
-        log_info "[${pkg}] Tarball already exists in DISTDIR, reusing"
-        pop_d
-        return 0
+        log_info "[${pkg}] Removing existing tarball in DISTDIR"
+        rm -f "${DISTDIR}/${tarball_zst}"
     fi
     
     if [[ $DRY_RUN -eq 1 ]]; then
@@ -484,6 +483,11 @@ function phase_manifest_update() {
     
     log_phase "[${pkg}] Phase 2: Manifest update"
     
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[${pkg}] DRY-RUN: Would update Manifest"
+        return 0
+    fi
+    
     push_d "${__cosmic_de_dir}/${pkg}"
     
     local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
@@ -498,12 +502,6 @@ function phase_manifest_update() {
     # Backup existing Manifest
     if [[ -f "Manifest" ]]; then
         cp "Manifest" "Manifest.backup"
-    fi
-    
-    if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would update Manifest"
-        pop_d
-        return 0
     fi
     
     # Calculate hashes
@@ -940,11 +938,15 @@ function process_package() {
     
     # Execute phases
     local failed=0
+    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
     
     # Phase 1: Tarball
     if ! phase_tarball "$pkg" "$submodule_path"; then
         update_package_state "$pkg" "failed" "tarball" "Tarball generation failed"
         FAILED_PACKAGES+=("$pkg:tarball")
+        # Cleanup: remove tarball from DISTDIR and temp
+        rm -f "${DISTDIR}/${tarball_zst}"
+        rm -f "${TEMP_DIR}/${tarball_zst}"
         return 1
     fi
     update_package_state "$pkg" "in-progress" "tarball"
@@ -953,10 +955,12 @@ function process_package() {
     if ! phase_manifest_update "$pkg"; then
         update_package_state "$pkg" "failed" "manifest" "Manifest update failed"
         FAILED_PACKAGES+=("$pkg:manifest")
-        # Cleanup
+        # Cleanup: restore Manifest, remove tarball
         push_d "${__cosmic_de_dir}/${pkg}"
         [[ -f "Manifest.backup" ]] && mv "Manifest.backup" "Manifest"
         pop_d
+        rm -f "${DISTDIR}/${tarball_zst}"
+        rm -f "${TEMP_DIR}/${tarball_zst}"
         return 1
     fi
     update_package_state "$pkg" "in-progress" "manifest"
@@ -965,11 +969,13 @@ function process_package() {
     if ! phase_bump "$pkg"; then
         update_package_state "$pkg" "failed" "bump" "Ebuild bump failed"
         FAILED_PACKAGES+=("$pkg:bump")
-        # Cleanup
+        # Cleanup: remove ebuild, restore Manifest, remove tarball
         push_d "${__cosmic_de_dir}/${pkg}"
         rm -f "${pkg}-${GENTOO_VERSION}.ebuild"
         [[ -f "Manifest.backup" ]] && mv "Manifest.backup" "Manifest"
         pop_d
+        rm -f "${DISTDIR}/${tarball_zst}"
+        rm -f "${TEMP_DIR}/${tarball_zst}"
         return 1
     fi
     update_package_state "$pkg" "in-progress" "bump"
@@ -978,12 +984,15 @@ function process_package() {
     if ! phase_fetch "$pkg"; then
         update_package_state "$pkg" "failed" "fetch" "Upstream source fetch failed"
         FAILED_PACKAGES+=("$pkg:fetch")
-        # Cleanup
+        # Cleanup: remove ebuild, restore Manifest, remove tarball
         push_d "${__cosmic_de_dir}/${pkg}"
         rm -f "${pkg}-${GENTOO_VERSION}.ebuild"
         [[ -f "Manifest.backup" ]] && mv "Manifest.backup" "Manifest"
+        [[ -f "Manifest.backup2" ]] && rm -f "Manifest.backup2"
         git checkout -- "${pkg}-${GENTOO_VERSION}.ebuild" 2>/dev/null || true
         pop_d
+        rm -f "${DISTDIR}/${tarball_zst}"
+        rm -f "${TEMP_DIR}/${tarball_zst}"
         return 1
     fi
     update_package_state "$pkg" "in-progress" "fetch"
@@ -996,10 +1005,17 @@ function process_package() {
     if ! phase_prepare "$pkg"; then
         update_package_state "$pkg" "failed" "prepare" "src_prepare test failed"
         FAILED_PACKAGES+=("$pkg:prepare")
-        # Cleanup
+        # Cleanup: clean workdir, remove ebuild, restore Manifest, remove tarball
         push_d "${__cosmic_de_dir}/${pkg}"
         ebuild "${pkg}-${GENTOO_VERSION}.ebuild" clean >/dev/null 2>&1 || true
+        rm -f "${pkg}-${GENTOO_VERSION}.ebuild"
+        rm -f "${pkg}-${GENTOO_VERSION}.ebuild.backup"
+        [[ -f "Manifest.backup" ]] && mv "Manifest.backup" "Manifest"
+        [[ -f "Manifest.backup2" ]] && rm -f "Manifest.backup2"
+        git checkout -- "${pkg}-${GENTOO_VERSION}.ebuild" 2>/dev/null || true
         pop_d
+        rm -f "${DISTDIR}/${tarball_zst}"
+        rm -f "${TEMP_DIR}/${tarball_zst}"
         return 1
     fi
     update_package_state "$pkg" "in-progress" "prepare"
@@ -1045,26 +1061,56 @@ function upload_to_github() {
         fi
     fi
     
-    # Upload tarballs
-    log_info "Uploading tarballs..."
+    # Upload and verify tarballs
+    log_info "Uploading and verifying tarballs..."
     local uploaded=0
     local failed=0
+    local verify_temp=$(mktemp -d)
     
     for tarball in "${DISTDIR}"/*-"${GENTOO_VERSION}"-crates.tar.zst; do
         if [[ -f "$tarball" ]]; then
-            log_info "Uploading $(basename "$tarball")..."
-            if gh release upload "${GENTOO_VERSION}" "$tarball" \
+            local basename_tarball=$(basename "$tarball")
+            log_info "Uploading ${basename_tarball}..."
+            
+            # Upload with clobber to replace existing
+            if ! gh release upload "${GENTOO_VERSION}" "$tarball" \
                 --repo "fsvm88/cosmic-overlay" \
                 --clobber 2>&1 | tee -a "${LOG_FILE}"; then
-                ((uploaded++))
+                log_warning "Failed to upload ${basename_tarball}"
+                ((failed++))
+                continue
+            fi
+            
+            # Download and verify checksum
+            log_info "Verifying ${basename_tarball}..."
+            if gh release download "${GENTOO_VERSION}" \
+                --repo "fsvm88/cosmic-overlay" \
+                --pattern "${basename_tarball}" \
+                --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
+                
+                # Compare checksums
+                local original_sum=$(b2sum "$tarball" | awk '{print $1}')
+                local downloaded_sum=$(b2sum "${verify_temp}/${basename_tarball}" | awk '{print $1}')
+                
+                if [[ "$original_sum" == "$downloaded_sum" ]]; then
+                    log_success "Verified ${basename_tarball}"
+                    ((uploaded++))
+                    rm -f "${verify_temp}/${basename_tarball}"
+                else
+                    log_error "Checksum mismatch for ${basename_tarball}!"
+                    log_error "  Local:      ${original_sum}"
+                    log_error "  Downloaded: ${downloaded_sum}"
+                    ((failed++))
+                fi
             else
-                log_warning "Failed to upload $(basename "$tarball")"
+                log_warning "Failed to download ${basename_tarball} for verification"
                 ((failed++))
             fi
         fi
     done
     
-    log_success "Uploaded ${uploaded} tarballs (${failed} failed)"
+    rm -rf "${verify_temp}"
+    log_success "Uploaded and verified ${uploaded} tarballs (${failed} failed)"
     return 0
 }
 
