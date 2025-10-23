@@ -32,7 +32,7 @@ QA_PREBUILT="*"
 # has been deprecated and unsupported for a few years upstream now
 # the user, adw-gtk3, has migrated to dart-sass since >=6.0
 # the two have incompatible CLI options
-RDEPEND="!dev-ruby/sass"
+RDEPEND="!dev-ruby/sass !dev-util/dart-sass"
 
 src_install() {
 	exeinto /usr/lib64/dart-sass
