@@ -18,9 +18,9 @@ KEYWORDS="~amd64 ~arm64"
 
 IUSE="doc"
 # network-sandbox: extra stuff to build
-# strip: the executable built is standalone,
-#			so it contains a copy of the runtime,
-#			which means the debug ID and folder is the same
+# strip: The Dart standalone executable embeds its own runtime.
+#        Stripping the binary can break it or remove necessary debug information,
+#        so stripping is disabled for safety.
 RESTRICT="network-sandbox strip"
 
 # dart-sass is the successor to dev-ruby/sass
