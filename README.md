@@ -2,22 +2,14 @@
 
 Unofficial Gentoo overlay for Cosmic desktop environment developed by System76
 
-> [!WARNING]
-> The package category for most packages has moved to cosmic-base/ as of 05.2025, this is to better align with Gentoo's naming with other DEs.
-> This should automatically be applied the next time sync the overlay through a pkgmove.
-
-> [!WARNING]
-> If you unmasked the packages following the guides below (`cosmic-de/*`), pkgmove **will not** automatically migrate this entry.
-> After the sync is done, and you apply the updates in `/etc`, you'll need to also manually update the wildcard unmasks to `cosmic-base/*`.
-
 ## Details
 
-- **this is highly in-flux, no guarantees are given**
 - done in a best-effort basis to try out the COSMIC DE, likely not representative of the final product if/when shipped in Gentoo
-- it is my first experience writing so many ebuilds and an entire eclass (a lot is taken from gentoo's repo `cargo.eclass`), so expect bugs, and you're welcome to submit PRs for improvements :)
-- packages in live ebuilds use the `master` branch from `git`
-- packages in non-live (non-9999 ebuilds) use `tags` from `git` due to libcosmic depending on bundled libs (hopefully this will go away at some point)
+- you're welcome to submit PRs for improvements :)
+- packages in live ebuilds (9999) use the `master` branch from upstream `git` repos
+- packages in non-live ebuilds use vendored dependencies compressed via script, uploaded and hosted as GitHub releases in this repository
 - please submit issues in this repo's issue tracker if you notice immediate usability issues (e.g: broken manifests), usually I can take care of them in 2-3 days
+- QA checks run via GitHub Actions on pushes and PRs
 
 ## Quick how-to
 
