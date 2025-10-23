@@ -113,14 +113,20 @@ for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
         fi
         log "  Updated ebuild variables"
 
-        # Step 2: Generate manifest
+        # Step 2: Generate manifest (only if package has SRC_URI)
         ebuild "${ebuild_file}" manifest ||
             errorExit 121 "${ebuild_file}: could not generate manifest"
-        log "  Generated manifest"
-
-        # Step 3: Commit ebuild and manifest together
-        git add "${ebuild_file}" Manifest ||
-            errorExit 122 "${ebuild_file}: could not git-add changes"
+        
+        # Step 3: Commit ebuild and manifest together (if manifest exists)
+        if [ -f "Manifest" ]; then
+            log "  Generated manifest"
+            git add "${ebuild_file}" Manifest ||
+                errorExit 122 "${ebuild_file}: could not git-add changes"
+        else
+            log "  No manifest needed (no SRC_URI)"
+            git add "${ebuild_file}" ||
+                errorExit 122 "${ebuild_file}: could not git-add ebuild"
+        fi
         
         git commit -m "cosmic-base/${pkg_dir}: add ${VERSION}" ||
             errorExit 123 "${ebuild_file}: could not commit changes"
