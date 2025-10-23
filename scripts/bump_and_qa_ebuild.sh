@@ -456,7 +456,7 @@ function phase_tarball() {
     local config_file="config.toml"
     local vendor_failed=0
     
-    if ! cargo vendor 2>&1 | head -n -1 > "${config_file}"; then
+    if ! cargo vendor > "${config_file}"; then
         log_error "[${pkg}] cargo vendor failed"
         vendor_failed=1
     fi
