@@ -94,7 +94,6 @@ for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
         log "  Created new ebuild ${ebuild_file} from template"
 
         # Update version, remove live ebuild settings, set KEYWORDS, update git ref, and update MY_PV
-        # Note: Do NOT replace 9999 in dependency specifications, only in variable assignments
         sed -i \
             -e 's:KEYWORDS=.*:KEYWORDS="~amd64":' \
             -e '/^inherit.*live.*/d' \
