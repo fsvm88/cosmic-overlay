@@ -11,13 +11,17 @@ inherit cosmic-de llvm-r1 systemd
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
 
-EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+MY_PV="epoch-1.0.0-beta.3"
+
+SRC_URI="
+	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
+	https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${P}-crates.tar.zst
+	"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 
@@ -45,8 +49,7 @@ src_prepare() {
 	sed \
 		-i 's|@libexecdir@/|/usr/libexec/|' \
 		data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
-		data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in \
-		|| die "sed failed in src_prepare"
+		data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
 }
 
 src_configure() {
