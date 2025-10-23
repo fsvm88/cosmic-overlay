@@ -1204,112 +1204,6 @@ function ensure_github_release() {
     return 0
 }
 
-# Upload and verify a single package tarball to GitHub
-function upload_package_tarball() {
-    local pkg="$1"
-    
-    if [[ $NO_UPLOAD -eq 1 ]]; then
-        log_verbose "[${pkg}] Skipping GitHub upload (--no-upload set)"
-        return 0
-    fi
-    
-    if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would upload tarball to GitHub"
-        return 0
-    fi
-    
-    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
-    local tarball_path="${DISTDIR}/${tarball_zst}"
-    
-    # Skip if no tarball (packages without Cargo.toml)
-    if [[ ! -f "${tarball_path}" ]]; then
-        log_info "[${pkg}] No tarball to upload (non-Rust package)"
-        return 0
-    fi
-    
-    log_phase "[${pkg}] Uploading tarball to GitHub..."
-    
-    # Ensure release exists
-    ensure_github_release || return 1
-    
-    # Upload with retry logic (up to 3 attempts)
-    local max_attempts=3
-    local attempt=1
-    local upload_success=0
-    
-    while [[ $attempt -le $max_attempts ]]; do
-        if [[ $attempt -gt 1 ]]; then
-            log_warning "[${pkg}] Retry attempt ${attempt}/${max_attempts}..."
-            sleep 2  # Brief delay between retries
-        else
-            log_info "[${pkg}] Uploading ${tarball_zst}..."
-        fi
-        
-        if gh release upload "${GENTOO_VERSION}" "${tarball_path}" \
-            --repo "fsvm88/cosmic-overlay" \
-            --clobber 2>&1 | tee -a "${LOG_FILE}"; then
-            upload_success=1
-            break
-        else
-            log_warning "[${pkg}] Upload attempt ${attempt}/${max_attempts} failed"
-            ((attempt++))
-        fi
-    done
-    
-    if [[ $upload_success -eq 0 ]]; then
-        log_error "[${pkg}] Failed to upload tarball after ${max_attempts} attempts"
-        return 1
-    fi
-    
-    # Download and verify checksum
-    log_info "[${pkg}] Verifying uploaded tarball..."
-    local verify_temp=$(mktemp -d)
-    
-    # Download with retry logic
-    attempt=1
-    local download_success=0
-    
-    while [[ $attempt -le $max_attempts ]]; do
-        if [[ $attempt -gt 1 ]]; then
-            log_warning "[${pkg}] Download retry attempt ${attempt}/${max_attempts}..."
-            sleep 2
-        fi
-        
-        if gh release download "${GENTOO_VERSION}" \
-            --repo "fsvm88/cosmic-overlay" \
-            --pattern "${tarball_zst}" \
-            --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
-            download_success=1
-            break
-        else
-            log_warning "[${pkg}] Download attempt ${attempt}/${max_attempts} failed"
-            ((attempt++))
-        fi
-    done
-    
-    if [[ $download_success -eq 0 ]]; then
-        log_error "[${pkg}] Failed to download tarball for verification after ${max_attempts} attempts"
-        rm -rf "${verify_temp}"
-        return 1
-    fi
-    
-    # Compare checksums
-    local original_sum=$(b2sum "${tarball_path}" | awk '{print $1}')
-    local downloaded_sum=$(b2sum "${verify_temp}/${tarball_zst}" | awk '{print $1}')
-    
-    if [[ "$original_sum" == "$downloaded_sum" ]]; then
-        log_success "[${pkg}] Tarball uploaded and verified"
-        rm -rf "${verify_temp}"
-        return 0
-    else
-        log_error "[${pkg}] Checksum mismatch!"
-        log_error "  Local:      ${original_sum}"
-        log_error "  Downloaded: ${downloaded_sum}"
-        rm -rf "${verify_temp}"
-        return 1
-    fi
-}
-
 # Process a single package
 function process_package() {
     local pkg="$1"
@@ -1479,12 +1373,6 @@ function process_package() {
     # Phase 8: Commit
     phase_commit "$pkg"
     update_package_state "$pkg" "completed" "commit"
-    
-    # Phase 9: Upload to GitHub (immediate per-package upload)
-    if ! upload_package_tarball "$pkg"; then
-        log_warning "[${pkg}] Upload failed, but package is committed locally"
-        # Don't fail the package - it's already committed
-    fi
     
     COMPLETED_PACKAGES+=("$pkg")
     log_success "[${pkg}] Package processing completed!"
