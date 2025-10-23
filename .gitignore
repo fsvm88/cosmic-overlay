@@ -1,1 +1,3 @@
 qa-reports/
+.bump-state-*.json
+.bump-*.log

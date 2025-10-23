@@ -2,6 +2,124 @@
 
 This directory contains scripts for testing, validating, and managing the COSMIC overlay repository using modern Gentoo QA tools.
 
+## 🚀 Main Version Bump Script (NEW)
+
+### **`bump_and_qa_ebuild.sh`** - Unified Ebuild Bump & QA Tool
+
+**⭐ RECOMMENDED for all version bumps** - Comprehensive script that handles the entire bump process for COSMIC packages, processing one ebuild at a time with full validation.
+
+**Key Features:**
+
+- 🔄 **Resume by default** - Automatically skips completed packages, efficient for large bumps
+- 📦 **One package at a time** - Clear progress, atomic commits, easier debugging
+- 🎯 **Full validation** - Tarball generation → Manifest → Bump → QA → Commit
+- 🔍 **Smart error handling** - Auto-comments failing PATCHES, clean rollback on errors
+- 📊 **Comprehensive reports** - Detailed summaries of completed, failed, and problematic packages
+- 💾 **State tracking** - JSON state file enables resume after failures or interruptions
+- 🌐 **GitHub integration** - Automatic release creation and tarball upload
+
+**Quick Start:**
+
+```bash
+# Bump all packages for a new COSMIC release
+./scripts/bump_and_qa_ebuild.sh epoch-1.0.0-beta.3
+
+# Process single package (useful for testing or fixes)
+./scripts/bump_and_qa_ebuild.sh epoch-1.0.0-beta.3 -p cosmic-edit
+
+# Dry-run to preview what would happen
+./scripts/bump_and_qa_ebuild.sh -n epoch-1.0.0-beta.3
+
+# Resume after fixing failed packages
+./scripts/bump_and_qa_ebuild.sh epoch-1.0.0-beta.3  # Just run again!
+```
+
+**Advanced Options:**
+
+```bash
+# Add Gentoo revision bump (-r1, -r2, etc.)
+./scripts/bump_and_qa_ebuild.sh epoch-1.0.0-beta.3 -r1
+
+# Force fresh run, ignore previous state
+./scripts/bump_and_qa_ebuild.sh --no-resume epoch-1.0.0-beta.3
+
+# Skip GitHub upload (local testing only)
+./scripts/bump_and_qa_ebuild.sh --no-upload epoch-1.0.0-beta.3
+
+# Testing mode - no commits to git
+./scripts/bump_and_qa_ebuild.sh --no-commit epoch-1.0.0-beta.3
+
+# Enable verbose logging
+./scripts/bump_and_qa_ebuild.sh -v epoch-1.0.0-beta.3
+
+# Clean up temp directory when done
+./scripts/bump_and_qa_ebuild.sh epoch-1.0.0-beta.3 --clean-temp
+```
+
+**Process Flow:**
+
+Each package goes through these phases:
+
+1. **Tarball** - Generate vendored crates with `cargo vendor` + zstd compression
+2. **Manifest** - Add tarball entry with BLAKE2B and SHA512 hashes
+3. **Bump** - Create new ebuild from template, update variables
+4. **Fetch** - Run `ebuild manifest` to download upstream source
+5. **Sysdeps** - Check for missing system dependencies via cargo tree
+6. **Prepare** - Test `src_prepare` phase (unpack + patch application)
+7. **QA** - Run pkgcheck scan for quality issues
+8. **Commit** - Git commit with descriptive message (one per package)
+
+**State Management:**
+
+- State file: `.bump-state-<version>.json` (auto-gitignored)
+- Log file: `.bump-<version>-<timestamp>.log` (auto-gitignored)
+- Temp directory: Kept by default for resume capability
+- Re-validation: Completed packages are re-validated on resume
+
+**Error Handling:**
+
+- **PATCHES failures**: Automatically commented out, flagged for manual review
+- **Package failures**: Logged, cleaned up, script continues to next package
+- **Missing dependencies**: Detected and reported, not auto-added (manual review)
+- **QA issues**: Scanned and reported, no auto-fixing (safer approach)
+
+**Report Output:**
+
+```
+╔═══════════════════════════════════════════════════════════════╗
+║       COSMIC OVERLAY BUMP REPORT: 1.0.0_beta3                ║
+╚═══════════════════════════════════════════════════════════════╝
+
+✓ COMPLETED PACKAGES (24)
+  ✓ cosmic-edit
+  ✓ cosmic-files ⚠ PATCHES COMMENTED
+  ...
+
+✗ FAILED PACKAGES (3)
+  ✗ cosmic-comp (Phase: prepare)
+  ...
+
+⚠ PATCHES COMMENTED (Manual Review Required)
+  • cosmic-files - Patch application failed
+
+⚠ MISSING SYSTEM DEPENDENCIES
+  cosmic-settings: media-libs/libpulse:0
+
+⚠ QA ISSUES
+  cosmic-edit: [error] MissingUnpackerDep
+```
+
+**Requirements:**
+
+- `git`, `git-lfs` - Repository management
+- `gh` - GitHub CLI (authenticated)
+- `cargo` - Rust dependency management
+- `ebuild`, `pkgdev`, `pkgcheck` - Gentoo package tools
+- `zstd`, `b2sum`, `sha512sum` - Compression and hashing
+- `jq` - JSON state file handling (optional but recommended)
+
+---
+
 ## QA and Testing Scripts (Python)
 
 _Replaced bash versions on 2025-09-04 for better maintainability and enhanced functionality._
@@ -67,17 +185,48 @@ _Replaced bash versions on 2025-09-04 for better maintainability and enhanced fu
 - Regenerates metadata cache
 - **Usage:** `./scripts/digests_and_cache.sh`
 
-**`generate_tarballs_for_tag.sh`** - Create release archives
+**`generate_tarballs_for_tag.sh`** - Create release archives ⚠️ **DEPRECATED**
 
+- **Use `bump_and_qa_ebuild.sh` instead** - includes tarball generation
+- Kept for reference only
 - Generates tarballs for specific git tags
-- Used for release management
-- **Usage:** `./scripts/generate_tarballs_for_tag.sh <tag>`
+- **Legacy Usage:** `./scripts/generate_tarballs_for_tag.sh <tag>`
 
-**`get_sys_deps.sh`** - Extract system dependencies
+**`bump_all_tagged_ebuilds.sh`** - Bump tagged versions ⚠️ **DEPRECATED**
 
+- **Use `bump_and_qa_ebuild.sh` instead** - includes bumping with full validation
+- Kept for reference only
+- Bumps all ebuilds to a specific tagged version
+- **Legacy Usage:** `./scripts/bump_all_tagged_ebuilds.sh <tag>`
+
+**`get_sys_deps.sh`** - Extract system dependencies ⚠️ **INTEGRATED**
+
+- **Functionality integrated into `bump_and_qa_ebuild.sh`**
+- Kept for standalone use if needed
 - Analyzes and lists system dependencies
-- Useful for documentation and packaging
-- **Usage:** `./scripts/get_sys_deps.sh`
+- **Usage:** `./scripts/get_sys_deps.sh [tag]`
+
+---
+
+## 📋 Migration Guide
+
+**Moving from legacy scripts to unified script:**
+
+| Old Workflow                                                                                                             | New Workflow                                |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| `generate_tarballs_for_tag.sh epoch-1.0.0-beta.3`<br>`bump_all_tagged_ebuilds.sh epoch-1.0.0-beta.3`<br>Manual QA checks | `bump_and_qa_ebuild.sh epoch-1.0.0-beta.3`  |
+| Manual dependency checking with `get_sys_deps.sh`                                                                        | Automatic during bump process               |
+| Manual manifest updates                                                                                                  | Automatic during bump process               |
+| Manual PATCHES fixes                                                                                                     | Auto-commented with report                  |
+| Manual GitHub uploads                                                                                                    | Automatic with `--no-upload` option to skip |
+
+**Benefits:**
+
+- ✅ One command instead of multiple steps
+- ✅ Automatic resume on failures
+- ✅ Per-package commits for clean git history
+- ✅ Comprehensive reporting of all issues
+- ✅ Safe error handling with automatic rollback
 
 ## Configuration
 
