@@ -465,33 +465,7 @@ function phase_tarball() {
     rm -f "${TEMP_DIR}/${tarball_name}"
     rm -rf vendor "${config_file}"
     
-    # Calculate checksum before copying
-    log_info "[${pkg}] Calculating checksum..."
-    local original_sum=$(b2sum "${tarball_path}" | awk '{print $1}')
-    log_verbose "[${pkg}] Original checksum: ${original_sum}"
-    
-    log_info "[${pkg}] Copying to DISTDIR..."
-    if ! cp "${tarball_path}" "${DISTDIR}/"; then
-        log_error "[${pkg}] Failed to copy to DISTDIR"
-        pop_d
-        return 1
-    fi
-    
-    # Verify checksum after copying
-    log_info "[${pkg}] Verifying copied tarball..."
-    local copied_sum=$(b2sum "${DISTDIR}/${tarball_zst}" | awk '{print $1}')
-    log_verbose "[${pkg}] Copied checksum:   ${copied_sum}"
-    
-    if [[ "${original_sum}" != "${copied_sum}" ]]; then
-        log_error "[${pkg}] Checksum mismatch after copy!"
-        log_error "  Original: ${original_sum}"
-        log_error "  Copied:   ${copied_sum}"
-        rm -f "${DISTDIR}/${tarball_zst}"
-        pop_d
-        return 1
-    fi
-    
-    log_success "[${pkg}] Tarball created and verified: ${tarball_zst}"
+    log_success "[${pkg}] Tarball created in TEMP_DIR: ${tarball_zst}"
     pop_d
     return 0
 }
@@ -503,18 +477,46 @@ function phase_manifest_update() {
     log_phase "[${pkg}] Phase 2: Manifest update"
     
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would update Manifest"
+        log_info "[${pkg}] DRY-RUN: Would copy tarball to DISTDIR and update Manifest"
         return 0
     fi
     
     local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
-    local tarball_path="${DISTDIR}/${tarball_zst}"
+    local temp_tarball_path="${TEMP_DIR}/${tarball_zst}"
+    local distdir_tarball_path="${DISTDIR}/${tarball_zst}"
     
     # Skip if no tarball (packages without Cargo.toml)
-    if [[ ! -f "${tarball_path}" ]]; then
-        log_info "[${pkg}] No tarball found, skipping Manifest update (non-Rust package)"
+    if [[ ! -f "${temp_tarball_path}" ]]; then
+        log_info "[${pkg}] No tarball found in TEMP_DIR, skipping Manifest update (non-Rust package)"
         return 0
     fi
+    
+    # Calculate checksum before copying
+    log_info "[${pkg}] Calculating checksum..."
+    local original_sum=$(b2sum "${temp_tarball_path}" | awk '{print $1}')
+    log_verbose "[${pkg}] Original checksum: ${original_sum}"
+    
+    # Copy tarball to DISTDIR
+    log_info "[${pkg}] Copying to DISTDIR..."
+    if ! cp "${temp_tarball_path}" "${DISTDIR}/"; then
+        log_error "[${pkg}] Failed to copy to DISTDIR"
+        return 1
+    fi
+    
+    # Verify checksum after copying
+    log_info "[${pkg}] Verifying copied tarball..."
+    local copied_sum=$(b2sum "${distdir_tarball_path}" | awk '{print $1}')
+    log_verbose "[${pkg}] Copied checksum:   ${copied_sum}"
+    
+    if [[ "${original_sum}" != "${copied_sum}" ]]; then
+        log_error "[${pkg}] Checksum mismatch after copy!"
+        log_error "  Original: ${original_sum}"
+        log_error "  Copied:   ${copied_sum}"
+        rm -f "${distdir_tarball_path}"
+        return 1
+    fi
+    
+    log_success "[${pkg}] Tarball copied and verified in DISTDIR"
     
     push_d "${__cosmic_de_dir}/${pkg}"
     
@@ -523,11 +525,11 @@ function phase_manifest_update() {
         cp "Manifest" "Manifest.backup"
     fi
     
-    # Calculate hashes
-    log_info "[${pkg}] Calculating hashes..."
-    local size=$(stat -c%s "${tarball_path}")
-    local blake2b=$(b2sum "${tarball_path}" | awk '{print $1}')
-    local sha512=$(sha512sum "${tarball_path}" | awk '{print $1}')
+    # Calculate hashes from DISTDIR copy
+    log_info "[${pkg}] Updating Manifest..."
+    local size=$(stat -c%s "${distdir_tarball_path}")
+    local blake2b=$(b2sum "${distdir_tarball_path}" | awk '{print $1}')
+    local sha512=$(sha512sum "${distdir_tarball_path}" | awk '{print $1}')
     
     # Add entry to Manifest (or update if exists)
     if [[ -f "Manifest" ]]; then
