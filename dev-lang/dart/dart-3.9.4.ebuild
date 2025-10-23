@@ -77,7 +77,7 @@ src_unpack() {
 src_compile() {
 	# Set up depot_tools PATH
 	export PATH="${S}/depot_tools:${PATH}"
-	cd "${S}/sdk" || die "Failed to pushd to sdk directory"
+	cd "${S}/sdk" || die "Failed to cd to sdk directory"
 
 	local build_mode="release"
 	use debug && build_mode="debug"
@@ -106,7 +106,7 @@ src_compile() {
 src_test() {
 	# Set up depot_tools PATH
 	export PATH="${S}/depot_tools:${PATH}"
-	cd "${S}/sdk" || die "Failed to pushd to sdk directory"
+	cd "${S}/sdk" || die "Failed to cd to sdk directory"
 
 	local build_mode="release"
 	use debug && build_mode="debug"
