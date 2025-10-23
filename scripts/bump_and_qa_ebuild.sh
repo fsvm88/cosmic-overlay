@@ -410,9 +410,9 @@ function phase_tarball() {
     push_d "${TEMP_DIR}/cosmic-epoch/${submodule_path}"
     
     if [[ ! -f "Cargo.toml" ]]; then
-        log_warning "[${pkg}] No Cargo.toml found, skipping"
+        log_info "[${pkg}] No Cargo.toml found, skipping tarball generation"
         pop_d
-        return 1
+        return 0
     fi
     
     # Pull LFS files if needed
@@ -488,16 +488,16 @@ function phase_manifest_update() {
         return 0
     fi
     
-    push_d "${__cosmic_de_dir}/${pkg}"
-    
     local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
     local tarball_path="${DISTDIR}/${tarball_zst}"
     
+    # Skip if no tarball (packages without Cargo.toml)
     if [[ ! -f "${tarball_path}" ]]; then
-        log_error "[${pkg}] Tarball not found: ${tarball_path}"
-        pop_d
-        return 1
+        log_info "[${pkg}] No tarball found, skipping Manifest update (non-Rust package)"
+        return 0
     fi
+    
+    push_d "${__cosmic_de_dir}/${pkg}"
     
     # Backup existing Manifest
     if [[ -f "Manifest" ]]; then
@@ -967,18 +967,19 @@ function upload_package_tarball() {
         return 0
     fi
     
+    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
+    local tarball_path="${DISTDIR}/${tarball_zst}"
+    
+    # Skip if no tarball (packages without Cargo.toml)
+    if [[ ! -f "${tarball_path}" ]]; then
+        log_info "[${pkg}] No tarball to upload (non-Rust package)"
+        return 0
+    fi
+    
     log_phase "[${pkg}] Uploading tarball to GitHub..."
     
     # Ensure release exists
     ensure_github_release || return 1
-    
-    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
-    local tarball_path="${DISTDIR}/${tarball_zst}"
-    
-    if [[ ! -f "${tarball_path}" ]]; then
-        log_error "[${pkg}] Tarball not found: ${tarball_path}"
-        return 1
-    fi
     
     # Upload with clobber to replace existing
     log_info "[${pkg}] Uploading ${tarball_zst}..."
