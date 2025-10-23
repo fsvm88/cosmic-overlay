@@ -41,11 +41,11 @@ DISTDIR=""
 TIMESTAMP=""
 
 # State tracking
-declare -a COMPLETED_PACKAGES
-declare -a FAILED_PACKAGES
-declare -a PATCHES_COMMENTED
-declare -A MISSING_DEPS
-declare -A QA_ISSUES
+declare -a COMPLETED_PACKAGES=()
+declare -a FAILED_PACKAGES=()
+declare -a PATCHES_COMMENTED=()
+declare -A MISSING_DEPS=()
+declare -A QA_ISSUES=()
 
 # Logging functions
 function log() { 
@@ -613,6 +613,11 @@ function phase_fetch() {
     
     log_phase "[${pkg}] Phase 4: Fetch upstream source"
     
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[${pkg}] DRY-RUN: Would run ebuild manifest"
+        return 0
+    fi
+    
     push_d "${__cosmic_de_dir}/${pkg}"
     
     local ebuild_file="${pkg}-${GENTOO_VERSION}.ebuild"
@@ -626,12 +631,6 @@ function phase_fetch() {
     # Backup Manifest before ebuild manifest command
     if [[ -f "Manifest" ]]; then
         cp "Manifest" "Manifest.backup2"
-    fi
-    
-    if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would run ebuild manifest"
-        pop_d
-        return 0
     fi
     
     log_info "[${pkg}] Running ebuild manifest..."
@@ -728,6 +727,11 @@ function phase_prepare() {
     
     log_phase "[${pkg}] Phase 6: Test src_prepare"
     
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[${pkg}] DRY-RUN: Would test src_prepare"
+        return 0
+    fi
+    
     push_d "${__cosmic_de_dir}/${pkg}"
     
     local ebuild_file="${pkg}-${GENTOO_VERSION}.ebuild"
@@ -736,12 +740,6 @@ function phase_prepare() {
         log_error "[${pkg}] Ebuild not found: ${ebuild_file}"
         pop_d
         return 1
-    fi
-    
-    if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would test src_prepare"
-        pop_d
-        return 0
     fi
     
     log_info "[${pkg}] Testing unpack and prepare phases..."
@@ -1086,30 +1084,36 @@ function generate_report() {
     log "${BOLD}PACKAGE SUMMARY${NC}"
     log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     log ""
-    log "Total Packages:   $(( ${#COMPLETED_PACKAGES[@]} + ${#FAILED_PACKAGES[@]} ))"
-    log "  ${GREEN}✓${NC} Completed:    ${#COMPLETED_PACKAGES[@]}"
-    log "  ${RED}✗${NC} Failed:       ${#FAILED_PACKAGES[@]}"
+    local completed_count=${#COMPLETED_PACKAGES[@]}
+    local failed_count=${#FAILED_PACKAGES[@]}
+    log "Total Packages:   $(( completed_count + failed_count ))"
+    log "  ${GREEN}✓${NC} Completed:    ${completed_count}"
+    log "  ${RED}✗${NC} Failed:       ${failed_count}"
     log ""
     
-    if [[ ${#COMPLETED_PACKAGES[@]} -gt 0 ]]; then
+    if [[ ${completed_count} -gt 0 ]]; then
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         log "${GREEN}✓ COMPLETED PACKAGES${NC}"
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         log ""
         for pkg in "${COMPLETED_PACKAGES[@]}"; do
             local marker=""
-            for p in "${PATCHES_COMMENTED[@]}"; do
-                if [[ "$p" == "$pkg" ]]; then
-                    marker=" ${YELLOW}⚠ PATCHES COMMENTED${NC}"
-                    break
-                fi
-            done
+            local patches_count=${#PATCHES_COMMENTED[@]}
+            if [[ ${patches_count} -gt 0 ]]; then
+                for p in "${PATCHES_COMMENTED[@]}"; do
+                    if [[ "$p" == "$pkg" ]]; then
+                        marker=" ${YELLOW}⚠ PATCHES COMMENTED${NC}"
+                        break
+                    fi
+                done
+            fi
             log "  ${GREEN}✓${NC} ${pkg}${marker}"
         done
         log ""
     fi
     
-    if [[ ${#FAILED_PACKAGES[@]} -gt 0 ]]; then
+    local failed_count_check=${#FAILED_PACKAGES[@]}
+    if [[ ${failed_count_check} -gt 0 ]]; then
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         log "${RED}✗ FAILED PACKAGES${NC}"
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1124,7 +1128,8 @@ function generate_report() {
         done
     fi
     
-    if [[ ${#PATCHES_COMMENTED[@]} -gt 0 ]]; then
+    local patches_count_check=${#PATCHES_COMMENTED[@]}
+    if [[ ${patches_count_check} -gt 0 ]]; then
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         log "${YELLOW}⚠ PATCHES COMMENTED (Manual Review Required)${NC}"
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1138,7 +1143,8 @@ function generate_report() {
         done
     fi
     
-    if [[ ${#MISSING_DEPS[@]} -gt 0 ]]; then
+    local missing_deps_count=${#MISSING_DEPS[@]}
+    if [[ ${missing_deps_count} -gt 0 ]]; then
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         log "${YELLOW}⚠ MISSING SYSTEM DEPENDENCIES (Manual Review Required)${NC}"
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1157,7 +1163,8 @@ function generate_report() {
         done
     fi
     
-    if [[ ${#QA_ISSUES[@]} -gt 0 ]]; then
+    local qa_issues_count=${#QA_ISSUES[@]}
+    if [[ ${qa_issues_count} -gt 0 ]]; then
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         log "${YELLOW}⚠ QA ISSUES (Manual Review Required)${NC}"
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1338,7 +1345,7 @@ function main() {
     # Process packages
     local pkg_num=0
     for pkg in "${packages[@]}"; do
-        ((pkg_num++))
+        pkg_num=$((pkg_num + 1))
         process_package "$pkg" "$pkg_num" "$total" || true
     done
     
