@@ -34,7 +34,7 @@ RDEPEND="
 
 BDEPEND="
 	>=dev-lang/dart-3.0.0
-	>=dev-util/buf-1.20
+	>=dev-util/buf-1.57.2
 	dev-vcs/git
 "
 
