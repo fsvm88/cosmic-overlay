@@ -900,6 +900,92 @@ function phase_commit() {
     return 0
 }
 
+# Ensure GitHub release exists
+function ensure_github_release() {
+    if [[ $NO_UPLOAD -eq 1 ]] || [[ $DRY_RUN -eq 1 ]]; then
+        return 0
+    fi
+    
+    # Check if release exists, create if needed
+    if ! gh release view "${GENTOO_VERSION}" --repo "fsvm88/cosmic-overlay" &>/dev/null; then
+        log_info "Creating GitHub release ${GENTOO_VERSION}..."
+        if ! gh release create "${GENTOO_VERSION}" \
+            --repo "fsvm88/cosmic-overlay" \
+            --title "${GENTOO_VERSION}" \
+            --notes "Script-generated vendored crates for COSMIC ${GENTOO_VERSION}"; then
+            log_error "Failed to create GitHub release"
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# Upload and verify a single package tarball to GitHub
+function upload_package_tarball() {
+    local pkg="$1"
+    
+    if [[ $NO_UPLOAD -eq 1 ]]; then
+        log_verbose "[${pkg}] Skipping GitHub upload (--no-upload set)"
+        return 0
+    fi
+    
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[${pkg}] DRY-RUN: Would upload tarball to GitHub"
+        return 0
+    fi
+    
+    log_phase "[${pkg}] Uploading tarball to GitHub..."
+    
+    # Ensure release exists
+    ensure_github_release || return 1
+    
+    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
+    local tarball_path="${DISTDIR}/${tarball_zst}"
+    
+    if [[ ! -f "${tarball_path}" ]]; then
+        log_error "[${pkg}] Tarball not found: ${tarball_path}"
+        return 1
+    fi
+    
+    # Upload with clobber to replace existing
+    log_info "[${pkg}] Uploading ${tarball_zst}..."
+    if ! gh release upload "${GENTOO_VERSION}" "${tarball_path}" \
+        --repo "fsvm88/cosmic-overlay" \
+        --clobber 2>&1 | tee -a "${LOG_FILE}"; then
+        log_error "[${pkg}] Failed to upload tarball"
+        return 1
+    fi
+    
+    # Download and verify checksum
+    log_info "[${pkg}] Verifying uploaded tarball..."
+    local verify_temp=$(mktemp -d)
+    
+    if ! gh release download "${GENTOO_VERSION}" \
+        --repo "fsvm88/cosmic-overlay" \
+        --pattern "${tarball_zst}" \
+        --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
+        log_error "[${pkg}] Failed to download tarball for verification"
+        rm -rf "${verify_temp}"
+        return 1
+    fi
+    
+    # Compare checksums
+    local original_sum=$(b2sum "${tarball_path}" | awk '{print $1}')
+    local downloaded_sum=$(b2sum "${verify_temp}/${tarball_zst}" | awk '{print $1}')
+    
+    if [[ "$original_sum" == "$downloaded_sum" ]]; then
+        log_success "[${pkg}] Tarball uploaded and verified"
+        rm -rf "${verify_temp}"
+        return 0
+    else
+        log_error "[${pkg}] Checksum mismatch!"
+        log_error "  Local:      ${original_sum}"
+        log_error "  Downloaded: ${downloaded_sum}"
+        rm -rf "${verify_temp}"
+        return 1
+    fi
+}
+
 # Process a single package
 function process_package() {
     local pkg="$1"
@@ -1028,89 +1114,30 @@ function process_package() {
     phase_commit "$pkg"
     update_package_state "$pkg" "completed" "commit"
     
+    # Phase 9: Upload to GitHub (immediate per-package upload)
+    if ! upload_package_tarball "$pkg"; then
+        log_warning "[${pkg}] Upload failed, but package is committed locally"
+        # Don't fail the package - it's already committed
+    fi
+    
     COMPLETED_PACKAGES+=("$pkg")
     log_success "[${pkg}] Package processing completed!"
     return 0
 }
 
-# Upload tarballs to GitHub release
+# Legacy batch upload function (kept for compatibility, but uploads happen per-package now)
 function upload_to_github() {
     if [[ $NO_UPLOAD -eq 1 ]]; then
-        log_info "Skipping GitHub release upload (--no-upload set)"
+        log_info "GitHub upload was handled per-package during processing"
         return 0
     fi
     
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "DRY-RUN: Would upload tarballs to GitHub release ${GENTOO_VERSION}"
+        log_info "DRY-RUN: Per-package uploads would have occurred during processing"
         return 0
     fi
     
-    log_phase "Creating GitHub release and uploading tarballs..."
-    
-    # Check if release exists
-    if gh release view "${GENTOO_VERSION}" --repo "fsvm88/cosmic-overlay" &>/dev/null; then
-        log_info "Release ${GENTOO_VERSION} already exists"
-    else
-        log_info "Creating release ${GENTOO_VERSION}..."
-        if ! gh release create "${GENTOO_VERSION}" \
-            --repo "fsvm88/cosmic-overlay" \
-            --title "${GENTOO_VERSION}" \
-            --notes "Script-generated vendored crates for COSMIC ${GENTOO_VERSION}"; then
-            log_error "Failed to create GitHub release"
-            return 1
-        fi
-    fi
-    
-    # Upload and verify tarballs
-    log_info "Uploading and verifying tarballs..."
-    local uploaded=0
-    local failed=0
-    local verify_temp=$(mktemp -d)
-    
-    for tarball in "${DISTDIR}"/*-"${GENTOO_VERSION}"-crates.tar.zst; do
-        if [[ -f "$tarball" ]]; then
-            local basename_tarball=$(basename "$tarball")
-            log_info "Uploading ${basename_tarball}..."
-            
-            # Upload with clobber to replace existing
-            if ! gh release upload "${GENTOO_VERSION}" "$tarball" \
-                --repo "fsvm88/cosmic-overlay" \
-                --clobber 2>&1 | tee -a "${LOG_FILE}"; then
-                log_warning "Failed to upload ${basename_tarball}"
-                ((failed++))
-                continue
-            fi
-            
-            # Download and verify checksum
-            log_info "Verifying ${basename_tarball}..."
-            if gh release download "${GENTOO_VERSION}" \
-                --repo "fsvm88/cosmic-overlay" \
-                --pattern "${basename_tarball}" \
-                --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
-                
-                # Compare checksums
-                local original_sum=$(b2sum "$tarball" | awk '{print $1}')
-                local downloaded_sum=$(b2sum "${verify_temp}/${basename_tarball}" | awk '{print $1}')
-                
-                if [[ "$original_sum" == "$downloaded_sum" ]]; then
-                    log_success "Verified ${basename_tarball}"
-                    ((uploaded++))
-                    rm -f "${verify_temp}/${basename_tarball}"
-                else
-                    log_error "Checksum mismatch for ${basename_tarball}!"
-                    log_error "  Local:      ${original_sum}"
-                    log_error "  Downloaded: ${downloaded_sum}"
-                    ((failed++))
-                fi
-            else
-                log_warning "Failed to download ${basename_tarball} for verification"
-                ((failed++))
-            fi
-        fi
-    done
-    
-    rm -rf "${verify_temp}"
-    log_success "Uploaded and verified ${uploaded} tarballs (${failed} failed)"
+    log_info "All package tarballs were uploaded during individual package processing"
     return 0
 }
 
