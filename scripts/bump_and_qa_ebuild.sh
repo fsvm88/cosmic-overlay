@@ -465,6 +465,11 @@ function phase_tarball() {
     rm -f "${TEMP_DIR}/${tarball_name}"
     rm -rf vendor "${config_file}"
     
+    # Calculate checksum before copying
+    log_info "[${pkg}] Calculating checksum..."
+    local original_sum=$(b2sum "${tarball_path}" | awk '{print $1}')
+    log_verbose "[${pkg}] Original checksum: ${original_sum}"
+    
     log_info "[${pkg}] Copying to DISTDIR..."
     if ! cp "${tarball_path}" "${DISTDIR}/"; then
         log_error "[${pkg}] Failed to copy to DISTDIR"
@@ -472,7 +477,21 @@ function phase_tarball() {
         return 1
     fi
     
-    log_success "[${pkg}] Tarball created: ${tarball_zst}"
+    # Verify checksum after copying
+    log_info "[${pkg}] Verifying copied tarball..."
+    local copied_sum=$(b2sum "${DISTDIR}/${tarball_zst}" | awk '{print $1}')
+    log_verbose "[${pkg}] Copied checksum:   ${copied_sum}"
+    
+    if [[ "${original_sum}" != "${copied_sum}" ]]; then
+        log_error "[${pkg}] Checksum mismatch after copy!"
+        log_error "  Original: ${original_sum}"
+        log_error "  Copied:   ${copied_sum}"
+        rm -f "${DISTDIR}/${tarball_zst}"
+        pop_d
+        return 1
+    fi
+    
+    log_success "[${pkg}] Tarball created and verified: ${tarball_zst}"
     pop_d
     return 0
 }
