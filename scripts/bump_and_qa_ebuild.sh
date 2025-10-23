@@ -1000,12 +1000,32 @@ function upload_package_tarball() {
     # Ensure release exists
     ensure_github_release || return 1
     
-    # Upload with clobber to replace existing
-    log_info "[${pkg}] Uploading ${tarball_zst}..."
-    if ! gh release upload "${GENTOO_VERSION}" "${tarball_path}" \
-        --repo "fsvm88/cosmic-overlay" \
-        --clobber 2>&1 | tee -a "${LOG_FILE}"; then
-        log_error "[${pkg}] Failed to upload tarball"
+    # Upload with retry logic (up to 3 attempts)
+    local max_attempts=3
+    local attempt=1
+    local upload_success=0
+    
+    while [[ $attempt -le $max_attempts ]]; do
+        if [[ $attempt -gt 1 ]]; then
+            log_warning "[${pkg}] Retry attempt ${attempt}/${max_attempts}..."
+            sleep 2  # Brief delay between retries
+        else
+            log_info "[${pkg}] Uploading ${tarball_zst}..."
+        fi
+        
+        if gh release upload "${GENTOO_VERSION}" "${tarball_path}" \
+            --repo "fsvm88/cosmic-overlay" \
+            --clobber 2>&1 | tee -a "${LOG_FILE}"; then
+            upload_success=1
+            break
+        else
+            log_warning "[${pkg}] Upload attempt ${attempt}/${max_attempts} failed"
+            ((attempt++))
+        fi
+    done
+    
+    if [[ $upload_success -eq 0 ]]; then
+        log_error "[${pkg}] Failed to upload tarball after ${max_attempts} attempts"
         return 1
     fi
     
@@ -1013,11 +1033,30 @@ function upload_package_tarball() {
     log_info "[${pkg}] Verifying uploaded tarball..."
     local verify_temp=$(mktemp -d)
     
-    if ! gh release download "${GENTOO_VERSION}" \
-        --repo "fsvm88/cosmic-overlay" \
-        --pattern "${tarball_zst}" \
-        --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
-        log_error "[${pkg}] Failed to download tarball for verification"
+    # Download with retry logic
+    attempt=1
+    local download_success=0
+    
+    while [[ $attempt -le $max_attempts ]]; do
+        if [[ $attempt -gt 1 ]]; then
+            log_warning "[${pkg}] Download retry attempt ${attempt}/${max_attempts}..."
+            sleep 2
+        fi
+        
+        if gh release download "${GENTOO_VERSION}" \
+            --repo "fsvm88/cosmic-overlay" \
+            --pattern "${tarball_zst}" \
+            --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
+            download_success=1
+            break
+        else
+            log_warning "[${pkg}] Download attempt ${attempt}/${max_attempts} failed"
+            ((attempt++))
+        fi
+    done
+    
+    if [[ $download_success -eq 0 ]]; then
+        log_error "[${pkg}] Failed to download tarball for verification after ${max_attempts} attempts"
         rm -rf "${verify_temp}"
         return 1
     fi
