@@ -86,9 +86,12 @@ for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
         errorExit 4 "could not find template file: ${template_file}"
 
     if [ ! -f "${ebuild_file}" ]; then
+        log "Processing ${pkg_dir}..."
+        
+        # Step 1: Create new ebuild and substitute variables
         cp "${template_file}" "${ebuild_file}" ||
             errorExit 5 "could not create ${ebuild_file} from template"
-        log "Created new ebuild ${ebuild_file} from template"
+        log "  Created new ebuild ${ebuild_file} from template"
 
         # Update version, remove live ebuild settings, set KEYWORDS, update git ref, and update MY_PV
         # Note: Do NOT replace 9999 in dependency specifications, only in variable assignments
@@ -108,28 +111,37 @@ for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
                 "${ebuild_file}" ||
                 errorExit 124 "${ebuild_file}: could not remove COSMIC_GIT_UNPACK"
         fi
+        log "  Updated ebuild variables"
 
-        ebuild "${ebuild_file}" digest ||
-            errorExit 121 "${ebuild_file}: could not refresh digest"
-        git add "${ebuild_file}" ||
+        # Step 2: Generate manifest
+        ebuild "${ebuild_file}" manifest ||
+            errorExit 121 "${ebuild_file}: could not generate manifest"
+        log "  Generated manifest"
+
+        # Step 3: Commit ebuild and manifest together
+        git add "${ebuild_file}" Manifest ||
             errorExit 122 "${ebuild_file}: could not git-add changes"
+        
+        git commit -m "cosmic-base/${pkg_dir}: add ${VERSION}" ||
+            errorExit 123 "${ebuild_file}: could not commit changes"
+        
         bumped_pkgs+=("${pkg_dir}-${VERSION}")
-        log "Added ${ebuild_file} to staging"
+        log "  Committed ${pkg_dir}-${VERSION}"
+        log ""
     else
         log "SKIPPING ${ebuild_file}, already exists"
     fi
     pop_d
 done
 
-# Commit all changes if any packages were bumped
+# Summary
 if [ ${#bumped_pkgs[@]} -gt 0 ]; then
-    commit_msg="cosmic-base: add version ${VERSION} for:"$'\n'
+    log "Successfully bumped ${#bumped_pkgs[@]} package(s) to version ${VERSION}:"
     for pkg in "${bumped_pkgs[@]}"; do
-        commit_msg+="- ${pkg}"$'\n'
+        log "  - ${pkg}"
     done
-    git commit -m "${commit_msg}" ||
-        errorExit 123 "could not commit changes for: ${bumped_pkgs[*]}"
-    log "Committed changes for: ${bumped_pkgs[*]}"
+else
+    log "No packages were bumped (all already exist)"
 fi
 
 log "ALL DONE! do not forget to test and push!"
