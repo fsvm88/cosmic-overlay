@@ -69,6 +69,8 @@ Each package goes through these phases:
 7. **QA** - Run pkgcheck scan for quality issues
 8. **Commit** - Git commit with descriptive message (one per package)
 
+**Note:** Meta-packages (e.g., `cosmic-meta`, `pop-theme-meta`) only go through phases 3, 7, and 8 (Bump → QA → Commit) since they have no source code.
+
 **State Management:**
 
 - State file: `.bump-state-<version>.json` (auto-gitignored)

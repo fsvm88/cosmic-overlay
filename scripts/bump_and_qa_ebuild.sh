@@ -379,6 +379,13 @@ function prepare_cosmic_epoch() {
     log_success "cosmic-epoch prepared at ${TEMP_DIR}/cosmic-epoch"
 }
 
+# Check if a package is a meta-package (no source, just dependencies)
+function is_meta_package() {
+    local pkg="$1"
+    # cosmic-meta and pop-theme-meta are meta packages
+    [[ "$pkg" == "cosmic-meta" ]] || [[ "$pkg" == "pop-theme-meta" ]]
+}
+
 # Generate list of packages to process
 function get_package_list() {
     if [[ -n "${SINGLE_PACKAGE}" ]]; then
@@ -644,8 +651,8 @@ function phase_bump() {
         fi
     fi
     
-    # Verify SRC_URI exists
-    if ! grep -q "SRC_URI=" "${ebuild_file}"; then
+    # Verify SRC_URI exists (skip for meta-packages as they don't have source)
+    if ! is_meta_package "$pkg" && ! grep -q "SRC_URI=" "${ebuild_file}"; then
         log_error "[${pkg}] No SRC_URI found in ebuild"
         rm -f "${ebuild_file}"
         pop_d
@@ -1104,7 +1111,36 @@ function process_package() {
         fi
     fi
     
-    # Find submodule path
+    # Check if this is a meta-package (no source code, just dependencies)
+    if is_meta_package "$pkg"; then
+        log_info "[${pkg}] Meta-package detected - simplified processing"
+        
+        # Meta-packages only need bump and commit
+        # Phase 1: Bump ebuild
+        if ! phase_bump "$pkg"; then
+            update_package_state "$pkg" "failed" "bump" "Ebuild bump failed"
+            FAILED_PACKAGES+=("$pkg:bump")
+            push_d "${__cosmic_de_dir}/${pkg}"
+            rm -f "${pkg}-${GENTOO_VERSION}.ebuild"
+            pop_d
+            return 1
+        fi
+        update_package_state "$pkg" "in-progress" "bump"
+        
+        # Phase 2: QA scan (non-fatal)
+        phase_qa "$pkg"
+        update_package_state "$pkg" "in-progress" "qa"
+        
+        # Phase 3: Commit
+        phase_commit "$pkg"
+        update_package_state "$pkg" "completed" "commit"
+        
+        COMPLETED_PACKAGES+=("$pkg")
+        log_success "[${pkg}] Meta-package processing completed!"
+        return 0
+    fi
+    
+    # Find submodule path (for regular packages with source code)
     local submodule_path="$pkg"
     if [[ ! -d "${TEMP_DIR}/cosmic-epoch/${pkg}" ]]; then
         # Try xdg-desktop-portal-cosmic
@@ -1117,7 +1153,6 @@ function process_package() {
     fi
     
     # Execute phases
-    local failed=0
     local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
     
     # Phase 1: Tarball
