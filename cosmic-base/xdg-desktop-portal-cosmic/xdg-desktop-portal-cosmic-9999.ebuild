@@ -5,7 +5,8 @@ EAPI=8
 
 LLVM_COMPAT=({18..20})
 LLVM_OPTIONAL=1
-inherit cosmic-de llvm-r1
+
+inherit cosmic-de llvm-r1 systemd
 
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
@@ -33,7 +34,6 @@ RDEPEND+="
 	')
 "
 
-
 pkg_setup() {
 	rust_pkg_setup
 	llvm-r1_pkg_setup
@@ -60,8 +60,12 @@ src_install() {
 	exeinto /usr/libexec
 	doexe "$(cosmic-de_target_dir)/$PN"
 
+	systemd_newuserunit data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
+			xdg-desktop-portal-cosmic.service
+
 	insinto /usr/share/dbus-1/services
-	doins data/org.freedesktop.impl.portal.desktop.cosmic.service
+	newins data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in \
+			org.freedesktop.impl.portal.desktop.cosmic.service
 
 	insinto /usr/share/xdg-desktop-portal/portals
 	doins data/cosmic.portal
