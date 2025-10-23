@@ -547,7 +547,178 @@ function phase_manifest_update() {
     echo "DIST ${tarball_zst} ${size} BLAKE2B ${blake2b} SHA512 ${sha512}" >> "Manifest"
     
     log_success "[${pkg}] Manifest updated with tarball entry"
+    log_info "[${pkg}] Manifest entry:"
+    log_info "  File: ${tarball_zst}"
+    log_info "  Size: ${size} bytes"
+    log_info "  BLAKE2B: ${blake2b}"
+    log_info "  SHA512:  ${sha512}"
+    
     pop_d
+    return 0
+}
+
+# PHASE 2.5: Upload tarball to GitHub immediately after Manifest update
+function phase_upload_tarball() {
+    local pkg="$1"
+    
+    log_phase "[${pkg}] Phase 2.5: Upload tarball to GitHub"
+    
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[${pkg}] DRY-RUN: Would upload tarball to GitHub"
+        return 0
+    fi
+    
+    if [[ $NO_UPLOAD -eq 1 ]]; then
+        log_warning "[${pkg}] Skipping GitHub upload (--no-upload specified)"
+        return 0
+    fi
+    
+    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
+    local tarball_path="${DISTDIR}/${tarball_zst}"
+    
+    # Skip if no tarball (packages without Cargo.toml)
+    if [[ ! -f "${tarball_path}" ]]; then
+        log_info "[${pkg}] No tarball to upload (non-Rust package)"
+        return 0
+    fi
+    
+    log_info "[${pkg}] Uploading tarball to GitHub..."
+    
+    # Ensure release exists
+    if ! ensure_github_release; then
+        log_error "[${pkg}] Failed to ensure GitHub release exists"
+        return 1
+    fi
+    
+    # Get local hashes before upload
+    log_info "[${pkg}] Calculating local hashes..."
+    local local_blake2b
+    local_blake2b=$(b2sum "${tarball_path}" | awk '{print $1}')
+    local local_sha512
+    local_sha512=$(sha512sum "${tarball_path}" | awk '{print $1}')
+    local local_size
+    local_size=$(stat -c%s "${tarball_path}")
+    
+    log_info "[${pkg}] Local tarball hashes:"
+    log_info "  ${BOLD}File:${NC}     ${tarball_zst}"
+    log_info "  ${BOLD}Size:${NC}     ${local_size} bytes"
+    log_info "  ${BOLD}BLAKE2B:${NC}  ${local_blake2b}"
+    log_info "  ${BOLD}SHA512:${NC}   ${local_sha512}"
+    
+    # Upload with retry logic (up to 3 attempts)
+    local max_attempts=3
+    local attempt=1
+    local upload_success=0
+    
+    while [[ $attempt -le $max_attempts ]]; do
+        if [[ $attempt -gt 1 ]]; then
+            log_warning "[${pkg}] Retry attempt ${attempt}/${max_attempts}..."
+            sleep 2  # Brief delay between retries
+        else
+            log_info "[${pkg}] Uploading to GitHub release ${GENTOO_VERSION}..."
+        fi
+        
+        if gh release upload "${GENTOO_VERSION}" "${tarball_path}" \
+            --repo "fsvm88/cosmic-overlay" \
+            --clobber 2>&1 | tee -a "${LOG_FILE}"; then
+            upload_success=1
+            break
+        else
+            log_warning "[${pkg}] Upload attempt ${attempt}/${max_attempts} failed"
+            ((attempt++))
+        fi
+    done
+    
+    if [[ $upload_success -eq 0 ]]; then
+        log_error "[${pkg}] Failed to upload tarball after ${max_attempts} attempts"
+        return 1
+    fi
+    
+    log_success "[${pkg}] Tarball uploaded to GitHub"
+    
+    # Download and verify checksum
+    log_info "[${pkg}] Verifying uploaded tarball from GitHub..."
+    local verify_temp
+    verify_temp=$(mktemp -d)
+    
+    # Download with retry logic
+    attempt=1
+    local download_success=0
+    
+    while [[ $attempt -le $max_attempts ]]; do
+        if [[ $attempt -gt 1 ]]; then
+            log_warning "[${pkg}] Download retry attempt ${attempt}/${max_attempts}..."
+            sleep 2
+        fi
+        
+        if gh release download "${GENTOO_VERSION}" \
+            --repo "fsvm88/cosmic-overlay" \
+            --pattern "${tarball_zst}" \
+            --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
+            download_success=1
+            break
+        else
+            log_warning "[${pkg}] Download attempt ${attempt}/${max_attempts} failed"
+            ((attempt++))
+        fi
+    done
+    
+    if [[ $download_success -eq 0 ]]; then
+        log_error "[${pkg}] Failed to download tarball for verification after ${max_attempts} attempts"
+        rm -rf "${verify_temp}"
+        return 1
+    fi
+    
+    # Calculate hashes of downloaded tarball
+    log_info "[${pkg}] Calculating downloaded tarball hashes..."
+    local downloaded_blake2b
+    downloaded_blake2b=$(b2sum "${verify_temp}/${tarball_zst}" | awk '{print $1}')
+    local downloaded_sha512
+    downloaded_sha512=$(sha512sum "${verify_temp}/${tarball_zst}" | awk '{print $1}')
+    local downloaded_size
+    downloaded_size=$(stat -c%s "${verify_temp}/${tarball_zst}")
+    
+    log_info "[${pkg}] Downloaded tarball hashes:"
+    log_info "  ${BOLD}File:${NC}     ${tarball_zst}"
+    log_info "  ${BOLD}Size:${NC}     ${downloaded_size} bytes"
+    log_info "  ${BOLD}BLAKE2B:${NC}  ${downloaded_blake2b}"
+    log_info "  ${BOLD}SHA512:${NC}   ${downloaded_sha512}"
+    
+    # Compare all hashes
+    local hash_mismatch=0
+    
+    if [[ "$local_blake2b" != "$downloaded_blake2b" ]]; then
+        log_error "[${pkg}] ${BOLD}BLAKE2B mismatch!${NC}"
+        log_error "  ${BOLD}Local:${NC}      ${local_blake2b}"
+        log_error "  ${BOLD}GitHub:${NC}     ${downloaded_blake2b}"
+        hash_mismatch=1
+    fi
+    
+    if [[ "$local_sha512" != "$downloaded_sha512" ]]; then
+        log_error "[${pkg}] ${BOLD}SHA512 mismatch!${NC}"
+        log_error "  ${BOLD}Local:${NC}      ${local_sha512}"
+        log_error "  ${BOLD}GitHub:${NC}     ${downloaded_sha512}"
+        hash_mismatch=1
+    fi
+    
+    if [[ "$local_size" != "$downloaded_size" ]]; then
+        log_error "[${pkg}] ${BOLD}Size mismatch!${NC}"
+        log_error "  ${BOLD}Local:${NC}      ${local_size} bytes"
+        log_error "  ${BOLD}GitHub:${NC}     ${downloaded_size} bytes"
+        hash_mismatch=1
+    fi
+    
+    rm -rf "${verify_temp}"
+    
+    if [[ $hash_mismatch -eq 1 ]]; then
+        log_error "[${pkg}] ${BOLD}Hash verification FAILED!${NC}"
+        log_error "[${pkg}] The tarball on GitHub differs from the local copy!"
+        log_error "[${pkg}] This will cause ebuild fetch to fail with hash mismatches."
+        return 1
+    fi
+    
+    log_success "[${pkg}] ${BOLD}Hash verification PASSED!${NC}"
+    log_success "[${pkg}] All hashes match between local, DISTDIR, and GitHub"
     return 0
 }
 
@@ -1179,6 +1350,20 @@ function process_package() {
         return 1
     fi
     update_package_state "$pkg" "in-progress" "manifest"
+    
+    # Phase 2.5: Upload tarball to GitHub (IMMEDIATE - before ebuild fetch!)
+    if ! phase_upload_tarball "$pkg"; then
+        update_package_state "$pkg" "failed" "upload" "GitHub upload/verification failed"
+        FAILED_PACKAGES+=("$pkg:upload")
+        # Cleanup: restore Manifest, remove tarball
+        push_d "${__cosmic_de_dir}/${pkg}"
+        [[ -f "Manifest.backup" ]] && mv "Manifest.backup" "Manifest"
+        pop_d
+        rm -f "${DISTDIR}/${tarball_zst}"
+        rm -f "${TEMP_DIR}/${tarball_zst}"
+        return 1
+    fi
+    update_package_state "$pkg" "in-progress" "upload"
     
     # Phase 3: Bump
     if ! phase_bump "$pkg"; then
