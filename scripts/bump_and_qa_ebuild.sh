@@ -829,7 +829,7 @@ function phase_bump() {
     
     log_info "[${pkg}] Applying transformations..."
     sed -i \
-        -e 's:KEYWORDS=.*:KEYWORDS="~amd64":' \
+        -e 's|KEYWORDS=.*|KEYWORDS="~amd64"|' \
         -e '/^inherit.*live.*/d' \
         -e '/PROPERTIES=/d' \
         -e '/EGIT_BRANCH=/c\EGIT_COMMIT="'"${ORIGINAL_TAG}"'"' \
