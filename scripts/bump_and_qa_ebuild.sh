@@ -669,7 +669,7 @@ function phase_upload_tarball() {
         log_success "[${pkg}] Tarball uploaded to GitHub"
         
         # Wait for GitHub to process the file (CDN propagation delay)
-        local sleep_duration=$((5 + RANDOM % 6))  # Random between 5-10 seconds
+        local sleep_duration=$((5 + RANDOM % 6))  # Random between 5-10 seconds inclusive
         log_info "[${pkg}] Waiting ${sleep_duration}s for GitHub CDN propagation..."
         sleep ${sleep_duration}
         
