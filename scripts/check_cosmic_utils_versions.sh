@@ -251,10 +251,15 @@ function check_repository() {
         if [ -n "$upstream_version" ]; then
             version_source="Git Tag"
         else
-            # Try Cargo.toml
+            # Try Cargo.toml only if no releases/tags exist
             upstream_version=$(get_cargo_toml_version "$repo" || true)
             if [ -n "$upstream_version" ]; then
-                version_source="Cargo.toml"
+                # Ignore 0.1.0 from Cargo.toml if no releases/tags (default from cargo new)
+                if [ "$upstream_version" = "0.1.0" ]; then
+                    upstream_version=""
+                else
+                    version_source="Cargo.toml"
+                fi
             fi
         fi
     fi
@@ -264,15 +269,35 @@ function check_repository() {
         upstream_version=$(normalize_version "$upstream_version")
     fi
     
-    # Output results
+    # Determine status based on the rules:
+    # 1. no ebuilds in overlay -> new
+    # 2. 9999 only in overlay, no tags/releases upstream -> up-to-date
+    # 3. 9999 only in overlay, tags/releases upstream -> update
+    # 4. 9999 and tagged in overlay, NEW tags/releases upstream not in overlay -> update
+    # 5. 9999 and tagged in overlay, no new tags/releases upstream not in overlay -> up-to-date
+    
     if [ -z "$upstream_version" ]; then
-        echo "${repo}|${current_version}|no-version-found|N/A|unknown"
+        # No version info from upstream
+        if [ "$current_version" = "not-in-overlay" ]; then
+            echo "${repo}|${current_version}|no-version-found|N/A|new"
+        elif [ "$current_version" = "9999-only" ]; then
+            # Rule 2: 9999 only, no upstream tags/releases -> up-to-date
+            echo "${repo}|${current_version}|live-only|N/A|up-to-date"
+        else
+            # Has tagged ebuild but no upstream version info
+            echo "${repo}|${current_version}|no-version-found|N/A|unknown"
+        fi
+    elif [ "$current_version" = "not-in-overlay" ]; then
+        # Rule 1: not in overlay -> new
+        echo "${repo}|${current_version}|${upstream_version}|${version_source}|new"
     elif [ "$current_version" = "9999-only" ]; then
-        # 9999 tracks live git, always considered up-to-date
-        echo "${repo}|${current_version}|${upstream_version}|${version_source}|up-to-date"
+        # Rule 3: 9999 only but upstream has tags/releases -> update (should create tagged ebuild)
+        echo "${repo}|${current_version}|${upstream_version}|${version_source}|update-available"
     elif version_newer "$current_version" "$upstream_version"; then
+        # Rule 4: has tagged ebuild, but upstream has newer version -> update
         echo "${repo}|${current_version}|${upstream_version}|${version_source}|update-available"
     else
+        # Rule 5: has tagged ebuild matching upstream -> up-to-date
         echo "${repo}|${current_version}|${upstream_version}|${version_source}|up-to-date"
     fi
 }
@@ -363,21 +388,20 @@ function display_table() {
         fi
         
         # Apply filter
-        if [ "$filter" = "updates-only" ] && [ "$status" != "update-available" ]; then
+        if [ "$filter" = "updates-only" ] && [ "$status" != "update-available" ] && [ "$status" != "new" ]; then
             continue
         fi
-        if [ "$filter" = "new-only" ] && [ "$current" != "not-in-overlay" ]; then
+        if [ "$filter" = "new-only" ] && [ "$status" != "new" ]; then
             continue
         fi
         
         # Count status
         case "$status" in
+            new)
+                new_count=$((new_count + 1))
+                ;;
             update-available)
-                if [ "$current" = "not-in-overlay" ]; then
-                    new_count=$((new_count + 1))
-                else
-                    update_count=$((update_count + 1))
-                fi
+                update_count=$((update_count + 1))
                 ;;
             up-to-date)
                 uptodate_count=$((uptodate_count + 1))
@@ -390,12 +414,11 @@ function display_table() {
         # Format output with colors
         local status_display
         case "$status" in
+            new)
+                status_display="${GREEN}NEW${NC}"
+                ;;
             update-available)
-                if [ "$current" = "not-in-overlay" ]; then
-                    status_display="${GREEN}NEW${NC}"
-                else
-                    status_display="${YELLOW}UPDATE${NC}"
-                fi
+                status_display="${YELLOW}UPDATE${NC}"
                 ;;
             up-to-date)
                 status_display="${GREEN}UP-TO-DATE${NC}"
@@ -423,7 +446,11 @@ function display_table() {
         fi
         
         local up_display="$upstream"
-        if [ ${#up_display} -gt 9 ]; then
+        if [ "$up_display" = "live-only" ]; then
+            up_display="(live)"
+        elif [ "$up_display" = "no-version-found" ]; then
+            up_display="---"
+        elif [ ${#up_display} -gt 9 ]; then
             up_display="${up_display:0:8}…"
         fi
         
@@ -433,10 +460,10 @@ function display_table() {
     echo "╚════════════════════════════════════╧═══════════╧═══════════╧═════════════════╝"
     echo ""
     echo "Summary:"
-    echo "  ${GREEN}●${NC} New packages available:    $new_count"
-    echo "  ${YELLOW}●${NC} Updates available:         $update_count"
-    echo "  ${GREEN}●${NC} Up-to-date packages:       $uptodate_count"
-    echo "  ${RED}●${NC} No version info:           $unknown_count"
+    echo -e "  ${GREEN}●${NC} New packages available:    $new_count"
+    echo -e "  ${YELLOW}●${NC} Updates available:         $update_count"
+    echo -e "  ${GREEN}●${NC} Up-to-date packages:       $uptodate_count"
+    echo -e "  ${RED}●${NC} No version info:           $unknown_count"
     echo ""
     
     if [ $new_count -gt 0 ] || [ $update_count -gt 0 ]; then
