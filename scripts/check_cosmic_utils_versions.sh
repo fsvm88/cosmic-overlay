@@ -218,9 +218,10 @@ function version_newer() {
         return 0
     fi
     
-    # If only 9999 exists, any versioned release is newer
+    # If only 9999 exists, it tracks live git so no update needed
+    # 9999 supersedes any tagged release
     if [ "$current" = "9999-only" ]; then
-        return 0
+        return 1
     fi
     
     # Simple string comparison (can be enhanced with version comparison logic)
@@ -266,6 +267,9 @@ function check_repository() {
     # Output results
     if [ -z "$upstream_version" ]; then
         echo "${repo}|${current_version}|no-version-found|N/A|unknown"
+    elif [ "$current_version" = "9999-only" ]; then
+        # 9999 tracks live git, always considered up-to-date
+        echo "${repo}|${current_version}|${upstream_version}|${version_source}|up-to-date"
     elif version_newer "$current_version" "$upstream_version"; then
         echo "${repo}|${current_version}|${upstream_version}|${version_source}|update-available"
     else
@@ -412,6 +416,8 @@ function display_table() {
         local curr_display="$current"
         if [ "$curr_display" = "not-in-overlay" ]; then
             curr_display="---"
+        elif [ "$curr_display" = "9999-only" ]; then
+            curr_display="9999"
         elif [ ${#curr_display} -gt 9 ]; then
             curr_display="${curr_display:0:8}…"
         fi
