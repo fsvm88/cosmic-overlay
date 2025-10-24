@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE catmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<catmetadata>
+	<longdescription lang="en">
+		The cosmic-utils category contains community-developed applications,
+		applets, and utilities for the COSMIC desktop environment. These packages
+		are maintained by the cosmic-utils organization on GitHub and provide
+		additional functionality beyond the core COSMIC desktop components.
+
+		This includes full-featured applications (calculators, text editors,
+		task managers, weather apps), panel/dock applets (system monitors,
+		quick actions), and command-line utilities for COSMIC integration.
+	</longdescription>
+</catmetadata>
