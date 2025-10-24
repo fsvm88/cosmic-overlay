@@ -115,8 +115,8 @@ function get_cosmic_utils_repos() {
         ((page++))
     done
     
-    # Filter out archived repos, forks, and templates
-    echo "$all_repos" | jq -r '.[] | select(.archived == false and .fork == false and .is_template == false) | .name'
+    # Filter out archived repos, forks, and templates, then sort alphabetically
+    echo "$all_repos" | jq -r '.[] | select(.archived == false and .fork == false and .is_template == false) | .name' | sort
 }
 
 # Function to get the latest GitHub release version
@@ -370,16 +370,16 @@ function display_table() {
         case "$status" in
             update-available)
                 if [ "$current" = "not-in-overlay" ]; then
-                    ((new_count++))
+                    new_count=$((new_count + 1))
                 else
-                    ((update_count++))
+                    update_count=$((update_count + 1))
                 fi
                 ;;
             up-to-date)
-                ((uptodate_count++))
+                uptodate_count=$((uptodate_count + 1))
                 ;;
             unknown)
-                ((unknown_count++))
+                unknown_count=$((unknown_count + 1))
                 ;;
         esac
         
@@ -410,7 +410,9 @@ function display_table() {
         
         # Truncate versions if too long
         local curr_display="$current"
-        if [ ${#curr_display} -gt 9 ]; then
+        if [ "$curr_display" = "not-in-overlay" ]; then
+            curr_display="---"
+        elif [ ${#curr_display} -gt 9 ]; then
             curr_display="${curr_display:0:8}…"
         fi
         
