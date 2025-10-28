@@ -22,7 +22,7 @@ RDEPEND+="
 	>=sys-auth/seatd-0.8.0
 	>=x11-libs/libxcb-1.16.1
 	>=x11-libs/pixman-0.43.4
-	media-libs/libdisplay-info:0/2
+	media-libs/libdisplay-info:0/3
 "
 
 src_configure() {
