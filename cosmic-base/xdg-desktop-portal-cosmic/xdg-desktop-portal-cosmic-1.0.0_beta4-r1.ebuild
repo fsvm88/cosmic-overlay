@@ -11,13 +11,17 @@ inherit cosmic-de llvm-r1 systemd
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
 
-EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+MY_PV="epoch-1.0.0-beta.4"
+
+SRC_URI="
+	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
+	https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${P}-crates.tar.zst
+	"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 
@@ -45,14 +49,13 @@ src_prepare() {
 	sed \
 		-i 's|@libexecdir@/|/usr/libexec/|' \
 		data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
-		data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in \
-		|| die "sed failed in src_prepare"
+		data/dbus-1/org.freedesktop.impl.portal.desktop.cosmic.service.in
 }
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Fri Oct 17 11:58:46 2025 -0700'
-	export VERGEN_GIT_SHA=56da80f1b4bb8ae84dc4aee50c191bcd6b2ec118
+	export VERGEN_GIT_COMMIT_DATE='Tue Oct 28 11:57:16 2025 -0600'
+	export VERGEN_GIT_SHA=463d1a79dabd4ba36675b7136dc89b18f8ab3444
 
 	cosmic-de_src_configure
 }
