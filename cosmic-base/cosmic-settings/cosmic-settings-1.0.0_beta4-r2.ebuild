@@ -5,18 +5,23 @@ EAPI=8
 
 LLVM_COMPAT=({18..21})
 LLVM_OPTIONAL=1
+
 inherit cosmic-de desktop llvm-r1
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
 
-EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+MY_PV="epoch-1.0.0-beta.4"
+
+SRC_URI="
+	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
+	https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${P}-crates.tar.zst
+	"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 IUSE+=" +networkmanager openvpn"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
