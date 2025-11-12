@@ -30,7 +30,7 @@ esac
 # @DESCRIPTION:
 # See description in rust.eclass from main tree.
 # This is set to specify the minimum Rust version
-RUST_MIN_VER="1.85.1"
+RUST_MIN_VER="1.90.0"
 
 # @ECLASS_VARIABLE: CARGO_OPTIONAL
 # @INTERNAL
