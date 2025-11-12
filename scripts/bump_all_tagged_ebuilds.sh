@@ -112,8 +112,9 @@ for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
         fi
         log "  Updated ebuild variables"
 
-        # Step 2: Generate manifest (only if package has SRC_URI)
-        ebuild "${ebuild_file}" manifest ||
+        # Step 2: Generate manifest using files already in DISTDIR
+        # Use 'digest' instead of 'manifest' to avoid needing pre-existing checksums
+        ebuild "${ebuild_file}" digest ||
             errorExit 121 "${ebuild_file}: could not generate manifest"
         
         # Step 3: Commit ebuild and manifest together (if manifest exists)

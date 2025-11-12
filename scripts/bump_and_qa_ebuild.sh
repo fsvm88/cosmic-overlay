@@ -456,7 +456,7 @@ function phase_tarball() {
     local config_file="config.toml"
     local vendor_failed=0
     
-    if ! cargo vendor > "${config_file}"; then
+    if ! cargo vendor 2>/dev/null > "${config_file}"; then
         log_error "[${pkg}] cargo vendor failed"
         vendor_failed=1
     fi
@@ -910,14 +910,16 @@ function phase_fetch() {
         return 1
     fi
     
-    # Backup Manifest before ebuild manifest command
+    # Backup Manifest before ebuild digest command
     if [[ -f "Manifest" ]]; then
         cp "Manifest" "Manifest.backup2"
     fi
     
-    log_info "[${pkg}] Running ebuild manifest..."
-    if ! ebuild "${ebuild_file}" manifest 2>&1 | tee -a "${LOG_FILE}"; then
-        log_error "[${pkg}] ebuild manifest failed"
+    # Use 'ebuild digest' instead of 'fetch + manifest'
+    # digest generates checksums from files already in DISTDIR without verification
+    log_info "[${pkg}] Running ebuild digest (using files in DISTDIR)..."
+    if ! ebuild "${ebuild_file}" digest 2>&1 | tee -a "${LOG_FILE}"; then
+        log_error "[${pkg}] ebuild digest failed"
         # Restore Manifest
         if [[ -f "Manifest.backup2" ]]; then
             mv "Manifest.backup2" "Manifest"
