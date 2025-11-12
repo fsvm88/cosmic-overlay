@@ -910,29 +910,16 @@ function phase_fetch() {
         return 1
     fi
     
-    # Backup Manifest before ebuild manifest command
+    # Backup Manifest before ebuild digest command
     if [[ -f "Manifest" ]]; then
         cp "Manifest" "Manifest.backup2"
     fi
     
-    # Fetch distfiles first (respects existing files in DISTDIR)
-    # Then generate manifest from those files
-    if grep -q "^SRC_URI=" "${ebuild_file}"; then
-        log_info "[${pkg}] Fetching distfiles (will use existing files in DISTDIR)..."
-        if ! ebuild "${ebuild_file}" fetch 2>&1 | tee -a "${LOG_FILE}"; then
-            log_error "[${pkg}] ebuild fetch failed"
-            # Restore Manifest
-            if [[ -f "Manifest.backup2" ]]; then
-                mv "Manifest.backup2" "Manifest"
-            fi
-            pop_d
-            return 1
-        fi
-    fi
-    
-    log_info "[${pkg}] Running ebuild manifest..."
-    if ! ebuild "${ebuild_file}" manifest 2>&1 | tee -a "${LOG_FILE}"; then
-        log_error "[${pkg}] ebuild manifest failed"
+    # Use 'ebuild digest' instead of 'fetch + manifest'
+    # digest generates checksums from files already in DISTDIR without verification
+    log_info "[${pkg}] Running ebuild digest (using files in DISTDIR)..."
+    if ! ebuild "${ebuild_file}" digest 2>&1 | tee -a "${LOG_FILE}"; then
+        log_error "[${pkg}] ebuild digest failed"
         # Restore Manifest
         if [[ -f "Manifest.backup2" ]]; then
             mv "Manifest.backup2" "Manifest"
