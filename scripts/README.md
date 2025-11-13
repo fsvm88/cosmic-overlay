@@ -150,34 +150,7 @@ _Replaced bash versions on 2025-09-04 for better maintainability and enhanced fu
 - **Requirements:** Python 3, pkgcheck/pkgdev (auto-detected, optional)
 - **Usage:** `python3 scripts/simple-qa-check.py [--quiet] [--config CONFIG]`
 
-### 📊 Report Generation
-
-**`generate-qa-report.py`** - Generate HTML/Markdown reports
-
-- **Enhanced HTML Output**: Modern table-based layout with responsive design
-- **Package-Issue Layout**: One row per package issue (improved from card layout)
-- **Color-Coded Severity**: Error=red, Warning=orange, Info=blue, Style=purple
-- **JSON Parsing**: Native handling of pkgcheck JSON and line-delimited JSON formats
-- **Mobile-Friendly**: Responsive design with sticky headers and hover effects
-- **Backwards Compatibility**: Falls back to text-based parsing for legacy tools
-- **Requirements:** Python 3 (standard library only)
-- **Usage:** `python3 scripts/generate-qa-report.py [--overlay-root PATH] [--reports-dir PATH]`
-
 ## Repository Management Scripts (Bash)
-
-### 🔄 Package Updates
-
-**`bump_all_ebuilds.sh`** - Update all packages to latest versions
-
-- Updates both stable and live ebuilds
-- Fetches latest tags from upstream repositories
-- **Usage:** `./scripts/bump_all_ebuilds.sh`
-
-**`bump_all_tagged_ebuilds.sh`** - Update stable packages only
-
-- Updates only tagged releases (skips live ebuilds)
-- Safer option for production overlays
-- **Usage:** `./scripts/bump_all_tagged_ebuilds.sh`
 
 ### 🛠️ Maintenance
 
@@ -186,20 +159,6 @@ _Replaced bash versions on 2025-09-04 for better maintainability and enhanced fu
 - Updates Manifest files for all packages
 - Regenerates metadata cache
 - **Usage:** `./scripts/digests_and_cache.sh`
-
-**`generate_tarballs_for_tag.sh`** - Create release archives ⚠️ **DEPRECATED**
-
-- **Use `bump_and_qa_ebuild.sh` instead** - includes tarball generation
-- Kept for reference only
-- Generates tarballs for specific git tags
-- **Legacy Usage:** `./scripts/generate_tarballs_for_tag.sh <tag>`
-
-**`bump_all_tagged_ebuilds.sh`** - Bump tagged versions ⚠️ **DEPRECATED**
-
-- **Use `bump_and_qa_ebuild.sh` instead** - includes bumping with full validation
-- Kept for reference only
-- Bumps all ebuilds to a specific tagged version
-- **Legacy Usage:** `./scripts/bump_all_tagged_ebuilds.sh <tag>`
 
 **`get_sys_deps.sh`** - Extract system dependencies ⚠️ **INTEGRATED**
 
@@ -272,8 +231,7 @@ Centralized configuration for all QA tools:
 ### Local Development Testing
 
 1. **Quick validation:** `python3 scripts/simple-qa-check.py`
-2. **Generate reports:** `python3 scripts/generate-qa-report.py`
-3. **Full pipeline test:** `python3 scripts/test-qa-pipeline.py` (if Docker available)
+2. **Full pipeline test:** `python3 scripts/test-qa-pipeline.py` (if Docker available)
 
 ### CI/CD Integration
 
