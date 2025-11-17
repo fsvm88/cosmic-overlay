@@ -3,7 +3,6 @@
 
 EAPI=8
 
-EGIT_LFS=1
 LLVM_COMPAT=({20..21})
 LLVM_OPTIONAL=1
 RUST_NEEDS_LLVM=1
@@ -13,13 +12,17 @@ inherit cosmic-de llvm-r1 pam systemd tmpfiles
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
 
-EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+MY_PV="epoch-1.0.0-beta.5"
+
+SRC_URI="
+	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
+	https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${P}-crates.tar.zst
+	"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 
 REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 
@@ -41,6 +44,10 @@ pkg_setup() {
 }
 
 src_configure() {
+	# Required for some crates to build properly due to build.rs scripts
+	export VERGEN_GIT_COMMIT_DATE='Tue Nov 4 10:23:18 2025 -0700'
+	export VERGEN_GIT_SHA=9aacf6cc1161546ff1c368d8c8f5c9fb230575d9
+
 	cosmic-de_src_configure --all
 }
 
