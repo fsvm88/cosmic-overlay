@@ -20,7 +20,6 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE+=" accessibility +greeter cups"
 
-# PATCHES commented out during bump due to patch failure - needs manual review
 PATCHES=(
 	"${FILESDIR}"/cosmic-session-1.0.0-beta5-backport-137.patch
 )
