@@ -16,23 +16,17 @@ EGIT_BRANCH=master
 EGIT_MIN_CLONE_TYPE=mirror
 EGIT_LFS_CLONE_TYPE=mirror
 
-BDEPEND="
-	media-gfx/imagemagick
-"
-
 # As of 2024-11-01, the git repo now provides a LICENSE
 LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS=""
 
+BDEPEND="
+	media-gfx/imagemagick
+"
+
 src_unpack() {
-	# if [[ "${PV}" == *9999* ]]; then
 	git-r3_src_unpack
-	# else
-	# 	if [[ -n ${A} ]]; then
-	# 		unpack "${A}"
-	# 	fi
-	# fi
 }
 
 src_install() {

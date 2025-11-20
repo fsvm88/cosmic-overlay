@@ -8,13 +8,17 @@ inherit cosmic-de
 DESCRIPTION="OSD daemon for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-osd"
 
-EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+MY_PV="epoch-1.0.0-beta.7"
+
+SRC_URI="
+	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
+	https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${P}-crates.tar.zst
+	"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 
 RDEPEND+="
 	>=media-libs/libpulse-17.0
