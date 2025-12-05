@@ -3,11 +3,9 @@
 
 EAPI=8
 
-LLVM_COMPAT=({20..21})
-LLVM_OPTIONAL=1
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de desktop llvm-r1
+inherit cosmic-de desktop
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
@@ -20,8 +18,6 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 IUSE+=" +networkmanager openvpn"
-
-REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
 
 RDEPEND+="
 	~cosmic-base/cosmic-icons-${PV}
@@ -41,16 +37,7 @@ RDEPEND+="
 	>=sys-apps/accountsservice-23.13.9
 	>=sys-devel/gettext-0.22.4
 	>=x11-misc/xkeyboard-config-2.41
-	$(llvm_gen_dep '
-		llvm-core/clang:${LLVM_SLOT}
-		llvm-core/llvm:${LLVM_SLOT}
-	')
 "
-
-pkg_setup() {
-	rust_pkg_setup
-	llvm-r1_pkg_setup
-}
 
 src_install() {
 	dobin "$(cosmic-de_target_dir)/$PN"
