@@ -32,6 +32,11 @@ esac
 # This is set to specify the minimum Rust version
 RUST_MIN_VER="1.90.0"
 
+# @ECLASS_VARIABLE: LLVM_COMPAT
+LLVM_COMPAT=({20..21})
+LLVM_OPTIONAL=1
+inherit llvm-r1
+
 # @ECLASS_VARIABLE: CARGO_OPTIONAL
 # @INTERNAL
 # @DESCRIPTION:
@@ -39,11 +44,6 @@ RUST_MIN_VER="1.90.0"
 # This is set to allow fine-tuning of which functions we use, and when.
 CARGO_OPTIONAL=1
 inherit cargo xdg
-
-# @ECLASS_VARIABLE: LLVM_COMPAT
-LLVM_COMPAT=({20..21})
-LLVM_OPTIONAL=1
-inherit llvm-r1
 
 # @ECLASS_VARIABLE: BDEPEND
 # @OUTPUT_VARIABLE
