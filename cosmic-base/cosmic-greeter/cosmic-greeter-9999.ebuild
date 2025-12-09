@@ -4,11 +4,9 @@
 EAPI=8
 
 EGIT_LFS=1
-LLVM_COMPAT=({20..21})
-LLVM_OPTIONAL=1
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de llvm-r1 pam systemd tmpfiles
+inherit cosmic-de pam systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
@@ -21,24 +19,13 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
-
 RDEPEND+="
 	~cosmic-base/cosmic-comp-${PV}
 	>=acct-user/cosmic-greeter-0
 	>=dev-libs/libinput-1.26.1
 	>=gui-libs/greetd-0.9.0
 	>=sys-libs/pam-1.5.3-r1
-	$(llvm_gen_dep '
-		llvm-core/clang:${LLVM_SLOT}
-		llvm-core/llvm:${LLVM_SLOT}
-	')
 "
-
-pkg_setup() {
-	rust_pkg_setup
-	llvm-r1_pkg_setup
-}
 
 src_configure() {
 	cosmic-de_src_configure --all

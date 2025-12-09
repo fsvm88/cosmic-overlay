@@ -3,11 +3,9 @@
 
 EAPI=8
 
-LLVM_COMPAT=({20..21})
-LLVM_OPTIONAL=1
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de llvm-r1 systemd
+inherit cosmic-de systemd
 
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
@@ -20,8 +18,6 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
 
-REQUIRED_USE+=" ${LLVM_REQUIRED_USE}"
-
 PATCHES=(
 	"${FILESDIR}/xdg-desktop-portal-1.0.0_beta3-add-SystemdService-directive.patch"
 )
@@ -29,16 +25,7 @@ PATCHES=(
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
 	>=media-video/pipewire-1.0.3
-	$(llvm_gen_dep '
-		llvm-core/clang:${LLVM_SLOT}
-		llvm-core/llvm:${LLVM_SLOT}
-	')
 "
-
-pkg_setup() {
-	rust_pkg_setup
-	llvm-r1_pkg_setup
-}
 
 src_prepare() {
 	cosmic-de_src_prepare

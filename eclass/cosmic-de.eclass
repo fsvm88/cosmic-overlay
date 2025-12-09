@@ -32,6 +32,18 @@ esac
 # This is set to specify the minimum Rust version
 RUST_MIN_VER="1.90.0"
 
+# @ECLASS_VARIABLE: LLVM_COMPAT
+# @DESCRIPTION:
+# See description in llvm-r1.eclass from main tree.
+# This is set to specify which LLVM versions we support.
+LLVM_COMPAT=({20..21})
+# @ECLASS_VARIABLE: LLVM_OPTIONAL
+# @DESCRIPTION:
+# See description in llvm-r1.eclass from main tree.
+# This is set to allow fine-tuning of which functions we use, and when.
+LLVM_OPTIONAL=1
+inherit llvm-r1
+
 # @ECLASS_VARIABLE: CARGO_OPTIONAL
 # @INTERNAL
 # @DESCRIPTION:
@@ -91,6 +103,11 @@ systemd? ( sys-apps/systemd:= )
 	>=sys-apps/dbus-1.15.8
 	>=sys-apps/dbus-broker-36
 )
+$(llvm_gen_dep '
+	llvm-core/clang:${LLVM_SLOT}
+	llvm-core/llvm:${LLVM_SLOT}
+	'
+)
 "
 
 # @ECLASS_VARIABLE: COSMIC_DE_GVFS_IUSE
@@ -134,11 +151,22 @@ fi
 
 IUSE+=" debug debug-line-tables-only elogind max-opt systemd"
 REQUIRED_USE="
+${LLVM_REQUIRED_USE}
 debug? ( !max-opt )
 debug-line-tables-only? ( !debug )
 max-opt? ( !debug )
 ^^ ( elogind systemd )
 "
+
+# @FUNCTION: cosmic-de_pkg_setup
+# @DESCRIPTION:
+# Sets up rust and LLVM environment.
+# libcosmic and possibly other packages depend on clang being available
+# due to libclang dependency
+cosmic-de_pkg_setup() {
+	rust_pkg_setup
+	llvm-r1_pkg_setup
+}
 
 # @FUNCTION: _cosmic-de_src_unpack_tagged
 # @DESCRIPTION:
@@ -318,7 +346,7 @@ cosmic-de_pkg_postrm() {
 	xdg_pkg_postrm
 }
 
-EXPORT_FUNCTIONS src_unpack src_prepare src_configure src_compile src_test pkg_preinst pkg_postinst pkg_postrm
+EXPORT_FUNCTIONS pkg_setup src_unpack src_prepare src_configure src_compile src_test pkg_preinst pkg_postinst pkg_postrm
 
 # @FUNCTION: cosmic-de_install_metainfo
 # @DESCRIPTION:
