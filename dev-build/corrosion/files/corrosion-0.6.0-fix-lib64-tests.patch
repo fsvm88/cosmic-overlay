@@ -1,0 +1,35 @@
+From: Gentoo
+Subject: Fix tests to use CMAKE_INSTALL_LIBDIR instead of hardcoded lib/
+
+Tests were hardcoding lib/ for library paths, which fails on Gentoo multilib
+systems that use lib64/ for 64-bit libraries. Use GNUInstallDirs to detect
+the correct library directory.
+
+--- a/test/corrosion_install/install_lib/CMakeLists.txt
++++ b/test/corrosion_install/install_lib/CMakeLists.txt
+@@ -1,12 +1,14 @@
+ cmake_minimum_required(VERSION 3.15)
+ project(test_project VERSION 0.1.0)
+ include(ExternalProject)
++include(GNUInstallDirs)
+ 
+ add_library(static_lib STATIC IMPORTED)
+ add_library(shared_lib SHARED IMPORTED)
+ set(install_prefix "${CMAKE_CURRENT_BINARY_DIR}/rust_lib")
+-set(static_lib_install_path "${install_prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}rust_lib${CMAKE_STATIC_LIBRARY_SUFFIX}")
+-set(shared_lib_install_path "${install_prefix}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}rust_lib${CMAKE_SHARED_LIBRARY_SUFFIX}")
++# Use CMAKE_INSTALL_LIBDIR to support lib64 on multilib systems
++set(static_lib_install_path "${install_prefix}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}rust_lib${CMAKE_STATIC_LIBRARY_SUFFIX}")
++set(shared_lib_install_path "${install_prefix}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_SHARED_LIBRARY_PREFIX}rust_lib${CMAKE_SHARED_LIBRARY_SUFFIX}")
+ 
+ set_target_properties(static_lib PROPERTIES
+                       IMPORTED_LOCATION
+@@ -32,7 +34,7 @@ add_custom_target(build_rust_project_dummy
+ 
+ add_dependencies(main-static build_rust_project_dummy)
+ 
+-set(CMAKE_BUILD_RPATH ${install_prefix}/lib)
++set(CMAKE_BUILD_RPATH ${install_prefix}/${CMAKE_INSTALL_LIBDIR})
+ add_executable(main-shared main.cpp)
+ target_link_libraries(main-shared
+         PUBLIC shared_lib)
