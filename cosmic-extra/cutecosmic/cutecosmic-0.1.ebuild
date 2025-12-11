@@ -18,26 +18,14 @@ PATCHES=(
 	"${FILESDIR}/${P}-system-corrosion.patch"
 )
 
-DEPEND="
-	>=dev-qt/qtbase-6.8.0:6=[dbus,gui]
-	>=dev-qt/qtdeclarative-6.8.0:6=
+RDEPEND="
+    >=dev-qt/qtbase-6.8.0:6=[dbus,gui]
+    >=dev-qt/qtdeclarative-6.8.0:6=
 "
-RDEPEND="${DEPEND}"
 BDEPEND="
-	>=dev-build/cmake-3.22
-	>=dev-build/corrosion-0.6.0
-	>=dev-lang/rust-1.85.1
-	dev-qt/qtbase:6[gui]
-	dev-lang/rust
+    >=dev-build/cmake-3.22
+    >=dev-build/corrosion-0.6.0
+    >=dev-qt/qtbase-6.8.0:6=[dbus,gui]
+    >=dev-qt/qtdeclarative-6.8.0:6=
+    dev-lang/rust
 "
-
-src_configure() {
-	local mycmakeargs=(
-		-DCMAKE_BUILD_TYPE=Release
-	)
-	cmake_src_configure
-}
-
-src_install() {
-	cmake_src_install
-}
