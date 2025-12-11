@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE catmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<catmetadata>
+	<longdescription lang="en">
+		The cosmic-extra category contains third-party applications and utilities
+		that complement the COSMIC Desktop environment but are not part of the
+		official COSMIC project.
+	</longdescription>
+</catmetadata>
