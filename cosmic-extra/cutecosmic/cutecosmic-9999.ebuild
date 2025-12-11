@@ -15,6 +15,10 @@ SLOT="0"
 KEYWORDS=""
 RESTRICT="network-sandbox"
 
+PATCHES=(
+	"${FILESDIR}/${PN}-0.1-system-corrosion.patch"
+)
+
 DEPEND="
 	>=dev-qt/qtbase-6.8.0:6=[dbus,gui]
 	>=dev-qt/qtdeclarative-6.8.0:6=
@@ -22,7 +26,9 @@ DEPEND="
 RDEPEND="${DEPEND}"
 BDEPEND="
 	>=dev-build/cmake-3.22
+	>=dev-build/corrosion-0.6.0
 	>=dev-lang/rust-1.85.1
+	dev-qt/qtbase:6[gui]
 	virtual/rust
 "
 
