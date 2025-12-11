@@ -28,7 +28,7 @@ BDEPEND="
 	>=dev-build/corrosion-0.6.0
 	>=dev-lang/rust-1.85.1
 	dev-qt/qtbase:6[gui]
-	virtual/rust
+	dev-lang/rust
 "
 
 src_configure() {
