@@ -23,14 +23,14 @@ DEPEND="
 	x11-libs/libXft
 	media-libs/fontconfig
 	media-libs/freetype
-	sys-libs/expat
+	dev-libs/expat
 "
 
 RDEPEND="${DEPEND}"
 
 BDEPEND="
 	dev-vcs/git
-	app-portage/pkgconf
+	dev-util/pkgconf
 	virtual/pkgconfig
 "
 

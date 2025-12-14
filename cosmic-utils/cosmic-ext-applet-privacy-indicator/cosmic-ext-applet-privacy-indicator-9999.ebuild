@@ -27,7 +27,7 @@ RDEPEND="${DEPEND}"
 
 BDEPEND="
 	dev-vcs/git
-	app-portage/pkgconf
+	dev-util/pkgconf
 	virtual/pkgconfig
 "
 
