@@ -1,6 +1,8 @@
 acct-group
 acct-user
 cosmic-base
+cosmic-extra
+cosmic-utils
 dev-lang
 dev-util
 virtual
