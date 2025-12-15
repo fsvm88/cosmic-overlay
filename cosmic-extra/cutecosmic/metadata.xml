@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>fsvm88@gentoo.org</email>
+		<name>Fabio Scaccabarozzi</name>
+	</maintainer>
+	<longdescription lang="en">
+		Qt platform theme plugin for the COSMIC Desktop environment.
+		Helps Qt and KDE applications look and feel more at home in COSMIC.
+		
+		Features:
+		- Dark mode and per-application dark mode override
+		- High contrast mode (Qt 6.10+)
+		- File dialogs integration
+		- Icon theme support with symbolic icon re-coloring
+		- Font configuration
+		- Color palette integration
+	</longdescription>
+	<upstream>
+		<remote-id type="github">IgKh/cutecosmic</remote-id>
+		<bugs-to>https://github.com/IgKh/cutecosmic/issues</bugs-to>
+	</upstream>
+</pkgmetadata>

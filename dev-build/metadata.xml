@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE catmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<catmetadata>
+	<longdescription lang="en">
+		The dev-build category contains build system utilities and tools.
+	</longdescription>
+</catmetadata>
