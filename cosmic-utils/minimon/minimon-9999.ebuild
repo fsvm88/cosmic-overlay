@@ -9,12 +9,10 @@ inherit cargo desktop git-r3 xdg-utils
 
 DESCRIPTION="Minimon COSMIC Applet"
 HOMEPAGE="https://github.com/cosmic-utils/minimon-applet"
-SRC_URI=""
-# The actual license needs verification with 'cargo license' in the source directory.
-LICENSE="GPL-3.0"
+LICENSE="GPL-3"
 
 SLOT="0"
-KEYWORDS="~amd64" # Adjust keywords as necessary for your architecture
+KEYWORDS="~amd64"
 
 # observatory system monitor repository is archived, using gnome-system-monitor instead.
 DEPEND="

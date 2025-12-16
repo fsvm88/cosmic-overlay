@@ -7,17 +7,12 @@ RUST_MIN_VER="1.85.0"
 RUST_MAX_VER="1.92.0"
 inherit cargo desktop git-r3 xdg-utils
 
-DESCRIPTION="Classic Menu is a customizable application launcher for the COSMIC™ desktop environment. It provides a classic style menu for launching applications, accessing system tools, and managing power options."
+DESCRIPTION="Classic style customizable application launcher for COSMIC DE"
 HOMEPAGE="https://github.com/championpeak87/cosmic-ext-classic-menu"
-SRC_URI=""
-# The actual license needs verification with 'cargo license' in the source directory.
-LICENSE="GPL-3.0"
+LICENSE="GPL-3"
 
 SLOT="0"
-KEYWORDS="~amd64" # Adjust keywords as necessary for your architecture
-
-DEPEND="
-"
+KEYWORDS="~amd64"
 
 RDEPEND="${DEPEND}"
 

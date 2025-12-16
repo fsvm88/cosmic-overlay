@@ -9,12 +9,10 @@ inherit cargo desktop git-r3 xdg-utils
 
 DESCRIPTION="Cosmic Privacy Indicator"
 HOMEPAGE="https://github.com/D-Brox/cosmic-ext-applet-privacy-indicator"
-SRC_URI=""
-# The actual license needs verification with 'cargo license' in the source directory.
-LICENSE="GPL-3.0"
+LICENSE="GPL-3"
 
 SLOT="0"
-KEYWORDS="~amd64" # Adjust keywords as necessary for your architecture
+KEYWORDS="~amd64"
 
 # Dependencies based on the GitHub info (libexpat1-dev, libfontconfig-dev, libfreetype-dev, libxkbcommon-dev)
 # These map to Gentoo packages. The 'just' command runner is a build dependency.

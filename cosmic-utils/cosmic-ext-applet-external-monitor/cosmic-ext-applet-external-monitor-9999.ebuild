@@ -9,12 +9,10 @@ inherit cargo desktop git-r3 xdg-utils
 
 DESCRIPTION="External Monitor Brightness Applet for the COSMIC™ desktop"
 HOMEPAGE="https://github.com/cosmic-utils/cosmic-ext-applet-external-monitor-brightness"
-SRC_URI=""
-# The actual license needs verification with 'cargo license' in the source directory.
-LICENSE="GPL-3.0"
+LICENSE="GPL-3"
 
 SLOT="0"
-KEYWORDS="~amd64" # Adjust keywords as necessary for your architecture
+KEYWORDS="~amd64"
 
 DEPEND="
 	app-misc/ddcutil
