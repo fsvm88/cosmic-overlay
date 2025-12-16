@@ -3,6 +3,7 @@ acct-user
 cosmic-base
 cosmic-extra
 cosmic-utils
+dev-build
 dev-lang
 dev-util
 virtual
