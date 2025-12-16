@@ -7,6 +7,8 @@ CRATES="
 	cc@1.0.73
 "
 
+RUST_MIN_VER="1.77.4"
+RUST_MAX_VER="1.92.0"
 RUST_MIN_VERSION="1.77.4"
 
 inherit cargo cmake

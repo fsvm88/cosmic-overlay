@@ -3,6 +3,7 @@
 
 EAPI=8
 
+RUST_MAX_VER="1.92.0"
 inherit cmake
 
 DESCRIPTION="Qt platform theme for the COSMIC Desktop environment"
