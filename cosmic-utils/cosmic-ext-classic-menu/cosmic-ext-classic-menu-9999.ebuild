@@ -5,50 +5,28 @@ EAPI=8
 
 RUST_MIN_VER="1.85.0"
 RUST_MAX_VER="1.92.0"
-inherit cargo desktop git-r3 xdg-utils
+inherit cosmic-de desktop
 
 DESCRIPTION="Classic style customizable application launcher for COSMIC DE"
 HOMEPAGE="https://github.com/championpeak87/cosmic-ext-classic-menu"
-LICENSE="GPL-3"
 
+EGIT_REPO_URI="${HOMEPAGE}"
+EGIT_BRANCH="master"
+
+LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-RDEPEND="${DEPEND}"
-
-BDEPEND="
+BDEPEND+="
 	dev-vcs/git
 	dev-util/pkgconf
 	virtual/pkgconfig
 "
 
-# Source code fetched via git-r3 eclass
-# Ensure this matches the repository URL from the GitHub link
-EGIT_REPO_URI="https://github.com/championpeak87/cosmic-ext-classic-menu.git"
-# Use the master branch or specify a different one
-GIT_BBRANCH="master"
-
-# Gentoo's cargo eclass handles most of the build process.
-# We override the compile and install phases to use 'just' as requested,
-# ensuring it operates within the Portage sandbox (${ED}).
-
-src_unpack() {
-	git-r3_src_unpack
-	cargo_live_src_unpack
-}
-
-src_configure() {
-	cargo_src_configure --no-default-features
-}
-
-src_compile() {
-	cargo_src_compile
-}
-
 src_install() {
 	exeinto /usr/bin
-	doexe "$(cargo_target_dir)/cosmic-ext-classic-menu-applet"
-	doexe "$(cargo_target_dir)/cosmic-ext-classic-menu-settings"
+	doexe "$(cosmic-de_target_dir)/cosmic-ext-classic-menu-applet"
+	doexe "$(cosmic-de_target_dir)/cosmic-ext-classic-menu-settings"
 
 	insinto /usr/share/icons/hicolor/scalable/apps
 	doicon -s scalable res/icons/hicolor/scalable/apps/com.championpeak87.cosmic-ext-classic-menu.svg
@@ -57,8 +35,4 @@ src_install() {
 
 	insinto /usr/share/metainfo
 	doins res/com.championpeak87.cosmic-ext-classic-menu.metainfo.xml
-}
-
-pkg_postinst() {
-	xdg_icon_cache_update
 }

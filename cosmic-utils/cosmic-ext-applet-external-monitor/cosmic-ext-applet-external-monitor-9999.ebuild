@@ -30,7 +30,7 @@ BDEPEND+="
 
 src_install() {
 	exeinto /usr/bin
-	doexe "$(cosmic-de_target_dir)/cosmic-ext-applet-external-monitor-brightness"
+	doexe "$(cosmic-de_target_dir)/${PN}"
 
 	insinto /usr/share/icons/hicolor/symbolic/apps
 	doicon res/icons/cosmic-applet-battery-display-brightness-high-symbolic.svg

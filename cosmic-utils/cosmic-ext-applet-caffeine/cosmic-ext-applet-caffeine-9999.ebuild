@@ -23,7 +23,6 @@ RDEPEND+="
 	>=media-libs/fontconfig-2.14.2-r3
 	>=media-libs/freetype-2.13.2
 	>=x11-libs/libXft-2.3.9
-	>=x11-libs/libxkbcommon-1.6.0
 "
 
 BDEPEND+="
@@ -40,7 +39,7 @@ src_prepare() {
 
 src_install() {
 	exeinto /usr/bin
-	doexe "$(cosmic-de_target_dir)/cosmic-ext-applet-caffeine"
+	doexe "$(cosmic-de_target_dir)/${PN}"
 
 	insinto /usr/share/icons/hicolor/scalable/apps
 	doicon -s scalable res/net.tropicbliss.CosmicExtAppletCaffeine-empty.svg
