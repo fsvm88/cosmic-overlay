@@ -5,21 +5,22 @@ EAPI=8
 
 RUST_MIN_VER="1.88.0"
 RUST_MAX_VER="1.92.0"
-inherit cargo desktop git-r3 xdg-utils
+inherit cosmic-de desktop
 
-DESCRIPTION="Minimon COSMIC Applet"
+DESCRIPTION="Minimon COSMIC DE Applet"
 HOMEPAGE="https://github.com/cosmic-utils/minimon-applet"
-LICENSE="GPL-3"
 
+EGIT_REPO_URI="${HOMEPAGE}"
+EGIT_BRANCH="main"
+
+LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
 # observatory system monitor repository is archived, using gnome-system-monitor instead.
-DEPEND="
+RDEPEND+="
 	gnome-extra/gnome-system-monitor
 "
-
-RDEPEND="${DEPEND}"
 
 BDEPEND="
 	dev-vcs/git
@@ -27,32 +28,9 @@ BDEPEND="
 	virtual/pkgconfig
 "
 
-# Source code fetched via git-r3 eclass
-# Ensure this matches the repository URL from the GitHub link
-EGIT_REPO_URI="https://github.com/cosmic-utils/minimon-applet.git"
-# Use the master branch or specify a different one
-GIT_BBRANCH="master"
-
-# Gentoo's cargo eclass handles most of the build process.
-# We override the compile and install phases to use 'just' as requested,
-# ensuring it operates within the Portage sandbox (${ED}).
-
-src_unpack() {
-	git-r3_src_unpack
-	cargo_live_src_unpack
-}
-
-src_configure() {
-	cargo_src_configure --no-default-features
-}
-
-src_compile() {
-	cargo_src_compile
-}
-
 src_install() {
 	exeinto /usr/bin
-	doexe "$(cargo_target_dir)/cosmic-applet-minimon"
+	doexe "$(cosmic-de_target_dir)/cosmic-applet-minimon"
 
 	insinto /usr/share/icons/hicolor/scalable/apps
 	doicon -s scalable res/icons/apps/io.github.cosmic_utils.minimon-applet-cpu.svg
@@ -67,8 +45,4 @@ src_install() {
 
 	insinto /usr/share/metainfo
 	doins res/io.github.cosmic_utils.minimon-applet.metainfo.xml
-}
-
-pkg_postinst() {
-	xdg_icon_cache_update
 }
