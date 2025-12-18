@@ -4,4 +4,11 @@
 	<maintainer type="person">
 		<email>rosen@aleksandrov.tech</email>
 	</maintainer>
+	<use>
+		<flag name="debug-line-tables-only">When compiling in release or debug mode, only add line-tables, not full debug info.</flag>
+		<flag name="max-opt">Compile in release-maximum-optimization injected profile (codegen-units=1). Still compatible with debug-line-tables-only.</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">cosmic-utils/cosmic-ext-applet-external-monitor-brightness</remote-id>
+	</upstream>
 </pkgmetadata>
