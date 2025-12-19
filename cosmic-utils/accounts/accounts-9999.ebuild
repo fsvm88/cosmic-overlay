@@ -30,6 +30,8 @@ src_configure() {
 }
 
 src_install() {
+	export APPID="dev.edfloreshz.Accounts"
+
 	# Install daemon
 	dobin "$(cosmic-de_target_dir)/accounts-daemon"
 
@@ -42,28 +44,26 @@ src_install() {
 	# Install D-Bus service activation file
 	# Create the D-Bus service file for proper D-Bus activation
 	insinto /usr/share/dbus-1/services
-	cat > "${T}"/dev.edfloreshz.Accounts.service <<-EOF || die
+	cat > "${T}"/${APPID}.service <<-EOF || die
 		[D-BUS Service]
-		Name=dev.edfloreshz.Accounts
+		Name=${APPID}
 		Exec=/usr/bin/accounts-daemon
 		SystemdService=cosmic-accounts.service
 	EOF
-	doins "${T}"/dev.edfloreshz.Accounts.service
+	doins "${T}"/${APPID}.service
 
 	# Install provider configurations
 	insinto /etc/accounts/providers
 	doins accounts-daemon/data/providers/*.toml
 
 	# Install desktop file with proper name
-	newmenu accounts-ui/resources/app.desktop dev.edfloreshz.Accounts.desktop
+	newmenu accounts-ui/resources/app.desktop ${APPID}.desktop
 
 	# Install metainfo with proper name
 	insinto /usr/share/metainfo
-	newins accounts-ui/resources/app.metainfo.xml dev.edfloreshz.Accounts.metainfo.xml
-
+	newins accounts-ui/resources/app.metainfo.xml ${APPID}.metainfo.xml
 	# Install icon with proper name matching the desktop file
-	insinto /usr/share/icons/hicolor/scalable/apps
-	newins accounts-ui/resources/icons/hicolor/scalable/apps/icon.svg dev.edfloreshz.Accounts.svg
+	newicon -s scalable accounts-ui/resources/icons/hicolor/scalable/apps/icon.svg ${APPID}.svg
 
 	# Documentation
 	einstalldocs

@@ -27,11 +27,11 @@ src_install() {
 	exeinto /usr/bin
 	doexe "$(cosmic-de_target_dir)/${PN}"
 
-	insinto /usr/share/icons/hicolor/scalable/apps
-	doicon -s scalable res/icons/hicolor/scalable/apps/io.github.cosmic_utils.Examine.svg
+	export APPID="io.github.cosmic_utils.Examine"
 
-	domenu res/io.github.cosmic_utils.Examine.desktop
+	doicon -s scalable res/icons/hicolor/scalable/apps/${APPID}.svg
 
-	insinto /usr/share/metainfo
-	doins res/io.github.cosmic_utils.Examine.metainfo.xml
+	domenu res/${APPID}.desktop
+
+	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
 }

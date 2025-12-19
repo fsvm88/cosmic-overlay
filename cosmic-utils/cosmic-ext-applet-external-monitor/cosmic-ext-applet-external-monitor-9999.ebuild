@@ -29,18 +29,15 @@ BDEPEND+="
 "
 
 src_install() {
+	export APPID="io.github.cosmic_utils.cosmic-ext-applet-external-monitor-brightness"
+
 	exeinto /usr/bin
 	doexe "$(cosmic-de_target_dir)/${PN}"
 
-	insinto /usr/share/icons/hicolor/symbolic/apps
-	doicon res/icons/cosmic-applet-battery-display-brightness-high-symbolic.svg
-	doicon res/icons/cosmic-applet-battery-display-brightness-low-symbolic.svg
-	doicon res/icons/cosmic-applet-battery-display-brightness-medium-symbolic.svg
-	doicon res/icons/cosmic-applet-battery-display-brightness-off-symbolic.svg
-	doicon res/icons/display-symbolic.svg
+	doicon -s symbolic res/icons/display-symbolic.svg
 
-	newmenu res/desktop_entry.desktop io.github.cosmic_utils.cosmic-ext-applet-external-monitor-brightness.desktop
+	newmenu res/desktop_entry.desktop ${APPID}.desktop
 
 	insinto /usr/share/metainfo
-	newins res/metainfo.xml io.github.cosmic_utils.cosmic-ext-applet-external-monitor-brightness.metainfo.xml
+	newins res/metainfo.xml ${APPID}.metainfo.xml
 }

@@ -29,15 +29,12 @@ BDEPEND+="
 "
 
 src_install() {
+	export APPID="dev.DBrox.CosmicGameModeStatus"
+
 	exeinto /usr/bin
 	doexe "$(cosmic-de_target_dir)/${PN}"
 
-#	insinto /usr/share/icons/hicolor/scalable/apps
-#	doicon -s scalable res/net.tropicbliss.CosmicExtAppletCaffeine-empty.svg
-#	doicon -s scalable res/net.tropicbliss.CosmicExtAppletCaffeine-full.svg
+	domenu res/${APPID}.desktop
 
-	domenu res/dev.DBrox.CosmicGameModeStatus.desktop
-
-	insinto /usr/share/metainfo
-	doins res/dev.DBrox.CosmicGameModeStatus.metainfo.xml
+	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
 }

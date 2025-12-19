@@ -32,17 +32,11 @@ src_install() {
 	exeinto /usr/bin
 	doexe "$(cosmic-de_target_dir)/cosmic-applet-minimon"
 
-	insinto /usr/share/icons/hicolor/scalable/apps
-	doicon -s scalable res/icons/apps/io.github.cosmic_utils.minimon-applet-cpu.svg
-	doicon -s scalable res/icons/apps/io.github.cosmic_utils.minimon-applet-gpu.svg
-	doicon -s scalable res/icons/apps/io.github.cosmic_utils.minimon-applet-harddisk.svg
-	doicon -s scalable res/icons/apps/io.github.cosmic_utils.minimon-applet-network.svg
-	doicon -s scalable res/icons/apps/io.github.cosmic_utils.minimon-applet-ram.svg
-	doicon -s scalable res/icons/apps/io.github.cosmic_utils.minimon-applet.svg
-	doicon -s scalable res/icons/apps/io.github.cosmic_utils.minimon-applet-temperature.svg
+	export APPID="io.github.cosmic_utils.minimon-applet"
 
-	domenu res/io.github.cosmic_utils.minimon-applet.desktop
+	doicon -s scalable res/icons/apps/*.svg
 
-	insinto /usr/share/metainfo
-	doins res/io.github.cosmic_utils.minimon-applet.metainfo.xml
+	domenu res/${APPID}.desktop
+
+	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
 }

@@ -27,12 +27,9 @@ src_install() {
 	exeinto /usr/bin
 	doexe "$(cosmic-de_target_dir)/${PN}"
 
-#	insinto /usr/share/icons/hicolor/scalable/apps
-#	doicon -s scalable res/net.tropicbliss.CosmicExtAppletCaffeine-empty.svg
-#	doicon -s scalable res/net.tropicbliss.CosmicExtAppletCaffeine-full.svg
+	export APPID="dev.DBrox.CosmicPrivacyIndicator"
 
-	domenu res/dev.DBrox.CosmicPrivacyIndicator.desktop
+	domenu res/${APPID}.desktop
 
-	insinto /usr/share/metainfo
-	doins res/dev.DBrox.CosmicPrivacyIndicator.metainfo.xml
+	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
 }

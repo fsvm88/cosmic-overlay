@@ -28,11 +28,14 @@ src_install() {
 	doexe "$(cosmic-de_target_dir)/cosmic-ext-classic-menu-applet"
 	doexe "$(cosmic-de_target_dir)/cosmic-ext-classic-menu-settings"
 
-	insinto /usr/share/icons/hicolor/scalable/apps
-	doicon -s scalable res/icons/hicolor/scalable/apps/com.championpeak87.cosmic-ext-classic-menu.svg
+	export APPID="com.championpeak87.cosmic-ext-classic-menu"
 
-	domenu res/com.championpeak87.cosmic-ext-classic-menu.desktop
+	domenu res/${APPID}.desktop
 
-	insinto /usr/share/metainfo
-	doins res/com.championpeak87.cosmic-ext-classic-menu.metainfo.xml
+	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
+
+	doicon -s scalable res/icons/hicolor/scalable/apps/${APPID}.svg
+
+	insinto /usr/share/cosmic/${APPID}/applet-buttons
+	doins -r res/icons/bundled/applet-button/*.svg
 }

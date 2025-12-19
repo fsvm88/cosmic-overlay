@@ -38,15 +38,15 @@ src_prepare() {
 }
 
 src_install() {
+	export APPID="net.tropicbliss.CosmicExtAppletCaffeine"
+
 	exeinto /usr/bin
 	doexe "$(cosmic-de_target_dir)/${PN}"
 
-	insinto /usr/share/icons/hicolor/scalable/apps
-	doicon -s scalable res/net.tropicbliss.CosmicExtAppletCaffeine-empty.svg
-	doicon -s scalable res/net.tropicbliss.CosmicExtAppletCaffeine-full.svg
+	doicon -s scalable res/${APPID}-empty.svg
+	doicon -s scalable res/${APPID}-full.svg
 
-	domenu res/net.tropicbliss.CosmicExtAppletCaffeine.desktop
+	domenu res/${APPID}.desktop
 
-	insinto /usr/share/metainfo
-	doins res/net.tropicbliss.CosmicExtAppletCaffeine.metainfo.xml
+	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
 }

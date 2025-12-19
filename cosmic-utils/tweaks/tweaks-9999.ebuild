@@ -24,14 +24,15 @@ BDEPEND+="
 "
 
 src_install() {
+	export APPID="dev.edfloreshz.CosmicTweaks"
+
 	exeinto /usr/bin
-	doexe "$(cargo_target_dir)/cosmic-ext-tweaks"
+	doexe "$(cosmic-de_target_dir)/cosmic-ext-tweaks"
 
-	insinto /usr/share/icons/hicolor/scalable/apps
-	newicon -s scalable res/icons/hicolor/scalable/apps/icon.svg dev.edfloreshz.CosmicTweaks.svg
+	newicon -s scalable res/icons/hicolor/scalable/apps/icon.svg ${APPID}.svg
 
-	newmenu res/app.desktop dev.edfloreshz.CosmicTweaks.desktop
+	newmenu res/app.desktop ${APPID}.desktop
 
 	insinto /usr/share/metainfo
-	newins res/metainfo.xml net.tropicbliss.CosmicExtAppletCaffeine.metainfo.xml
+	newins res/metainfo.xml ${APPID}.metainfo.xml
 }
