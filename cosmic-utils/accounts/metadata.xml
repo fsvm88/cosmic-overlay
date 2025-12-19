@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>fsvm88@gentoo.org</email>
+		<name>Fabio Scaccabarozzi</name>
+	</maintainer>
+	<longdescription lang="en">
+		A comprehensive online account management system for the COSMIC desktop environment.
+
+		The package includes:
+		- Core library for account, provider, and credential management
+		- D-Bus daemon service for OAuth2 authentication and credential storage
+		- GUI application for managing online accounts in COSMIC
+		- Provider configuration system for various services
+	</longdescription>
+	<use>
+		<flag name="debug-line-tables-only">When compiling in release or debug mode, only add line-tables, not full debug info.</flag>
+		<flag name="max-opt">Compile in release-maximum-optimization injected profile (codegen-units=1). Still compatible with debug-line-tables-only.</flag>
+	</use>
+	<upstream>
+		<bugs-to>https://github.com/cosmic-utils/accounts/issues</bugs-to>
+		<remote-id type="github">cosmic-utils/accounts</remote-id>
+	</upstream>
+</pkgmetadata>

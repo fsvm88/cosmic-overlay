@@ -3,6 +3,7 @@
 
 EAPI=8
 
+RUST_MAX_VER="1.92.0"
 inherit cmake
 
 DESCRIPTION="Qt platform theme for the COSMIC Desktop environment"
@@ -19,13 +20,13 @@ PATCHES=(
 )
 
 RDEPEND="
-    >=dev-qt/qtbase-6.8.0:6=[dbus,gui]
-    >=dev-qt/qtdeclarative-6.8.0:6=
+	>=dev-qt/qtbase-6.8.0:6=[dbus,gui]
+	>=dev-qt/qtdeclarative-6.8.0:6=
 "
 BDEPEND="
-    >=dev-build/cmake-3.22
-    >=dev-build/corrosion-0.6.0
-    >=dev-qt/qtbase-6.8.0:6=[dbus,gui]
-    >=dev-qt/qtdeclarative-6.8.0:6=
-    dev-lang/rust
+	>=dev-build/cmake-3.22
+	>=dev-build/corrosion-0.6.0
+	>=dev-qt/qtbase-6.8.0:6=[dbus,gui]
+	>=dev-qt/qtdeclarative-6.8.0:6=
+	dev-lang/rust
 "
