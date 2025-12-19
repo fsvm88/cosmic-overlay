@@ -3,8 +3,6 @@
 
 EAPI=8
 
-RUST_MIN_VER="1.88.0"
-RUST_MAX_VER="1.92.0"
 inherit cosmic-de desktop
 
 DESCRIPTION="Minimon COSMIC DE Applet"
