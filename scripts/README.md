@@ -152,6 +152,52 @@ _Replaced bash versions on 2025-09-04 for better maintainability and enhanced fu
 
 ## Repository Management Scripts (Bash)
 
+### 🔄 Package Updates
+
+**`check_cosmic_utils_versions.sh`** - Check for new cosmic-utils packages ⭐ **NEW**
+
+- **Purpose:** Monitors 38+ community packages from [cosmic-utils](https://github.com/cosmic-utils) organization
+- **Check Methods:** GitHub releases → Git tags → Cargo.toml (in priority order)
+- **Comparison:** Compares upstream versions against local cosmic-utils/ category
+- **Output Formats:** Table (default), JSON, CSV
+- **Filtering:** Show all, updates-only, or new-only packages
+- **Rate Limits:** 60 req/hour (no auth), 5000 req/hour (with GITHUB_TOKEN)
+- **Requirements:** curl, jq, git
+
+**Usage:**
+
+```bash
+# Show all packages in table format
+./scripts/check_cosmic_utils_versions.sh
+
+# Show only packages with updates available
+./scripts/check_cosmic_utils_versions.sh updates-only
+
+# Show only new packages not yet in overlay
+./scripts/check_cosmic_utils_versions.sh new-only
+
+# Output as JSON for automation
+./scripts/check_cosmic_utils_versions.sh json
+
+# With GitHub authentication (higher rate limit)
+export GITHUB_TOKEN="ghp_your_token_here"
+./scripts/check_cosmic_utils_versions.sh
+```
+
+**Output Example:**
+
+```
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                      COSMIC-UTILS VERSION CHECK RESULTS                       ║
+╟────────────────────────────────────┬───────────┬───────────┬─────────────────╢
+║ Package                            │ Current   │ Upstream  │ Status          ║
+╟────────────────────────────────────┼───────────┼───────────┼─────────────────╢
+║ calculator                         │ 0.1.0     │ 0.2.0     │ UPDATE          ║
+║ tasks                              │ not-in... │ 0.3.0     │ NEW             ║
+║ forecast                           │ 1.0.0     │ 1.0.0     │ UP-TO-DATE      ║
+╚════════════════════════════════════╧═══════════╧═══════════╧═════════════════╝
+```
+
 ### 🛠️ Maintenance
 
 **`digests_and_cache.sh`** - Regenerate manifests and metadata cache
