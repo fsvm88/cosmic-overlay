@@ -3,8 +3,9 @@
 
 EAPI=8
 
+RUST_MIN_VER="1.90.0"
 RUST_MAX_VER="1.92.0"
-inherit cmake git-r3
+inherit cmake rust
 
 DESCRIPTION="Qt platform theme for the COSMIC Desktop environment"
 HOMEPAGE="https://github.com/IgKh/cutecosmic"
@@ -29,5 +30,4 @@ BDEPEND="
 	>=dev-build/corrosion-0.6.0
 	>=dev-qt/qtbase-6.8.0:6=[dbus,gui]
 	>=dev-qt/qtdeclarative-6.8.0:6=
-	dev-lang/rust
 "
