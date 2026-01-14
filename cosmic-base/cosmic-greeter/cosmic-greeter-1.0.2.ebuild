@@ -10,7 +10,7 @@ inherit cosmic-de pam systemd tmpfiles
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
 
-MY_PV="epoch-1.0.0"
+MY_PV="epoch-1.0.2"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -32,8 +32,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Fri Dec 5 09:17:33 2025 -0700'
-	export VERGEN_GIT_SHA=d5c4746a5a640bf65aa2fde9843e8bc3c0250175
+	export VERGEN_GIT_COMMIT_DATE='Tue Dec 30 08:50:47 2025 -0700'
+	export VERGEN_GIT_SHA=4d74121ac1fa48126f080d170be20abf551cdbaa
 
 	cosmic-de_src_configure --all
 }

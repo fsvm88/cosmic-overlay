@@ -5,10 +5,10 @@ EAPI=8
 
 inherit cosmic-de desktop
 
-DESCRIPTION="app library for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-applibrary"
+DESCRIPTION="workspaces support for COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-workspaces-epoch"
 
-MY_PV="epoch-1.0.0"
+MY_PV="epoch-1.0.2"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -20,14 +20,16 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
+RDEPEND+="
+	>=media-libs/mesa-24.0.4
+"
+
 src_install() {
-	# One of the few where $PN does not apply (would be cosmic-applibrary)
-	dobin "$(cosmic-de_target_dir)/cosmic-app-library"
+	# one of the few components with custom binary name, no $PN
+	dobin "$(cosmic-de_target_dir)/cosmic-workspaces"
 
-	domenu data/com.system76.CosmicAppLibrary.desktop
-
-	cosmic-de_install_metainfo data/com.system76.CosmicAppLibrary.metainfo.xml
+	domenu data/com.system76.CosmicWorkspaces.desktop
 
 	insinto /usr/share/icons/hicolor/scalable/apps
-	doins data/icons/com.system76.CosmicAppLibrary.svg
+	doins data/com.system76.CosmicWorkspaces.svg
 }

@@ -3,12 +3,12 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de
 
-DESCRIPTION="utility for capturing screenshots via XDG Desktop Portal from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-screenshot"
+DESCRIPTION="OSD daemon for COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-osd"
 
-MY_PV="epoch-1.0.0"
+MY_PV="epoch-1.0.2"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -21,14 +21,15 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND+="
-	>=cosmic-base/xdg-desktop-portal-cosmic-${PV}
+	>=media-libs/libpulse-17.0
+	>=virtual/libudev-251-r2
 "
+
+src_prepare() {
+	sed -i 's|.unwrap_or("/usr/libexec/polkit-agent-helper-1")|.unwrap_or("/usr/lib/polkit-1/polkit-agent-helper-1")|' src/subscriptions/polkit_agent_helper.rs || die 'Failed to patch polkit path'
+	cosmic-de_src_prepare
+}
 
 src_install() {
 	dobin "$(cosmic-de_target_dir)/$PN"
-
-	domenu resources/com.system76.CosmicScreenshot.desktop
-
-	insinto /usr/share/icons/hicolor
-	doins -r resources/icons/hicolor/*
 }
