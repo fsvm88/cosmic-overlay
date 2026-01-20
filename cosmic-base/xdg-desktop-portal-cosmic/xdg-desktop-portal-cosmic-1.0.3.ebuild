@@ -23,9 +23,9 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 # PATCHES commented out during bump due to patch failure - needs manual review
-# PATCHES=(
-# 	"${FILESDIR}/xdg-desktop-portal-1.0.0_beta3-add-SystemdService-directive.patch"
-# )
+PATCHES=(
+    "${FILESDIR}/xdg-desktop-portal-1.0.0_beta3-add-SystemdService-directive.patch"
+)
 
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
