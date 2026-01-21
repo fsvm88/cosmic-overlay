@@ -10,7 +10,7 @@ inherit cosmic-de systemd
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
 
-MY_PV="epoch-1.0.1"
+MY_PV="epoch-1.0.3"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -43,8 +43,8 @@ src_prepare() {
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Dec 30 08:46:07 2025 -0700'
-	export VERGEN_GIT_SHA=63903c94507d14732f8b95d745d75dc4944ff461
+	export VERGEN_GIT_COMMIT_DATE='Fri Jan 16 16:08:41 2026 -0700'
+	export VERGEN_GIT_SHA=e80eb7f11247371efd06e373d891815cd6a8acf1
 
 	cosmic-de_src_configure
 }

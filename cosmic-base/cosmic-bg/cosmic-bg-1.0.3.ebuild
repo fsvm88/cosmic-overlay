@@ -8,7 +8,7 @@ inherit cosmic-de desktop
 DESCRIPTION="display background service for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-bg"
 
-MY_PV="epoch-1.0.1"
+MY_PV="epoch-1.0.3"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
