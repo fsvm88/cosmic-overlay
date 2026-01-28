@@ -61,7 +61,7 @@ src_prepare() {
 	# https://github.com/pop-os/cosmic-session/pull/95/files
 	sed \
 		-i "s|DCONF_PROFILE=cosmic|DCONF_PROFILE=/usr/share/dconf/profile/cosmic|" \
-		data/start-cosmic
+		data/start-cosmic || die "failed to patch data/start-cosmic via sed"
 }
 
 src_configure() {

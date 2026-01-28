@@ -59,7 +59,7 @@ src_install() {
 		-e '/#\[Install\]/s/^#//' \
 		-e '/#Alias/s/^#//' \
 		debian/cosmic-greeter.service
-	systemd_dounit debian/cosmic-greeter.service
+	systemd_dounit debian/cosmic-greeter.service || die "failed to patch systemd unit via sed"
 
 	newtmpfiles "${FILESDIR}/systemd.tmpfiles" "${PN}.conf"
 }

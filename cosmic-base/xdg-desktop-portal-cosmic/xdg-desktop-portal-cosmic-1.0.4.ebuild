@@ -28,7 +28,6 @@ PATCHES=(
 
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
-	>=media-video/pipewire-1.0.3
 "
 
 src_prepare() {
