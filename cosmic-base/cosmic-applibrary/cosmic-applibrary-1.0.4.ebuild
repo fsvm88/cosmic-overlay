@@ -5,10 +5,10 @@ EAPI=8
 
 inherit cosmic-de desktop
 
-DESCRIPTION="launcher for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-launcher"
+DESCRIPTION="app library for COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-applibrary"
 
-MY_PV="epoch-1.0.2"
+MY_PV="epoch-1.0.4"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -20,20 +20,14 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-BDEPEND+="
-	>=dev-util/intltool-0.51.0-r3
-"
-RDEPEND+="
-	~cosmic-base/pop-launcher-9999
-"
-
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	# One of the few where $PN does not apply (would be cosmic-applibrary)
+	dobin "$(cosmic-de_target_dir)/cosmic-app-library"
 
-	domenu data/com.system76.CosmicLauncher.desktop
+	domenu data/com.system76.CosmicAppLibrary.desktop
 
-	cosmic-de_install_metainfo data/com.system76.CosmicLauncher.metainfo.xml
+	cosmic-de_install_metainfo data/com.system76.CosmicAppLibrary.metainfo.xml
 
 	insinto /usr/share/icons/hicolor/scalable/apps
-	doins data/icons/com.system76.CosmicLauncher.svg
+	doins data/icons/com.system76.CosmicAppLibrary.svg
 }

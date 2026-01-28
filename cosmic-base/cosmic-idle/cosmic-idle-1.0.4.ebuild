@@ -3,12 +3,12 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de
 
-DESCRIPTION="utility for capturing screenshots via XDG Desktop Portal from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-screenshot"
+DESCRIPTION="screen idle daemon for COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-idle"
 
-MY_PV="epoch-1.0.2"
+MY_PV="epoch-1.0.4"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -20,15 +20,10 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-RDEPEND+="
-	>=cosmic-base/xdg-desktop-portal-cosmic-${PV}
-"
+src_configure() {
+	cosmic-de_src_configure --all
+}
 
 src_install() {
 	dobin "$(cosmic-de_target_dir)/$PN"
-
-	domenu resources/com.system76.CosmicScreenshot.desktop
-
-	insinto /usr/share/icons/hicolor
-	doins -r resources/icons/hicolor/*
 }

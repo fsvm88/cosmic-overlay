@@ -10,7 +10,7 @@ inherit cosmic-de systemd
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
 
-MY_PV="epoch-1.0.2"
+MY_PV="epoch-1.0.4"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -28,7 +28,6 @@ PATCHES=(
 
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
-	>=media-video/pipewire-1.0.3
 "
 
 src_prepare() {
@@ -43,8 +42,8 @@ src_prepare() {
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Thu Jan 8 16:06:31 2026 -0800'
-	export VERGEN_GIT_SHA=c1df2bf9ef8ca15417c3856877161c17cc8257e7
+	export VERGEN_GIT_COMMIT_DATE='Tue Jan 27 11:12:47 2026 -0700'
+	export VERGEN_GIT_SHA=2ab83d5053dca735be56304493b8cb2dde462a42
 
 	cosmic-de_src_configure
 }

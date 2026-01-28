@@ -8,7 +8,7 @@ inherit cosmic-de desktop
 DESCRIPTION="applets for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-applets"
 
-MY_PV="epoch-1.0.2"
+MY_PV="epoch-1.0.4"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
