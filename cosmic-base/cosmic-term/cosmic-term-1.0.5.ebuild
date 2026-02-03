@@ -5,10 +5,10 @@ EAPI=8
 
 inherit cosmic-de desktop
 
-DESCRIPTION="file manager from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-files"
+DESCRIPTION="terminal emulator (built using alacritty_terminal) from COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-term"
 
-MY_PV="epoch-1.0.3"
+MY_PV="epoch-1.0.5"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -19,37 +19,25 @@ SRC_URI="
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE+=" ${COSMIC_DE_GVFS_IUSE}"
 
-BDEPEND+="
-	dev-libs/glib:2
-	${COSMIC_DE_GVFS_DEPENDS}
-"
 RDEPEND+="
-	x11-misc/xdg-utils
-	${COSMIC_DE_GVFS_DEPENDS}
+	>=cosmic-base/cosmic-icons-${PV}
 "
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Fri Jan 16 17:33:48 2026 +0100'
-	export VERGEN_GIT_SHA=3ff39c01eafa7a887f3ee8dbaaaa0139d1140a05
+	export VERGEN_GIT_COMMIT_DATE='Mon Feb 2 14:45:03 2026 -0700'
+	export VERGEN_GIT_SHA=fed389bc4c35ef6b6a7cf6da5dcb97f2bc614749
 
 	cosmic-de_src_configure
 }
 
-src_compile() {
-	cosmic-de_src_compile
-	cosmic-de_src_compile --package "$PN-applet"
-}
-
 src_install() {
 	dobin "$(cosmic-de_target_dir)/$PN"
-	dobin "$(cosmic-de_target_dir)/$PN-applet"
 
-	domenu res/com.system76.CosmicFiles.desktop
+	domenu res/com.system76.CosmicTerm.desktop
 
-	cosmic-de_install_metainfo res/com.system76.CosmicFiles.metainfo.xml
+	cosmic-de_install_metainfo res/com.system76.CosmicTerm.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*

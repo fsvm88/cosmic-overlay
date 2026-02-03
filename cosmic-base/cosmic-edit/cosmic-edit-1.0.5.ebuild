@@ -8,7 +8,7 @@ inherit cosmic-de desktop
 DESCRIPTION="text editor from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-edit"
 
-MY_PV="epoch-1.0.3"
+MY_PV="epoch-1.0.5"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -22,8 +22,8 @@ KEYWORDS="~amd64"
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Fri Jan 16 10:10:37 2026 -0700'
-	export VERGEN_GIT_SHA=f1923f5b9991f747c5341407cbc65087d7feb42d
+	export VERGEN_GIT_COMMIT_DATE='Mon Feb 2 16:07:15 2026 -0500'
+	export VERGEN_GIT_SHA=021a8e614eff652ee33c8923da6200649ff7f8e1
 
 	cosmic-de_src_configure
 }

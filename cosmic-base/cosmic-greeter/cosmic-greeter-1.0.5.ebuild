@@ -10,7 +10,7 @@ inherit cosmic-de pam systemd tmpfiles
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
 
-MY_PV="epoch-1.0.3"
+MY_PV="epoch-1.0.5"
 
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
@@ -32,8 +32,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Fri Jan 16 17:29:16 2026 +0100'
-	export VERGEN_GIT_SHA=f13961274a99f930cdcce4cff2074e627339ef6d
+	export VERGEN_GIT_COMMIT_DATE='Fri Jan 30 19:04:39 2026 -0700'
+	export VERGEN_GIT_SHA=d542978314d0d7f4b28d35d00752099bf70be46a
 
 	cosmic-de_src_configure --all
 }
@@ -59,7 +59,7 @@ src_install() {
 		-e '/#\[Install\]/s/^#//' \
 		-e '/#Alias/s/^#//' \
 		debian/cosmic-greeter.service
-	systemd_dounit debian/cosmic-greeter.service
+	systemd_dounit debian/cosmic-greeter.service || die "failed to patch systemd unit via sed"
 
 	newtmpfiles "${FILESDIR}/systemd.tmpfiles" "${PN}.conf"
 }

@@ -8,7 +8,7 @@ inherit cosmic-de desktop systemd
 DESCRIPTION="sessions manager for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-session"
 
-MY_PV="epoch-1.0.3"
+MY_PV="epoch-1.0.5"
 SRC_URI="
 	https://github.com/pop-os/${PN}/archive/refs/tags/${MY_PV}.tar.gz -> ${PN}-${PV}.tar.gz
 	https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${P}-crates.tar.zst
@@ -61,7 +61,7 @@ src_prepare() {
 	# https://github.com/pop-os/cosmic-session/pull/95/files
 	sed \
 		-i "s|DCONF_PROFILE=cosmic|DCONF_PROFILE=/usr/share/dconf/profile/cosmic|" \
-		data/start-cosmic
+		data/start-cosmic || die "failed to patch data/start-cosmic via sed"
 }
 
 src_configure() {
