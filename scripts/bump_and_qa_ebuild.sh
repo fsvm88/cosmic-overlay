@@ -159,6 +159,131 @@ function convert_version() {
     echo "$ver"
 }
 
+# Validate ORIGINAL_TAG format
+# Ensures tag follows epoch-X.Y.Z or similar naming convention
+function validate_original_tag() {
+    local tag="$1"
+    
+    if [[ -z "$tag" ]]; then
+        errorExit 100 "ORIGINAL_TAG cannot be empty"
+    fi
+    
+    # Tag should start with 'epoch-' followed by version-like pattern
+    # Allow: epoch-1.0.0, epoch-1.0.0-alpha.1, epoch-1.0.0-beta.2, etc.
+    if ! [[ "$tag" =~ ^epoch-[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+        errorExit 100 "Invalid tag format: ${tag}
+Expected format: epoch-X.Y.Z or epoch-X.Y.Z-{alpha|beta|rc}.N
+Examples: epoch-1.0.0, epoch-1.0.0-alpha.1, epoch-1.0.0-beta.2"
+    fi
+    
+    # Reject tags with suspicious shell metacharacters or control characters
+    # Using character class that doesn't need as much escaping
+    if [[ "$tag" =~ [\;\|\&\<\>\$\`] ]]; then
+        errorExit 100 "Tag contains suspicious characters: ${tag}"
+    fi
+    
+    log_verbose "Tag validation passed: ${tag}"
+}
+
+# Validate SINGLE_PACKAGE input
+# Ensures package name is sane and won't cause path traversal issues
+function validate_single_package() {
+    local pkg="$1"
+    
+    if [[ -z "$pkg" ]]; then
+        return 0  # Empty is OK, means process all packages
+    fi
+    
+    # Package names should only contain alphanumerics and hyphens
+    if ! [[ "$pkg" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+        errorExit 101 "Invalid package name: ${pkg}
+Package names must contain only alphanumerics, hyphens, underscores, and dots"
+    fi
+    
+    # Reject suspicious patterns like path traversal
+    if [[ "$pkg" =~ \.\. ]] || [[ "$pkg" =~ ^/ ]]; then
+        errorExit 101 "Package name cannot contain '..' or start with '/': ${pkg}"
+    fi
+    
+    log_verbose "Package validation passed: ${pkg}"
+}
+
+# Validate repository paths for sanity
+# Ensures repo paths don't contain suspicious elements that could cause issues
+function validate_repo_path() {
+    local path_desc="$1"
+    local path="$2"
+    
+    if [[ -z "$path" ]]; then
+        errorExit 102 "${path_desc} cannot be empty"
+    fi
+    
+    # Reject obvious malicious patterns
+    if [[ "$path" =~ [\;\|\&\<\>\`\'\"] ]]; then
+        errorExit 102 "${path_desc} contains shell metacharacters: ${path}"
+    fi
+    
+    # Check if it's a URL, path should look reasonable
+    if [[ "$path" == https://* ]] || [[ "$path" == http://* ]]; then
+        # URLs should be well-formed
+        if ! [[ "$path" =~ ^https?://[a-zA-Z0-9._-]+(/[a-zA-Z0-9._/-]*)?$ ]]; then
+            errorExit 102 "Invalid repository URL: ${path}"
+        fi
+    fi
+    
+    log_verbose "${path_desc} validation passed"
+}
+
+# Manifest race condition prevention
+# When multiple script instances run on different packages in the same cosmic-base/ directory,
+# they can corrupt the Manifest file. This happens because:
+#
+# Instance A (package cosmic-edit):
+#   1. Read Manifest (contains entries for N packages)
+#   2. Add entry for cosmic-edit
+#   3. Write Manifest back
+#
+# Instance B (package cosmic-settings, starting simultaneously):
+#   1. Read Manifest (contains entries for N packages) <- sees state BEFORE A's write
+#   2. Add entry for cosmic-settings
+#   3. Write Manifest back <- OVERWRITES A's changes! Instance A's edit is lost
+#
+# Result: Manifest is corrupted, one package's entry is missing
+#
+# SOLUTION: Use file locking around Manifest operations
+# - acquire_manifest_lock: Obtain exclusive lock on Manifest file
+# - release_manifest_lock: Release the lock
+# - MANIFEST_LOCK_FD: File descriptor used for lock (defaults to 200)
+#
+# This serializes Manifest modifications across concurrent script invocations.
+
+MANIFEST_LOCK_FD=200
+
+function acquire_manifest_lock() {
+    local pkg="$1"
+    local lock_dir="${__cosmic_de_dir}/${pkg}"
+    
+    # Use directory as lock to avoid permission issues with lock files
+    if ! mkdir -p "${lock_dir}/.manifest.lock" 2>/dev/null; then
+        log_warning "[${pkg}] Could not acquire Manifest lock - proceeding without lock (may cause corruption if concurrent)"
+        return 1
+    fi
+    
+    log_verbose "[${pkg}] Acquired Manifest lock"
+    return 0
+}
+
+function release_manifest_lock() {
+    local pkg="$1"
+    local lock_dir="${__cosmic_de_dir}/${pkg}"
+    
+    if [[ -d "${lock_dir}/.manifest.lock" ]]; then
+        if rmdir "${lock_dir}/.manifest.lock" 2>/dev/null; then
+            log_verbose "[${pkg}] Released Manifest lock"
+        fi
+    fi
+}
+
 # Map -sys crates to Gentoo packages
 function map_sys_crate_to_package() {
     local crate="$1"
@@ -264,7 +389,17 @@ function rollback_package() {
     log_verbose "[${pkg}] Rolling back from phase: ${phase}"
 
     # Always restore Manifest if it was modified
-    restore_manifest "$pkg" 2>/dev/null || true
+    if ! restore_manifest "$pkg" 2>&1; then
+        log_warning "[${pkg}] Manifest restore failed or not needed (may not have been modified)"
+    fi
+
+    # Always clean up Manifest.backup to prevent partial state leakage
+    push_d "${__cosmic_de_dir}/${pkg}"
+    if [[ -f "Manifest.backup" ]]; then
+        rm -f "Manifest.backup"
+        log_verbose "[${pkg}] Cleaned up Manifest.backup"
+    fi
+    pop_d
 
     # Remove generated ebuild if requested
     if [[ $cleanup_ebuild -eq 1 ]]; then
@@ -278,18 +413,28 @@ function rollback_package() {
         fi
 
         # Try to restore from git
-        git checkout -- "${pkg}-${GENTOO_VERSION}.ebuild" 2>/dev/null || true
+        if ! git checkout -- "${pkg}-${GENTOO_VERSION}.ebuild" 2>&1 | tee -a "${LOG_FILE}"; then
+            log_warning "[${pkg}] Could not restore ebuild from git (may not be tracked)"
+        else
+            log_verbose "[${pkg}] Restored ebuild from git"
+        fi
         pop_d
     fi
 
     # Clean up source archive
     local source_archive="${pkg}-${GENTOO_VERSION}.tar.zst"
-    rm -f "${DISTDIR}/${source_archive}"
+    if [[ -f "${DISTDIR}/${source_archive}" ]]; then
+        log_verbose "[${pkg}] Cleaning up failed source archive from DISTDIR"
+        rm -f "${DISTDIR}/${source_archive}"
+    fi
     rm -f "${TEMP_DIR}/${source_archive}"
 
     # Clean up crates tarball
     local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
-    rm -f "${DISTDIR}/${tarball_zst}"
+    if [[ -f "${DISTDIR}/${tarball_zst}" ]]; then
+        log_verbose "[${pkg}] Cleaning up failed crates tarball from DISTDIR"
+        rm -f "${DISTDIR}/${tarball_zst}"
+    fi
     rm -f "${TEMP_DIR}/${tarball_zst}"
 }
 
@@ -344,6 +489,10 @@ function check_environment() {
         errorExit 3 "GitHub CLI not authenticated. Run: gh auth login"
     fi
 
+    # Validate repository paths
+    validate_repo_path "COSMIC_EPOCH_REPO" "$COSMIC_EPOCH_REPO"
+    validate_repo_path "COSMIC_OVERLAY_REPO" "$COSMIC_OVERLAY_REPO"
+
     # Check DISTDIR
     if [[ -f /etc/portage/make.conf ]]; then
         # shellcheck disable=SC1091
@@ -363,12 +512,46 @@ function check_environment() {
 }
 
 # Clone or reuse cosmic-epoch repository
+# Validate archive names for safety
+# Prevents path traversal, special characters, and collision risks
+function validate_archive_names() {
+    local pkg="$1"
+
+    local archive_source="${pkg}-${GENTOO_VERSION}.tar.zst"
+    local archive_crates="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
+
+    # Check for suspicious characters or patterns in package name
+    if [[ "${pkg}" =~ [^a-zA-Z0-9_-] ]]; then
+        log_error "Invalid package name: '${pkg}' contains suspicious characters"
+        return 1
+    fi
+
+    # Check archive names don't contain path traversal
+    if [[ "${archive_source}" == *".."* ]] || [[ "${archive_crates}" == *".."* ]]; then
+        log_error "Archive name validation failed: path traversal detected"
+        return 1
+    fi
+
+    # Validate version string doesn't contain path separators
+    if [[ "${GENTOO_VERSION}" =~ / ]]; then
+        log_error "Invalid version string: '${GENTOO_VERSION}' contains path separators"
+        return 1
+    fi
+
+    return 0
+}
+
 function prepare_cosmic_epoch() {
     log_phase "Preparing cosmic-epoch repository..."
 
     # Create new clone
     TEMP_DIR=$(mktemp -d -t cosmic-bump.XXXXXX)
     log_info "Created temp directory: ${TEMP_DIR}"
+
+    # Verify TEMP_DIR is writable (fail early if not)
+    if [[ ! -w "${TEMP_DIR}" ]]; then
+        errorExit 11 "TEMP_DIR (${TEMP_DIR}) is not writable"
+    fi
 
     CLEANUP_DIRS_FILES+=("${TEMP_DIR}")
 
@@ -532,6 +715,8 @@ function phase_crates_tarball() {
     track_temp "${temp_cargo_home}"
     log_verbose "[${pkg}] Using temporary CARGO_HOME: ${temp_cargo_home}"
 
+    # Save current CARGO_HOME (if set) and restore after vendor
+    local saved_cargo_home="${CARGO_HOME:-}"
     export CARGO_HOME="${temp_cargo_home}"
     log_info "[${pkg}] Running cargo vendor with isolated CARGO_HOME..."
     local config_file="config.toml"
@@ -542,9 +727,25 @@ function phase_crates_tarball() {
         vendor_failed=1
     fi
 
+    # Validate cargo vendor output
+    if [[ $vendor_failed -eq 0 ]]; then
+        if [[ ! -f "${config_file}" ]] || [[ ! -s "${config_file}" ]]; then
+            log_error "[${pkg}] cargo vendor output is missing or empty"
+            vendor_failed=1
+        elif [[ ! -d "vendor" ]] || [[ -z "$(ls -A vendor 2>/dev/null)" ]]; then
+            log_error "[${pkg}] vendor directory is missing or empty"
+            vendor_failed=1
+        fi
+    fi
+
+    # Restore previous CARGO_HOME
     log_verbose "[${pkg}] Cleaning up temporary CARGO_HOME: ${temp_cargo_home}"
     rm -rf "${temp_cargo_home}"
-    unset CARGO_HOME
+    if [[ -n "${saved_cargo_home}" ]]; then
+        export CARGO_HOME="${saved_cargo_home}"
+    else
+        unset CARGO_HOME
+    fi
 
     # Check if vendor failed
     if [[ $vendor_failed -eq 1 ]]; then
@@ -617,6 +818,10 @@ function phase_manifest_write() {
 
     push_d "${__cosmic_de_dir}/${pkg}"
 
+    # Acquire Manifest lock to prevent race conditions with concurrent script instances
+    # This ensures only one script modifies the Manifest at a time
+    acquire_manifest_lock "$pkg" || log_warning "[${pkg}] Could not acquire Manifest lock - race conditions possible"
+
     # Ensure Manifest file exists
     touch "Manifest"
 
@@ -626,6 +831,7 @@ function phase_manifest_write() {
     # Copy to DISTDIR
     if ! cp "${source_path}" "${DISTDIR}/"; then
         log_error "[${pkg}] Failed to copy source archive to DISTDIR"
+        release_manifest_lock "$pkg"
         pop_d
         return 1
     fi
@@ -634,18 +840,25 @@ function phase_manifest_write() {
     if ! cmp -s "${source_path}" "${DISTDIR}/${source_zst}"; then
         log_error "[${pkg}] DISTDIR copy does not match source (byte-for-byte check failed)"
         rm -f "${DISTDIR}/${source_zst}"
+        release_manifest_lock "$pkg"
         pop_d
         return 1
     fi
 
     # Calculate hashes from TEMP copy (source of truth)
     local src_size src_blake2b src_sha512
-    src_size=$(stat -c%s "${source_path}")
-    src_blake2b=$(b2sum "${source_path}" | awk '{print $1}')
-    src_sha512=$(sha512sum "${source_path}" | awk '{print $1}')
+    src_size=$(stat -c%s "${source_path}") || { log_error "[${pkg}] Failed to get source archive size"; release_manifest_lock "$pkg"; pop_d; return 1; }
+    [[ -n "$src_size" && "$src_size" =~ ^[0-9]+$ ]] || { log_error "[${pkg}] Invalid source archive size: $src_size"; release_manifest_lock "$pkg"; pop_d; return 1; }
+
+    src_blake2b=$(b2sum "${source_path}" | awk '{print $1}') || { log_error "[${pkg}] Failed to calculate BLAKE2B hash"; release_manifest_lock "$pkg"; pop_d; return 1; }
+    [[ -n "$src_blake2b" && ${#src_blake2b} -eq 128 ]] || { log_error "[${pkg}] Invalid BLAKE2B hash: $src_blake2b"; release_manifest_lock "$pkg"; pop_d; return 1; }
+
+    src_sha512=$(sha512sum "${source_path}" | awk '{print $1}') || { log_error "[${pkg}] Failed to calculate SHA512 hash"; release_manifest_lock "$pkg"; pop_d; return 1; }
+    [[ -n "$src_sha512" && ${#src_sha512} -eq 128 ]] || { log_error "[${pkg}] Invalid SHA512 hash: $src_sha512"; release_manifest_lock "$pkg"; pop_d; return 1; }
 
     # Remove old entry and write new one (using temp file for atomic operation)
     local manifest_temp=$(mktemp)
+    track_temp "${manifest_temp}"
     grep -v "^DIST ${source_zst}" "Manifest" > "${manifest_temp}" || true
     echo "DIST ${source_zst} ${src_size} BLAKE2B ${src_blake2b} SHA512 ${src_sha512}" >> "${manifest_temp}"
     mv "${manifest_temp}" "Manifest"
@@ -663,6 +876,7 @@ function phase_manifest_write() {
         # Copy to DISTDIR
         if ! cp "${crates_path}" "${DISTDIR}/"; then
             log_error "[${pkg}] Failed to copy crates archive to DISTDIR"
+            release_manifest_lock "$pkg"
             pop_d
             return 1
         fi
@@ -671,18 +885,25 @@ function phase_manifest_write() {
         if ! cmp -s "${crates_path}" "${DISTDIR}/${crates_zst}"; then
             log_error "[${pkg}] DISTDIR copy does not match source (byte-for-byte check failed)"
             rm -f "${DISTDIR}/${crates_zst}"
+            release_manifest_lock "$pkg"
             pop_d
             return 1
         fi
 
         # Calculate hashes from TEMP copy (source of truth)
         local crates_size crates_blake2b crates_sha512
-        crates_size=$(stat -c%s "${crates_path}")
-        crates_blake2b=$(b2sum "${crates_path}" | awk '{print $1}')
-        crates_sha512=$(sha512sum "${crates_path}" | awk '{print $1}')
+        crates_size=$(stat -c%s "${crates_path}") || { log_error "[${pkg}] Failed to get crates archive size"; release_manifest_lock "$pkg"; pop_d; return 1; }
+        [[ -n "$crates_size" && "$crates_size" =~ ^[0-9]+$ ]] || { log_error "[${pkg}] Invalid crates archive size: $crates_size"; release_manifest_lock "$pkg"; pop_d; return 1; }
+
+        crates_blake2b=$(b2sum "${crates_path}" | awk '{print $1}') || { log_error "[${pkg}] Failed to calculate crates BLAKE2B hash"; release_manifest_lock "$pkg"; pop_d; return 1; }
+        [[ -n "$crates_blake2b" && ${#crates_blake2b} -eq 128 ]] || { log_error "[${pkg}] Invalid crates BLAKE2B hash: $crates_blake2b"; release_manifest_lock "$pkg"; pop_d; return 1; }
+
+        crates_sha512=$(sha512sum "${crates_path}" | awk '{print $1}') || { log_error "[${pkg}] Failed to calculate crates SHA512 hash"; release_manifest_lock "$pkg"; pop_d; return 1; }
+        [[ -n "$crates_sha512" && ${#crates_sha512} -eq 128 ]] || { log_error "[${pkg}] Invalid crates SHA512 hash: $crates_sha512"; release_manifest_lock "$pkg"; pop_d; return 1; }
 
         # Remove old entry and write new one (using temp file for atomic operation)
         local manifest_temp=$(mktemp)
+        track_temp "${manifest_temp}"
         grep -v "^DIST ${crates_zst}" "Manifest" > "${manifest_temp}" || true
         echo "DIST ${crates_zst} ${crates_size} BLAKE2B ${crates_blake2b} SHA512 ${crates_sha512}" >> "${manifest_temp}"
         mv "${manifest_temp}" "Manifest"
@@ -695,6 +916,9 @@ function phase_manifest_write() {
     else
         log_info "[${pkg}] No crates archive (non-Rust package)"
     fi
+
+    # Release lock after all Manifest modifications are complete
+    release_manifest_lock "$pkg"
 
     pop_d
     log_success "[${pkg}] Manifest entries written successfully"
@@ -711,8 +935,12 @@ function upload_and_verify() {
     log_info "Uploading ${filename}..."
 
     # Upload with retry
-    if ! retry_with_backoff 3 gh release upload "${GENTOO_VERSION}" "${local_file}" \
-        --repo "$COSMIC_OVERLAY_REPO" --clobber 2>&1 | tee -a "${LOG_FILE}"; then
+    # NOTE: Capture exit code from retry_with_backoff (tee would return 0)
+    retry_with_backoff 3 gh release upload "${GENTOO_VERSION}" "${local_file}" \
+        --repo "$COSMIC_OVERLAY_REPO" --clobber 2>&1 | tee -a "${LOG_FILE}"
+    local upload_exit=${PIPESTATUS[0]}
+
+    if [[ $upload_exit -ne 0 ]]; then
         log_error "Failed to upload ${filename}"
         return 1
     fi
@@ -729,8 +957,12 @@ function upload_and_verify() {
     verify_temp=$(mktemp -d)
     track_temp "$verify_temp"
 
-    if ! retry_with_backoff 2 gh release download "${GENTOO_VERSION}" \
-        --repo "$COSMIC_OVERLAY_REPO" --pattern "${filename}" --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
+    # NOTE: Capture exit code from retry_with_backoff (tee would return 0)
+    retry_with_backoff 2 gh release download "${GENTOO_VERSION}" \
+        --repo "$COSMIC_OVERLAY_REPO" --pattern "${filename}" --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"
+    local download_exit=${PIPESTATUS[0]}
+
+    if [[ $download_exit -ne 0 ]]; then
         log_error "Failed to download ${filename} for verification"
         rm -rf "${verify_temp}"
         return 1
@@ -854,17 +1086,25 @@ function phase_bump() {
     cp "${template_file}" "${ebuild_file}"
 
     log_info "[${pkg}] Applying transformations..."
-    sed -i \
+    if ! sed -i \
         -e 's|KEYWORDS=.*|KEYWORDS="~amd64"|' \
         -e '/^inherit.*live.*/d' \
         -e '/PROPERTIES=/d' \
         -e '/EGIT_BRANCH=/c\EGIT_COMMIT="'"${ORIGINAL_TAG}"'"' \
         -e 's:^MY_PV=.*:MY_PV="'"${ORIGINAL_TAG}"'":' \
-        "${ebuild_file}"
+        "${ebuild_file}"; then
+        log_error "[${pkg}] sed transformation failed on ebuild file"
+        pop_d
+        return 1
+    fi
 
     # Remove COSMIC_GIT_UNPACK if present
     if grep -q "^COSMIC_GIT_UNPACK=" "${ebuild_file}"; then
-        sed -i '/^COSMIC_GIT_UNPACK=/d' "${ebuild_file}"
+        if ! sed -i '/^COSMIC_GIT_UNPACK=/d' "${ebuild_file}"; then
+            log_error "[${pkg}] sed failed to remove COSMIC_GIT_UNPACK"
+            pop_d
+            return 1
+        fi
     fi
 
     # Update VERGEN variables if present
@@ -891,10 +1131,14 @@ function phase_bump() {
             log_verbose "[${pkg}] VERGEN_GIT_SHA=${commit_sha}"
 
             # Update the variables in the ebuild
-            sed -i \
+            if ! sed -i \
                 -e "s|^\texport VERGEN_GIT_COMMIT_DATE=.*|\texport VERGEN_GIT_COMMIT_DATE='${commit_date}'|" \
                 -e "s|^\texport VERGEN_GIT_SHA=.*|\texport VERGEN_GIT_SHA=${commit_sha}|" \
-                "${ebuild_file}"
+                "${ebuild_file}"; then
+                log_error "[${pkg}] sed failed to update VERGEN variables"
+                pop_d
+                return 1
+            fi
         else
             log_warning "[${pkg}] Submodule not found, cannot update VERGEN variables"
         fi
@@ -941,7 +1185,12 @@ function phase_verify_fetch() {
     # This confirms our hashes are correctly written
     # Note: Files are already in DISTDIR, so this mainly validates the Manifest format
     log_info "[${pkg}] Verifying Manifest entries are valid..."
-    if ! ebuild "${ebuild_file}" fetch 2>&1 | tee -a "${LOG_FILE}"; then
+
+    # NOTE: Use PIPESTATUS to capture ebuild exit code (tee always returns 0)
+    ebuild "${ebuild_file}" fetch 2>&1 | tee -a "${LOG_FILE}"
+    local fetch_exit=${PIPESTATUS[0]}
+
+    if [[ $fetch_exit -ne 0 ]]; then
         log_error "[${pkg}] ebuild fetch failed - Manifest entries may be incorrect"
         pop_d
         return 1
@@ -1052,7 +1301,12 @@ function phase_prepare() {
     log_info "[${pkg}] Testing unpack and prepare phases..."
 
     # First attempt
-    if ebuild "${ebuild_file}" clean unpack prepare 2>&1 | tee -a "${LOG_FILE}"; then
+    # NOTE: Pipe ebuild output to tee, then check PIPESTATUS[0] for ebuild exit code
+    # (tee always returns 0, so we need PIPESTATUS to get actual command result)
+    ebuild "${ebuild_file}" clean unpack prepare 2>&1 | tee -a "${LOG_FILE}"
+    local ebuild_exit=${PIPESTATUS[0]}
+
+    if [[ $ebuild_exit -eq 0 ]]; then
         ebuild "${ebuild_file}" clean >/dev/null 2>&1
         log_success "[${pkg}] src_prepare test passed"
         pop_d
@@ -1069,33 +1323,49 @@ function phase_prepare() {
         return 1
     fi
 
-    # Try commenting out PATCHES
+    # Try commenting out PATCHES - more defensive approach
     log_info "[${pkg}] Commenting out PATCHES block..."
     cp "${ebuild_file}" "${ebuild_file}.backup"
 
-    # Add comment before PATCHES and comment out the array
-    sed -i '/^PATCHES=/i\# PATCHES commented out during bump due to patch failure - needs manual review' "${ebuild_file}"
-    sed -i 's/^PATCHES=/# PATCHES=/' "${ebuild_file}"
-
-    # Comment out the array contents
-    local in_patches=0
+    # Use awk to safely comment out PATCHES definition and its contents
+    # Handles both single-line PATCHES="..." and multi-line PATCHES=(...) arrays
     local temp_file=$(mktemp)
-    while IFS= read -r line; do
-        if [[ "$line" =~ ^#\ PATCHES= ]]; then
-            in_patches=1
-            echo "$line" >> "$temp_file"
-        elif [[ $in_patches -eq 1 ]]; then
-            if [[ "$line" =~ ^\) ]]; then
-                echo "# $line" >> "$temp_file"
-                in_patches=0
-            else
-                echo "# $line" >> "$temp_file"
-            fi
-        else
-            echo "$line" >> "$temp_file"
-        fi
-    done < "${ebuild_file}"
-    mv "$temp_file" "${ebuild_file}"
+    track_temp "${temp_file}"
+    awk '
+        /^PATCHES=/ {
+            if (!patches_seen) {
+                print "# PATCHES commented out during bump due to patch failure - needs manual review"
+                print "# " $0
+                patches_seen = 1
+                in_patches = 1
+            }
+            next
+        }
+        in_patches == 1 {
+            if (/^\)/) {
+                print "# " $0
+                in_patches = 0
+            } else if (/^[[:space:]]*$/) {
+                # Empty lines within patches stay empty
+                print ""
+            } else {
+                print "# " $0
+            }
+            next
+        }
+        { print }
+    ' "${ebuild_file}" > "${temp_file}"
+
+    if [[ ! -s "${temp_file}" ]]; then
+        log_error "[${pkg}] Failed to process PATCHES (output empty)"
+        mv "${ebuild_file}.backup" "${ebuild_file}"
+        rm -f "${temp_file}"
+        ebuild "${ebuild_file}" clean >/dev/null 2>&1
+        pop_d
+        return 1
+    fi
+
+    mv "${temp_file}" "${ebuild_file}"
 
     # Retry
     log_info "[${pkg}] Retrying src_prepare with PATCHES commented..."
@@ -1162,8 +1432,20 @@ function phase_commit() {
 
     local ebuild_file="${pkg}-${GENTOO_VERSION}.ebuild"
 
-    # Stage files
-    git add "${ebuild_file}" Manifest 2>/dev/null || true
+    # Stage files - verify success before committing
+    if ! git add "${ebuild_file}" Manifest 2>&1 | tee -a "${LOG_FILE}"; then
+        log_error "[${pkg}] Failed to stage ${ebuild_file} and Manifest"
+        pop_d
+        return 1
+    fi
+
+    # Verify files were actually staged
+    local staged_files=$(git diff --cached --name-only 2>/dev/null)
+    if [[ -z "${staged_files}" ]]; then
+        log_error "[${pkg}] No files were staged (${ebuild_file} and Manifest may not exist)"
+        pop_d
+        return 1
+    fi
 
     # Build commit message
     local msg="cosmic-base/${pkg}: add ${GENTOO_VERSION}"
@@ -1234,6 +1516,13 @@ function process_package() {
     log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     log "${BOLD}[${pkg_num}/${total_pkgs}] Processing: ${pkg}${NC}"
     log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+    # Validate archive names (safety check)
+    if ! validate_archive_names "$pkg"; then
+        log_error "[${pkg}] Archive name validation failed"
+        FAILED_PACKAGES+=("$pkg:validation")
+        return 1
+    fi
 
     # Check if this is a meta-package (no source code, just dependencies)
     if is_meta_package "$pkg"; then
@@ -1546,7 +1835,7 @@ function main() {
                 exit 0
                 ;;
             -r*)
-                REVISION_BUMP="${1}"
+                REVISION_BUMP="$1"
                 shift
                 ;;
             --revision)
@@ -1596,6 +1885,11 @@ function main() {
     fi
 
     ORIGINAL_TAG="${args[0]}"
+    
+    # Validate inputs early to fail fast on bad inputs
+    validate_original_tag "$ORIGINAL_TAG"
+    validate_single_package "$SINGLE_PACKAGE"
+    
     local base_version=$(convert_version "${ORIGINAL_TAG}")
 
     if [[ -n "$REVISION_BUMP" ]]; then
@@ -1622,6 +1916,19 @@ function main() {
     done < <(get_package_list)
 
     local total=${#packages[@]}
+
+    # Warn if no packages found
+    if [[ $total -eq 0 ]]; then
+        log_warning "No packages found to process!"
+        if [[ -n "${SINGLE_PACKAGE}" ]]; then
+            log_error "Single package specified (-p ${SINGLE_PACKAGE}) was not found in cosmic-base/"
+            errorExit 1 "Package not found"
+        else
+            log_error "No packages found in cosmic-base/ directory"
+            errorExit 1 "Empty package list"
+        fi
+    fi
+
     log_info "Processing ${total} package(s)"
     log ""
 
