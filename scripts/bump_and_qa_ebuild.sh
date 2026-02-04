@@ -28,13 +28,11 @@ ORIGINAL_TAG=""
 GENTOO_VERSION=""
 REVISION_BUMP=""
 SINGLE_PACKAGE=""
-RESUME_MODE=1        # Default: enabled
 KEEP_TEMP=1          # Default: enabled
 NO_UPLOAD=0
 NO_COMMIT=0
 DRY_RUN=0
 VERBOSE=0
-STATE_FILE=""
 LOG_FILE=""
 TEMP_DIR=""
 DISTDIR=""
@@ -199,84 +197,12 @@ function map_sys_crate_to_package() {
     esac
 }
 
-# Initialize state file
-function init_state_file() {
-    STATE_FILE="${__script_dir}/.bump-state-${GENTOO_VERSION}.json"
+# Initialize logging (state file removed - no resume mode)
+function init_logging() {
     TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
     LOG_FILE="${__script_dir}/.bump-${GENTOO_VERSION}-${TIMESTAMP}.log"
 
-    log_info "State file: ${STATE_FILE}"
     log_info "Log file: ${LOG_FILE}"
-
-    if [[ -f "${STATE_FILE}" ]] && [[ $RESUME_MODE -eq 1 ]]; then
-        log_info "Loading existing state from ${STATE_FILE}"
-        # Load temp_dir if exists
-        TEMP_DIR=$(jq -r '.temp_dir // empty' "${STATE_FILE}" 2>/dev/null || echo "")
-    else
-        log_info "Creating new state file"
-        cat > "${STATE_FILE}" <<EOF
-{
-  "version": "${GENTOO_VERSION}",
-  "original_tag": "${ORIGINAL_TAG}",
-  "temp_dir": "",
-  "started": "$(date -Iseconds)",
-  "last_updated": "$(date -Iseconds)",
-  "packages": {}
-}
-EOF
-    fi
-}
-
-# Update state file for a package
-function update_package_state() {
-    local pkg="$1"
-    local status="$2"
-    local phase="$3"
-    local extra="${4:-}"
-
-    local phases_json="[]"
-    if [[ -n "$phase" ]]; then
-        # Read existing phases and append new one
-        phases_json=$(jq ".packages.\"${pkg}\".phases // []" "${STATE_FILE}" 2>/dev/null || echo "[]")
-        phases_json=$(echo "$phases_json" | jq ". + [\"${phase}\"] | unique")
-    fi
-
-    local timestamp="$(date -Iseconds)"
-    local temp_state=$(mktemp)
-
-    jq \
-        --arg pkg "$pkg" \
-        --arg status "$status" \
-        --argjson phases "$phases_json" \
-        --arg timestamp "$timestamp" \
-        --arg extra "$extra" \
-        '.last_updated = $timestamp |
-         .packages[$pkg].status = $status |
-         .packages[$pkg].phases = $phases |
-         .packages[$pkg].last_updated = $timestamp |
-         if $status == "completed" then .packages[$pkg].completed_at = $timestamp
-         elif $status == "failed" then .packages[$pkg].failed_at = $timestamp | .packages[$pkg].error = $extra
-         else . end' \
-        "${STATE_FILE}" > "$temp_state"
-
-    mv "$temp_state" "${STATE_FILE}"
-}
-
-# Check if package is already completed
-function is_package_completed() {
-    local pkg="$1"
-
-    if [[ ! -f "${STATE_FILE}" ]]; then
-        echo "0"
-        return
-    fi
-
-    local status=$(jq -r ".packages.\"${pkg}\".status // \"\"" "${STATE_FILE}" 2>/dev/null)
-    if [[ "$status" == "completed" ]]; then
-        echo "1"
-    else
-        echo "0"
-    fi
 }
 
 # Update gitignore
@@ -286,15 +212,11 @@ function update_gitignore() {
     if [[ ! -f "$gitignore" ]]; then
         log_info "Creating .gitignore"
         cat > "$gitignore" <<EOF
-.bump-state-*.json
 .bump-*.log
 EOF
     else
-        if ! grep -q ".bump-state-\*.json" "$gitignore"; then
-            log_info "Adding state files to .gitignore"
-            echo ".bump-state-*.json" >> "$gitignore"
-        fi
         if ! grep -q ".bump-\*.log" "$gitignore"; then
+            log_info "Adding bump log files to .gitignore"
             echo ".bump-*.log" >> "$gitignore"
         fi
     fi
@@ -374,23 +296,7 @@ function rollback_package() {
 # Execute a phase with standard error handling
 # Arguments: pkg phase_name phase_function [cleanup_ebuild] [cleanup_workdir]
 # Returns: 0 on success, 1 on failure
-function run_phase() {
-    local pkg="$1"
-    local phase_name="$2"
-    local phase_func="$3"
-    local cleanup_ebuild="${4:-0}"
-    local cleanup_workdir="${5:-0}"
-
-    if ! "$phase_func" "$pkg"; then
-        update_package_state "$pkg" "failed" "$phase_name" "${phase_name} phase failed"
-        FAILED_PACKAGES+=("$pkg:$phase_name")
-        rollback_package "$pkg" "$phase_name" "$cleanup_ebuild" "$cleanup_workdir"
-        return 1
-    fi
-
-    update_package_state "$pkg" "in-progress" "$phase_name"
-    return 0
-}
+# Note: run_phase function removed - phases now handle errors directly in process_package()
 
 # Retry a command with exponential backoff
 # Arguments: max_attempts command [args...]
@@ -460,35 +366,9 @@ function check_environment() {
 function prepare_cosmic_epoch() {
     log_phase "Preparing cosmic-epoch repository..."
 
-    # Check if we can reuse existing clone
-    if [[ -n "${TEMP_DIR}" ]] && [[ -d "${TEMP_DIR}/cosmic-epoch" ]]; then
-        log_info "Reusing existing cosmic-epoch clone at ${TEMP_DIR}"
-        push_d "${TEMP_DIR}/cosmic-epoch"
-
-        # Verify it's the right tag
-        local current_tag=$(git describe --tags --exact-match 2>/dev/null || echo "")
-        if [[ "$current_tag" == "${ORIGINAL_TAG}" ]]; then
-            log_success "Already on correct tag: ${ORIGINAL_TAG}"
-            git submodule update --recursive --force || errorExit 14 "could not update submodules"
-            pop_d
-            return
-        else
-            log_warning "Clone at wrong tag (${current_tag}), re-checking out"
-            git switch -d "${ORIGINAL_TAG}" || errorExit 13 "could not switch to tag ${ORIGINAL_TAG}"
-            git submodule update --recursive --force || errorExit 14 "could not update submodules"
-            pop_d
-            return
-        fi
-    fi
-
     # Create new clone
     TEMP_DIR=$(mktemp -d -t cosmic-bump.XXXXXX)
     log_info "Created temp directory: ${TEMP_DIR}"
-
-    # Update state file with temp_dir
-    local temp_state=$(mktemp)
-    jq --arg dir "$TEMP_DIR" '.temp_dir = $dir' "${STATE_FILE}" > "$temp_state"
-    mv "$temp_state" "${STATE_FILE}"
 
     CLEANUP_DIRS_FILES+=("${TEMP_DIR}")
 
@@ -936,16 +816,10 @@ function phase_bump() {
 
     local ebuild_file="${pkg}-${GENTOO_VERSION}.ebuild"
 
-    # Check if already exists
+    # Check if already exists (always overwrite, no resume mode)
     if [[ -f "${ebuild_file}" ]]; then
-        if [[ $RESUME_MODE -eq 1 ]]; then
-            log_info "[${pkg}] Ebuild already exists, skipping bump"
-            pop_d
-            return 0
-        else
-            log_warning "[${pkg}] Ebuild exists, overwriting"
-            rm -f "${ebuild_file}"
-        fi
+        log_warning "[${pkg}] Ebuild exists, overwriting"
+        rm -f "${ebuild_file}"
     fi
 
     # Find template
@@ -1230,11 +1104,6 @@ function phase_prepare() {
         log_warning "[${pkg}] src_prepare passed with PATCHES commented"
         PATCHES_COMMENTED+=("$pkg")
 
-        # Update state
-        local temp_state=$(mktemp)
-        jq ".packages.\"${pkg}\".patches_commented = true" "${STATE_FILE}" > "$temp_state"
-        mv "$temp_state" "${STATE_FILE}"
-
         pop_d
         return 0
     else
@@ -1366,39 +1235,22 @@ function process_package() {
     log "${BOLD}[${pkg_num}/${total_pkgs}] Processing: ${pkg}${NC}"
     log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-    # Check if already completed (in resume mode)
-    if [[ $RESUME_MODE -eq 1 ]]; then
-        local completed=$(is_package_completed "$pkg")
-        if [[ "$completed" == "1" ]]; then
-            log_info "[${pkg}] Re-validating previously completed package..."
-            # Re-run QA check
-            phase_qa "$pkg"
-            log_success "[${pkg}] Validation passed, skipping"
-            COMPLETED_PACKAGES+=("$pkg")
-            return 0
-        fi
-    fi
-
     # Check if this is a meta-package (no source code, just dependencies)
     if is_meta_package "$pkg"; then
         log_info "[${pkg}] Meta-package detected (no sources, simplified: bump → QA → commit)"
 
         # Meta-packages: Phase 5, 9, 10 (bump, QA, commit - skipping 1-4, 6-8)
         if ! phase_bump "$pkg"; then
-            update_package_state "$pkg" "failed" "bump" "Ebuild bump failed"
             FAILED_PACKAGES+=("$pkg:bump")
             push_d "${__cosmic_de_dir}/${pkg}"
             rm -f "${pkg}-${GENTOO_VERSION}.ebuild"
             pop_d
             return 1
         fi
-        update_package_state "$pkg" "in-progress" "bump"
 
         phase_qa "$pkg"
-        update_package_state "$pkg" "in-progress" "qa"
 
         phase_commit "$pkg"
-        update_package_state "$pkg" "completed" "commit"
 
         COMPLETED_PACKAGES+=("$pkg")
         log_success "[${pkg}] Meta-package processing completed!"
@@ -1423,78 +1275,61 @@ function process_package() {
 
     # Phase 1: Source archive
     if ! phase_source_archive "$pkg" "$submodule_path"; then
-        update_package_state "$pkg" "failed" "source_archive" "Source archive generation failed"
         FAILED_PACKAGES+=("$pkg:source_archive")
         rollback_package "$pkg" "source_archive"
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "source_archive"
 
     # Phase 2: Crates tarball
     if ! phase_crates_tarball "$pkg" "$submodule_path"; then
-        update_package_state "$pkg" "failed" "crates_tarball" "Crates tarball generation failed"
         FAILED_PACKAGES+=("$pkg:crates_tarball")
         rollback_package "$pkg" "crates_tarball"
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "crates_tarball"
 
     # Phase 3: Write Manifest (we are the source of truth)
     if ! phase_manifest_write "$pkg"; then
-        update_package_state "$pkg" "failed" "manifest_write" "Manifest write failed"
         FAILED_PACKAGES+=("$pkg:manifest_write")
         rollback_package "$pkg" "manifest_write"
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "manifest_write"
 
     # Phase 4: Upload both archives to GitHub (before ebuild fetch!)
     if ! phase_upload "$pkg"; then
-        update_package_state "$pkg" "failed" "upload" "GitHub upload/verification failed"
         FAILED_PACKAGES+=("$pkg:upload")
         rollback_package "$pkg" "upload"
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "upload"
 
     # Phase 5: Bump ebuild
     if ! phase_bump "$pkg"; then
-        update_package_state "$pkg" "failed" "bump" "Ebuild bump failed"
         FAILED_PACKAGES+=("$pkg:bump")
         rollback_package "$pkg" "bump" 1
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "bump"
 
     # Phase 6: Verify fetch (validates our Manifest entries work)
     if ! phase_verify_fetch "$pkg"; then
-        update_package_state "$pkg" "failed" "verify_fetch" "Fetch verification failed"
         FAILED_PACKAGES+=("$pkg:verify_fetch")
         rollback_package "$pkg" "verify_fetch" 1
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "verify_fetch"
 
     # Phase 7: System dependencies (non-fatal)
     phase_sysdeps "$pkg" "$submodule_path"
-    update_package_state "$pkg" "in-progress" "sysdeps"
 
     # Phase 8: src_prepare test
     if ! phase_prepare "$pkg"; then
-        update_package_state "$pkg" "failed" "prepare" "src_prepare test failed"
         FAILED_PACKAGES+=("$pkg:prepare")
         rollback_package "$pkg" "prepare" 1 1
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "prepare"
 
     # Phase 9: QA scan (non-fatal)
     phase_qa "$pkg"
-    update_package_state "$pkg" "in-progress" "qa"
 
     # Phase 10: Commit
     phase_commit "$pkg"
-    update_package_state "$pkg" "completed" "commit"
 
     COMPLETED_PACKAGES+=("$pkg")
     log_success "[${pkg}] Package processing completed!"
@@ -1527,7 +1362,6 @@ function generate_report() {
     log "Upstream Tag:     ${ORIGINAL_TAG}"
     log "Gentoo Version:   ${GENTOO_VERSION}"
     log "Log File:         ${LOG_FILE}"
-    log "State File:       ${STATE_FILE}"
     log ""
     log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     log "${BOLD}PACKAGE SUMMARY${NC}"
@@ -1654,7 +1488,6 @@ function generate_report() {
         log ""
     fi
 
-    log "To resume/retry: ./scripts/bump_and_qa_ebuild.sh ${ORIGINAL_TAG}"
     log "To clean temp:   ./scripts/bump_and_qa_ebuild.sh ${ORIGINAL_TAG} --clean-temp"
     log ""
     log "${BOLD}═══════════════════════════════════════════════════════════════════════${NC}"
@@ -1673,7 +1506,6 @@ ARGUMENTS:
 OPTIONS:
   -r<N>, --revision <N>  Gentoo revision bump (e.g., -r1)
   -p, --package <pkg>    Process single package only
-  --no-resume            Force re-process all (ignore state file)
   --clean-temp           Remove temp directory on exit
   --no-upload            Skip GitHub release upload
   --no-commit            Don't commit changes
@@ -1696,9 +1528,6 @@ EXAMPLES:
 
   # Dry-run to see what would happen
   $0 -n epoch-1.0.0-beta.3
-
-  # Resume after fixing failures
-  $0 epoch-1.0.0-beta.3
 
   # Use alternative repository
   COSMIC_OVERLAY_REPO=myuser/cosmic-overlay $0 epoch-1.0.0-beta.3
@@ -1727,10 +1556,6 @@ function main() {
             -p|--package)
                 SINGLE_PACKAGE="$2"
                 shift 2
-                ;;
-            --no-resume)
-                RESUME_MODE=0
-                shift
                 ;;
             --clean-temp)
                 KEEP_TEMP=0
@@ -1785,7 +1610,7 @@ function main() {
     log ""
 
     # Initialize
-    init_state_file
+    init_logging
     update_gitignore
     check_environment
     prepare_cosmic_epoch
