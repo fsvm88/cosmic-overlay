@@ -44,6 +44,10 @@ TIMESTAMP=""
 COSMIC_EPOCH_REPO="${COSMIC_EPOCH_REPO:-https://github.com/pop-os/cosmic-epoch}"
 COSMIC_OVERLAY_REPO="${COSMIC_OVERLAY_REPO:-fsvm88/cosmic-overlay}"
 
+# Reproducibility: fixed timestamp for deterministic archives
+# Can be overridden via environment variable
+export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-0}"
+
 # State tracking
 declare -a COMPLETED_PACKAGES=()
 declare -a FAILED_PACKAGES=()
@@ -356,7 +360,12 @@ function rollback_package() {
         pop_d
     fi
 
-    # Always remove tarball files
+    # Clean up source archive
+    local source_archive="${pkg}-${GENTOO_VERSION}.tar.zst"
+    rm -f "${DISTDIR}/${source_archive}"
+    rm -f "${TEMP_DIR}/${source_archive}"
+
+    # Clean up crates tarball
     local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
     rm -f "${DISTDIR}/${tarball_zst}"
     rm -f "${TEMP_DIR}/${tarball_zst}"
@@ -530,12 +539,77 @@ function get_package_list() {
     pop_d
 }
 
-# PHASE 1: Generate vendored tarball
-function phase_tarball() {
+# PHASE 1: Generate source archive (deterministic)
+# Creates a reproducible source tarball from the git submodule
+function phase_source_archive() {
     local pkg="$1"
     local submodule_path="$2"
 
-    log_phase "[${pkg}] Phase 1: Tarball generation"
+    log_phase "[${pkg}] Phase 1: Source archive generation"
+
+    local submodule_dir="${TEMP_DIR}/cosmic-epoch/${submodule_path}"
+
+    if [[ ! -d "${submodule_dir}" ]]; then
+        log_warning "[${pkg}] Submodule directory not found: ${submodule_dir}"
+        return 1
+    fi
+
+    local archive_name="${pkg}-${GENTOO_VERSION}.tar.zst"
+    local archive_path="${TEMP_DIR}/${archive_name}"
+
+    # Remove existing archive if present
+    if [[ -f "${archive_path}" ]]; then
+        log_info "[${pkg}] Removing existing source archive"
+        rm -f "${archive_path}"
+    fi
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[${pkg}] DRY-RUN: Would create ${archive_name}"
+        return 0
+    fi
+
+    push_d "${submodule_dir}"
+
+    # Get the commit SHA for reproducibility (not tag, which can move)
+    local commit_sha
+    commit_sha=$(git rev-parse HEAD)
+    log_verbose "[${pkg}] Creating archive from commit: ${commit_sha}"
+
+    # Create deterministic archive:
+    # - git archive produces sorted, reproducible output for same commit
+    # - --prefix ensures consistent directory structure
+    # - SOURCE_DATE_EPOCH (set globally) ensures reproducible timestamps in zstd
+    # - zstd with fixed parameters for reproducible compression
+    log_info "[${pkg}] Creating source archive..."
+    if ! git archive \
+        --format=tar \
+        --prefix="${pkg}-${GENTOO_VERSION}/" \
+        "${commit_sha}" \
+    | zstd --long=31 --ultra -22 -T0 -o "${archive_path}"; then
+        log_error "[${pkg}] Failed to create source archive"
+        pop_d
+        return 1
+    fi
+
+    pop_d
+
+    local archive_size archive_blake2b archive_sha512
+    archive_size=$(stat -c%s "${archive_path}")
+    archive_blake2b=$(b2sum "${archive_path}" | awk '{print $1}')
+    archive_sha512=$(sha512sum "${archive_path}" | awk '{print $1}')
+    log_success "[${pkg}] Source archive: ${archive_name} (${archive_size} bytes)"
+    log_verbose "[${pkg}] BLAKE2B: ${archive_blake2b}"
+    log_verbose "[${pkg}] SHA512:  ${archive_sha512}"
+
+    return 0
+}
+
+# PHASE 2: Generate vendored crates tarball
+function phase_crates_tarball() {
+    local pkg="$1"
+    local submodule_path="$2"
+
+    log_phase "[${pkg}] Phase 2: Crates tarball generation"
 
     if [[ ! -d "${TEMP_DIR}/cosmic-epoch/${submodule_path}" ]]; then
         log_warning "[${pkg}] Submodule directory not found, skipping"
@@ -575,11 +649,10 @@ function phase_tarball() {
     # Create temporary CARGO_HOME for this package to avoid conflicts
     local temp_cargo_home
     temp_cargo_home=$(mktemp -d -t "cargo-home-${pkg}-XXXXXX")
+    track_temp "${temp_cargo_home}"
     log_verbose "[${pkg}] Using temporary CARGO_HOME: ${temp_cargo_home}"
 
-    # Export CARGO_HOME for cargo vendor
     export CARGO_HOME="${temp_cargo_home}"
-
     log_info "[${pkg}] Running cargo vendor with isolated CARGO_HOME..."
     local config_file="config.toml"
     local vendor_failed=0
@@ -589,7 +662,6 @@ function phase_tarball() {
         vendor_failed=1
     fi
 
-    # Clean up temporary CARGO_HOME immediately after vendor
     log_verbose "[${pkg}] Cleaning up temporary CARGO_HOME: ${temp_cargo_home}"
     rm -rf "${temp_cargo_home}"
     unset CARGO_HOME
@@ -609,7 +681,7 @@ function phase_tarball() {
     fi
 
     log_info "[${pkg}] Compressing with zstd..."
-    if ! zstd --long=31 -15 -T0 "${TEMP_DIR}/${tarball_name}" -o "${tarball_path}"; then
+    if ! zstd --long=31 --ultra -22 -T0 "${TEMP_DIR}/${tarball_name}" -o "${tarball_path}"; then
         log_error "[${pkg}] zstd compression failed"
         rm -f "${TEMP_DIR}/${tarball_name}"
         rm -rf vendor "${config_file}"
@@ -620,97 +692,194 @@ function phase_tarball() {
     rm -f "${TEMP_DIR}/${tarball_name}"
     rm -rf vendor "${config_file}"
 
-    log_success "[${pkg}] Tarball created in TEMP_DIR: ${tarball_zst}"
+    local tarball_size tarball_blake2b tarball_sha512
+    tarball_size=$(stat -c%s "${tarball_path}")
+    tarball_blake2b=$(b2sum "${tarball_path}" | awk '{print $1}')
+    tarball_sha512=$(sha512sum "${tarball_path}" | awk '{print $1}')
+    log_success "[${pkg}] Crates tarball: ${tarball_zst} (${tarball_size} bytes)"
+    log_verbose "[${pkg}] BLAKE2B: ${tarball_blake2b}"
+    log_verbose "[${pkg}] SHA512:  ${tarball_sha512}"
     pop_d
     return 0
 }
 
-# PHASE 2: Update Manifest with tarball entry
-function phase_manifest_update() {
+# PHASE 3: Write Manifest entries for both archives
+# We are the source of truth - these hashes are authoritative
+function phase_manifest_write() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 2: Manifest update"
+    log_phase "[${pkg}] Phase 3: Write Manifest entries"
+
+    local source_zst="${pkg}-${GENTOO_VERSION}.tar.zst"
+    local crates_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
+    local source_path="${TEMP_DIR}/${source_zst}"
+    local crates_path="${TEMP_DIR}/${crates_zst}"
 
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would copy tarball to DISTDIR and update Manifest"
+        log_info "[${pkg}] DRY-RUN: Would copy archives to DISTDIR and write Manifest"
         return 0
     fi
 
-    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
-    local temp_tarball_path="${TEMP_DIR}/${tarball_zst}"
-    local distdir_tarball_path="${DISTDIR}/${tarball_zst}"
-
-    # Skip if no tarball (packages without Cargo.toml)
-    if [[ ! -f "${temp_tarball_path}" ]]; then
-        log_info "[${pkg}] No tarball found in TEMP_DIR, skipping Manifest update (non-Rust package)"
-        return 0
-    fi
-
-    # Calculate checksum before copying
-    log_info "[${pkg}] Calculating checksum..."
-    local original_sum=$(b2sum "${temp_tarball_path}" | awk '{print $1}')
-    log_verbose "[${pkg}] Original checksum: ${original_sum}"
-
-    # Copy tarball to DISTDIR
-    log_info "[${pkg}] Copying to DISTDIR..."
-    if ! cp "${temp_tarball_path}" "${DISTDIR}/"; then
-        log_error "[${pkg}] Failed to copy to DISTDIR"
+    # Source archive is required
+    if [[ ! -f "${source_path}" ]]; then
+        log_error "[${pkg}] Source archive not found: ${source_path}"
         return 1
     fi
 
-    # Verify checksum after copying
-    log_info "[${pkg}] Verifying copied tarball..."
-    local copied_sum=$(b2sum "${distdir_tarball_path}" | awk '{print $1}')
-    log_verbose "[${pkg}] Copied checksum:   ${copied_sum}"
-
-    if [[ "${original_sum}" != "${copied_sum}" ]]; then
-        log_error "[${pkg}] Checksum mismatch after copy!"
-        log_error "  Original: ${original_sum}"
-        log_error "  Copied:   ${copied_sum}"
-        rm -f "${distdir_tarball_path}"
+    # Verify package directory exists
+    if [[ ! -d "${__cosmic_de_dir}/${pkg}" ]]; then
+        log_error "[${pkg}] Package directory not found: ${__cosmic_de_dir}/${pkg}"
         return 1
     fi
 
-    log_success "[${pkg}] Tarball copied and verified in DISTDIR"
-
-    # Backup existing Manifest
+    # Backup existing Manifest before any modifications
     backup_manifest "$pkg"
 
     push_d "${__cosmic_de_dir}/${pkg}"
 
-    # Calculate hashes from DISTDIR copy
-    log_info "[${pkg}] Updating Manifest..."
-    local size=$(stat -c%s "${distdir_tarball_path}")
-    local blake2b=$(b2sum "${distdir_tarball_path}" | awk '{print $1}')
-    local sha512=$(sha512sum "${distdir_tarball_path}" | awk '{print $1}')
+    # Ensure Manifest file exists
+    touch "Manifest"
 
-    # Add entry to Manifest (or update if exists)
-    if [[ -f "Manifest" ]]; then
-        # Remove old entry if exists
-        sed -i "/^DIST ${tarball_zst}/d" "Manifest"
+    # Process source archive
+    log_info "[${pkg}] Processing source archive: ${source_zst}"
+
+    # Copy to DISTDIR
+    if ! cp "${source_path}" "${DISTDIR}/"; then
+        log_error "[${pkg}] Failed to copy source archive to DISTDIR"
+        pop_d
+        return 1
     fi
 
-    echo "DIST ${tarball_zst} ${size} BLAKE2B ${blake2b} SHA512 ${sha512}" >> "Manifest"
+    # Sanity check: verify DISTDIR copy matches source byte-for-byte
+    if ! cmp -s "${source_path}" "${DISTDIR}/${source_zst}"; then
+        log_error "[${pkg}] DISTDIR copy does not match source (byte-for-byte check failed)"
+        rm -f "${DISTDIR}/${source_zst}"
+        pop_d
+        return 1
+    fi
 
-    log_success "[${pkg}] Manifest updated with tarball entry"
-    log_info "[${pkg}] Manifest entry:"
-    log_info "  File: ${tarball_zst}"
-    log_info "  Size: ${size} bytes"
-    log_info "  BLAKE2B: ${blake2b}"
-    log_info "  SHA512:  ${sha512}"
+    # Calculate hashes from TEMP copy (source of truth)
+    local src_size src_blake2b src_sha512
+    src_size=$(stat -c%s "${source_path}")
+    src_blake2b=$(b2sum "${source_path}" | awk '{print $1}')
+    src_sha512=$(sha512sum "${source_path}" | awk '{print $1}')
+
+    # Remove old entry and write new one (using temp file for atomic operation)
+    local manifest_temp=$(mktemp)
+    grep -v "^DIST ${source_zst}" "Manifest" > "${manifest_temp}" || true
+    echo "DIST ${source_zst} ${src_size} BLAKE2B ${src_blake2b} SHA512 ${src_sha512}" >> "${manifest_temp}"
+    mv "${manifest_temp}" "Manifest"
+
+    log_success "[${pkg}] Source archive entry written:"
+    log_info "  File: ${source_zst}"
+    log_info "  Size: ${src_size} bytes"
+    log_info "  BLAKE2B: ${src_blake2b}"
+    log_info "  SHA512:  ${src_sha512}"
+
+    # Process crates archive if it exists (some packages may not have Cargo.toml)
+    if [[ -f "${crates_path}" ]]; then
+        log_info "[${pkg}] Processing crates archive: ${crates_zst}"
+
+        # Copy to DISTDIR
+        if ! cp "${crates_path}" "${DISTDIR}/"; then
+            log_error "[${pkg}] Failed to copy crates archive to DISTDIR"
+            pop_d
+            return 1
+        fi
+
+        # Sanity check: verify DISTDIR copy matches source byte-for-byte
+        if ! cmp -s "${crates_path}" "${DISTDIR}/${crates_zst}"; then
+            log_error "[${pkg}] DISTDIR copy does not match source (byte-for-byte check failed)"
+            rm -f "${DISTDIR}/${crates_zst}"
+            pop_d
+            return 1
+        fi
+
+        # Calculate hashes from TEMP copy (source of truth)
+        local crates_size crates_blake2b crates_sha512
+        crates_size=$(stat -c%s "${crates_path}")
+        crates_blake2b=$(b2sum "${crates_path}" | awk '{print $1}')
+        crates_sha512=$(sha512sum "${crates_path}" | awk '{print $1}')
+
+        # Remove old entry and write new one (using temp file for atomic operation)
+        local manifest_temp=$(mktemp)
+        grep -v "^DIST ${crates_zst}" "Manifest" > "${manifest_temp}" || true
+        echo "DIST ${crates_zst} ${crates_size} BLAKE2B ${crates_blake2b} SHA512 ${crates_sha512}" >> "${manifest_temp}"
+        mv "${manifest_temp}" "Manifest"
+
+        log_success "[${pkg}] Crates archive entry written:"
+        log_info "  File: ${crates_zst}"
+        log_info "  Size: ${crates_size} bytes"
+        log_info "  BLAKE2B: ${crates_blake2b}"
+        log_info "  SHA512:  ${crates_sha512}"
+    else
+        log_info "[${pkg}] No crates archive (non-Rust package)"
+    fi
 
     pop_d
+    log_success "[${pkg}] Manifest entries written successfully"
     return 0
 }
 
-# PHASE 2.5: Upload tarball to GitHub immediately after Manifest update
-function phase_upload_tarball() {
+# Upload and verify a single file to GitHub with byte-for-byte verification
+# Arguments: local_file filename
+# Returns: 0 on success, 1 on failure
+function upload_and_verify() {
+    local local_file="$1"
+    local filename="$2"
+
+    log_info "Uploading ${filename}..."
+
+    # Upload with retry
+    if ! retry_with_backoff 3 gh release upload "${GENTOO_VERSION}" "${local_file}" \
+        --repo "$COSMIC_OVERLAY_REPO" --clobber 2>&1 | tee -a "${LOG_FILE}"; then
+        log_error "Failed to upload ${filename}"
+        return 1
+    fi
+
+    log_success "Uploaded ${filename}"
+
+    # Wait for CDN propagation
+    local sleep_duration=$((5 + RANDOM % 6))
+    log_info "Waiting ${sleep_duration}s for CDN propagation..."
+    sleep "$sleep_duration"
+
+    # Download for verification
+    local verify_temp
+    verify_temp=$(mktemp -d)
+    track_temp "$verify_temp"
+
+    if ! retry_with_backoff 2 gh release download "${GENTOO_VERSION}" \
+        --repo "$COSMIC_OVERLAY_REPO" --pattern "${filename}" --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
+        log_error "Failed to download ${filename} for verification"
+        rm -rf "${verify_temp}"
+        return 1
+    fi
+
+    # Byte-for-byte comparison (more reliable than hash comparison)
+    if ! cmp -s "${local_file}" "${verify_temp}/${filename}"; then
+        log_error "Byte-for-byte verification FAILED for ${filename}"
+        log_error "The file on GitHub differs from the local copy"
+        # Clean up corrupted file from DISTDIR to prevent reuse
+        rm -f "${local_file}"
+        log_info "Removed corrupted file from DISTDIR: ${filename}"
+        rm -rf "${verify_temp}"
+        return 1
+    fi
+
+    rm -rf "${verify_temp}"
+    log_success "Verified ${filename} - byte-for-byte match"
+    return 0
+}
+
+# PHASE 4: Upload both archives to GitHub
+function phase_upload() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 2.5: Upload tarball to GitHub"
+    log_phase "[${pkg}] Phase 4: Upload archives to GitHub"
 
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would upload tarball to GitHub"
+        log_info "[${pkg}] DRY-RUN: Would upload archives to GitHub"
         return 0
     fi
 
@@ -719,16 +888,10 @@ function phase_upload_tarball() {
         return 0
     fi
 
-    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
-    local tarball_path="${DISTDIR}/${tarball_zst}"
-
-    # Skip if no tarball (packages without Cargo.toml)
-    if [[ ! -f "${tarball_path}" ]]; then
-        log_info "[${pkg}] No tarball to upload (non-Rust package)"
-        return 0
-    fi
-
-    log_info "[${pkg}] Uploading tarball to GitHub..."
+    local source_zst="${pkg}-${GENTOO_VERSION}.tar.zst"
+    local crates_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
+    local source_path="${DISTDIR}/${source_zst}"
+    local crates_path="${DISTDIR}/${crates_zst}"
 
     # Ensure release exists
     if ! ensure_github_release; then
@@ -736,94 +899,38 @@ function phase_upload_tarball() {
         return 1
     fi
 
-    # Get local hashes before upload
-    log_info "[${pkg}] Calculating local hashes..."
-    local local_blake2b
-    local_blake2b=$(b2sum "${tarball_path}" | awk '{print $1}')
-    local local_sha512
-    local_sha512=$(sha512sum "${tarball_path}" | awk '{print $1}')
-    local local_size
-    local_size=$(stat -c%s "${tarball_path}")
-
-    log_info "[${pkg}] Local tarball hashes:"
-    log_info "  ${BOLD}File:${NC}     ${tarball_zst}"
-    log_info "  ${BOLD}Size:${NC}     ${local_size} bytes"
-    log_info "  ${BOLD}BLAKE2B:${NC}  ${local_blake2b}"
-    log_info "  ${BOLD}SHA512:${NC}   ${local_sha512}"
-
-    # Upload tarball with exponential backoff retry (max 3 attempts)
-    log_info "[${pkg}] Uploading to GitHub release ${GENTOO_VERSION}..."
-    if ! retry_with_backoff 3 gh release upload "${GENTOO_VERSION}" "${tarball_path}" \
-        --repo "$COSMIC_OVERLAY_REPO" --clobber 2>&1 | tee -a "${LOG_FILE}"; then
-        log_error "[${pkg}] Failed to upload tarball to GitHub"
+    # Upload source archive (required)
+    if [[ ! -f "${source_path}" ]]; then
+        log_error "[${pkg}] Source archive not found in DISTDIR: ${source_path}"
         return 1
     fi
 
-    log_success "[${pkg}] Tarball uploaded to GitHub"
-
-    # Wait for GitHub CDN propagation
-    local sleep_duration=$((5 + RANDOM % 6))  # Random between 5-10 seconds
-    log_info "[${pkg}] Waiting ${sleep_duration}s for GitHub CDN propagation..."
-    sleep "$sleep_duration"
-
-    # Download and verify checksum
-    log_info "[${pkg}] Downloading and verifying tarball..."
-    local verify_temp
-    verify_temp=$(mktemp -d)
-    track_temp "$verify_temp"
-
-    if ! retry_with_backoff 2 gh release download "${GENTOO_VERSION}" \
-        --repo "$COSMIC_OVERLAY_REPO" --pattern "${tarball_zst}" --dir "${verify_temp}" 2>&1 | tee -a "${LOG_FILE}"; then
-        log_error "[${pkg}] Failed to download tarball from GitHub for verification"
-        rm -rf "${verify_temp}"
+    log_info "[${pkg}] Uploading source archive..."
+    if ! upload_and_verify "${source_path}" "${source_zst}"; then
+        log_error "[${pkg}] Source archive upload/verification failed"
         return 1
     fi
 
-    # Calculate and compare hashes
-    local downloaded_blake2b
-    downloaded_blake2b=$(b2sum "${verify_temp}/${tarball_zst}" | awk '{print $1}')
-    local downloaded_sha512
-    downloaded_sha512=$(sha512sum "${verify_temp}/${tarball_zst}" | awk '{print $1}')
-    local downloaded_size
-    downloaded_size=$(stat -c%s "${verify_temp}/${tarball_zst}")
-
-    log_info "[${pkg}] Downloaded tarball hashes:"
-    log_info "  ${BOLD}File:${NC}     ${tarball_zst}"
-    log_info "  ${BOLD}Size:${NC}     ${downloaded_size} bytes"
-    log_info "  ${BOLD}BLAKE2B:${NC}  ${downloaded_blake2b}"
-    log_info "  ${BOLD}SHA512:${NC}   ${downloaded_sha512}"
-
-    rm -rf "${verify_temp}"
-
-    # Verify all hashes match
-    local hash_ok=1
-    if [[ "$local_blake2b" != "$downloaded_blake2b" ]]; then
-        log_warning "[${pkg}] BLAKE2B mismatch: ${local_blake2b} vs ${downloaded_blake2b}"
-        hash_ok=0
-    fi
-    if [[ "$local_sha512" != "$downloaded_sha512" ]]; then
-        log_warning "[${pkg}] SHA512 mismatch: ${local_sha512} vs ${downloaded_sha512}"
-        hash_ok=0
-    fi
-    if [[ "$local_size" != "$downloaded_size" ]]; then
-        log_warning "[${pkg}] Size mismatch: ${local_size} vs ${downloaded_size}"
-        hash_ok=0
+    # Upload crates archive if it exists
+    if [[ -f "${crates_path}" ]]; then
+        log_info "[${pkg}] Uploading crates archive..."
+        if ! upload_and_verify "${crates_path}" "${crates_zst}"; then
+            log_error "[${pkg}] Crates archive upload/verification failed"
+            return 1
+        fi
+    else
+        log_info "[${pkg}] No crates archive to upload (non-Rust package)"
     fi
 
-    if [[ $hash_ok -eq 0 ]]; then
-        log_error "[${pkg}] Hash verification failed - tarball on GitHub differs from local copy"
-        return 1
-    fi
-
-    log_success "[${pkg}] Hash verification passed - all hashes match"
+    log_success "[${pkg}] All archives uploaded and verified successfully"
     return 0
 }
 
-# PHASE 3: Bump ebuild
+# PHASE 5: Bump ebuild
 function phase_bump() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 3: Ebuild bump"
+    log_phase "[${pkg}] Phase 5: Ebuild bump"
 
     push_d "${__cosmic_de_dir}/${pkg}"
 
@@ -934,14 +1041,15 @@ function phase_bump() {
     return 0
 }
 
-# PHASE 4: Fetch upstream source
-function phase_fetch() {
+# PHASE 6: Verify fetch works with our Manifest entries
+# We do NOT run 'ebuild digest' - our Manifest entries are authoritative
+function phase_verify_fetch() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 4: Fetch upstream source"
+    log_phase "[${pkg}] Phase 6: Verify fetch"
 
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would run ebuild manifest"
+        log_info "[${pkg}] DRY-RUN: Would verify ebuild fetch"
         return 0
     fi
 
@@ -955,33 +1063,32 @@ function phase_fetch() {
         return 1
     fi
 
-    # Backup Manifest before ebuild digest command (in case it was already backed up, restore first)
-    restore_manifest "$pkg" 2>/dev/null || true
-    backup_manifest "$pkg"
-
-    # Use 'ebuild digest' instead of 'fetch + manifest'
-    # digest generates checksums from files already in DISTDIR without verification
-    log_info "[${pkg}] Running ebuild digest (using files in DISTDIR)..."
-    if ! ebuild "${ebuild_file}" digest 2>&1 | tee -a "${LOG_FILE}"; then
-        log_error "[${pkg}] ebuild digest failed"
-        # Restore Manifest
-        restore_manifest "$pkg"
+    # Verify that portage can fetch with our Manifest entries
+    # This confirms our hashes are correctly written
+    # Note: Files are already in DISTDIR, so this mainly validates the Manifest format
+    log_info "[${pkg}] Verifying Manifest entries are valid..."
+    if ! ebuild "${ebuild_file}" fetch 2>&1 | tee -a "${LOG_FILE}"; then
+        log_error "[${pkg}] ebuild fetch failed - Manifest entries may be incorrect"
         pop_d
         return 1
     fi
 
-    cleanup_manifest_backup "$pkg"
-    log_success "[${pkg}] Upstream source fetched and Manifest updated"
+    log_success "[${pkg}] Manifest entries verified via fetch"
     pop_d
     return 0
 }
 
-# PHASE 5: Check system dependencies
+# PHASE 7: Check system dependencies
 function phase_sysdeps() {
     local pkg="$1"
     local submodule_path="$2"
 
-    log_phase "[${pkg}] Phase 5: System dependency check"
+    log_phase "[${pkg}] Phase 7: System dependency check"
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[${pkg}] DRY-RUN: Would analyze system dependencies"
+        return 0
+    fi
 
     if [[ ! -d "${TEMP_DIR}/cosmic-epoch/${submodule_path}" ]]; then
         log_warning "[${pkg}] Submodule not found, skipping sysdeps check"
@@ -1047,11 +1154,11 @@ function phase_sysdeps() {
     return 0
 }
 
-# PHASE 6: Test src_prepare
+# PHASE 8: Test src_prepare
 function phase_prepare() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 6: Test src_prepare"
+    log_phase "[${pkg}] Phase 8: Test src_prepare"
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log_info "[${pkg}] DRY-RUN: Would test src_prepare"
@@ -1140,11 +1247,11 @@ function phase_prepare() {
     fi
 }
 
-# PHASE 7: QA scan
+# PHASE 9: QA scan
 function phase_qa() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 7: QA scan"
+    log_phase "[${pkg}] Phase 9: QA scan"
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log_info "[${pkg}] DRY-RUN: Would run QA scan"
@@ -1165,11 +1272,12 @@ function phase_qa() {
     return 0
 }
 
-# PHASE 8: Commit changes
+# PHASE 10: Commit changes
 function phase_commit() {
     local pkg="$1"
+    local submodule_path="$2"
 
-    log_phase "[${pkg}] Phase 8: Commit changes"
+    log_phase "[${pkg}] Phase 10: Commit changes"
 
     if [[ $NO_COMMIT -eq 1 ]]; then
         log_info "[${pkg}] --no-commit set, skipping commit"
@@ -1239,7 +1347,7 @@ function ensure_github_release() {
         if ! gh release create "${GENTOO_VERSION}" \
             --repo "$COSMIC_OVERLAY_REPO" \
             --title "${GENTOO_VERSION}" \
-            --notes "Script-generated vendored crates for COSMIC ${GENTOO_VERSION}"; then
+            --notes "Script-generated source and crates archives for COSMIC ${GENTOO_VERSION}"; then
             log_error "Failed to create GitHub release"
             return 1
         fi
@@ -1273,10 +1381,9 @@ function process_package() {
 
     # Check if this is a meta-package (no source code, just dependencies)
     if is_meta_package "$pkg"; then
-        log_info "[${pkg}] Meta-package detected - simplified processing"
+        log_info "[${pkg}] Meta-package detected (no sources, simplified: bump → QA → commit)"
 
-        # Meta-packages only need bump and commit
-        # Phase 1: Bump ebuild
+        # Meta-packages: Phase 5, 9, 10 (bump, QA, commit - skipping 1-4, 6-8)
         if ! phase_bump "$pkg"; then
             update_package_state "$pkg" "failed" "bump" "Ebuild bump failed"
             FAILED_PACKAGES+=("$pkg:bump")
@@ -1287,11 +1394,9 @@ function process_package() {
         fi
         update_package_state "$pkg" "in-progress" "bump"
 
-        # Phase 2: QA scan (non-fatal)
         phase_qa "$pkg"
         update_package_state "$pkg" "in-progress" "qa"
 
-        # Phase 3: Commit
         phase_commit "$pkg"
         update_package_state "$pkg" "completed" "commit"
 
@@ -1312,29 +1417,39 @@ function process_package() {
         fi
     fi
 
-    # Execute phases
-    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
+    # Execute phases - 10-phase architecture (Manifest written BEFORE upload to fail fast on hash issues):
+    # 1: Source archive  2: Crates tarball  3: Write Manifest (hashes from TEMP_DIR)
+    # 4: Upload (verify byte-for-byte)  5: Bump  6: Verify fetch  7: Sysdeps  8: Prepare  9: QA  10: Commit
 
-    # Phase 1: Tarball
-    if ! phase_tarball "$pkg" "$submodule_path"; then
-        update_package_state "$pkg" "failed" "tarball" "Tarball generation failed"
-        FAILED_PACKAGES+=("$pkg:tarball")
-        rollback_package "$pkg" "tarball"
+    # Phase 1: Source archive
+    if ! phase_source_archive "$pkg" "$submodule_path"; then
+        update_package_state "$pkg" "failed" "source_archive" "Source archive generation failed"
+        FAILED_PACKAGES+=("$pkg:source_archive")
+        rollback_package "$pkg" "source_archive"
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "tarball"
+    update_package_state "$pkg" "in-progress" "source_archive"
 
-    # Phase 2: Manifest update
-    if ! phase_manifest_update "$pkg"; then
-        update_package_state "$pkg" "failed" "manifest" "Manifest update failed"
-        FAILED_PACKAGES+=("$pkg:manifest")
-        rollback_package "$pkg" "manifest"
+    # Phase 2: Crates tarball
+    if ! phase_crates_tarball "$pkg" "$submodule_path"; then
+        update_package_state "$pkg" "failed" "crates_tarball" "Crates tarball generation failed"
+        FAILED_PACKAGES+=("$pkg:crates_tarball")
+        rollback_package "$pkg" "crates_tarball"
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "manifest"
+    update_package_state "$pkg" "in-progress" "crates_tarball"
 
-    # Phase 2.5: Upload tarball to GitHub (IMMEDIATE - before ebuild fetch!)
-    if ! phase_upload_tarball "$pkg"; then
+    # Phase 3: Write Manifest (we are the source of truth)
+    if ! phase_manifest_write "$pkg"; then
+        update_package_state "$pkg" "failed" "manifest_write" "Manifest write failed"
+        FAILED_PACKAGES+=("$pkg:manifest_write")
+        rollback_package "$pkg" "manifest_write"
+        return 1
+    fi
+    update_package_state "$pkg" "in-progress" "manifest_write"
+
+    # Phase 4: Upload both archives to GitHub (before ebuild fetch!)
+    if ! phase_upload "$pkg"; then
         update_package_state "$pkg" "failed" "upload" "GitHub upload/verification failed"
         FAILED_PACKAGES+=("$pkg:upload")
         rollback_package "$pkg" "upload"
@@ -1342,7 +1457,7 @@ function process_package() {
     fi
     update_package_state "$pkg" "in-progress" "upload"
 
-    # Phase 3: Bump
+    # Phase 5: Bump ebuild
     if ! phase_bump "$pkg"; then
         update_package_state "$pkg" "failed" "bump" "Ebuild bump failed"
         FAILED_PACKAGES+=("$pkg:bump")
@@ -1351,20 +1466,20 @@ function process_package() {
     fi
     update_package_state "$pkg" "in-progress" "bump"
 
-    # Phase 4: Fetch
-    if ! phase_fetch "$pkg"; then
-        update_package_state "$pkg" "failed" "fetch" "Upstream source fetch failed"
-        FAILED_PACKAGES+=("$pkg:fetch")
-        rollback_package "$pkg" "fetch" 1
+    # Phase 6: Verify fetch (validates our Manifest entries work)
+    if ! phase_verify_fetch "$pkg"; then
+        update_package_state "$pkg" "failed" "verify_fetch" "Fetch verification failed"
+        FAILED_PACKAGES+=("$pkg:verify_fetch")
+        rollback_package "$pkg" "verify_fetch" 1
         return 1
     fi
-    update_package_state "$pkg" "in-progress" "fetch"
+    update_package_state "$pkg" "in-progress" "verify_fetch"
 
-    # Phase 5: System dependencies (non-fatal)
+    # Phase 7: System dependencies (non-fatal)
     phase_sysdeps "$pkg" "$submodule_path"
     update_package_state "$pkg" "in-progress" "sysdeps"
 
-    # Phase 6: src_prepare test
+    # Phase 8: src_prepare test
     if ! phase_prepare "$pkg"; then
         update_package_state "$pkg" "failed" "prepare" "src_prepare test failed"
         FAILED_PACKAGES+=("$pkg:prepare")
@@ -1373,11 +1488,11 @@ function process_package() {
     fi
     update_package_state "$pkg" "in-progress" "prepare"
 
-    # Phase 7: QA (non-fatal)
+    # Phase 9: QA scan (non-fatal)
     phase_qa "$pkg"
     update_package_state "$pkg" "in-progress" "qa"
 
-    # Phase 8: Commit
+    # Phase 10: Commit
     phase_commit "$pkg"
     update_package_state "$pkg" "completed" "commit"
 
