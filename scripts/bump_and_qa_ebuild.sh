@@ -83,8 +83,81 @@ function log_error() {
     log "${RED}[✗]${NC} $*"
 }
 
+# Helper function to show actionable error messages with context
+function error_with_context() {
+    local what="$1"        # What failed (brief)
+    local cause="$2"       # Why it failed (cause)
+    local suggestion="$3"  # How to fix it (suggestion)
+
+    log_error "$what"
+    [[ -n "$cause" ]] && log "  → Cause: $cause"
+    [[ -n "$suggestion" ]] && log "  → Try: $suggestion"
+}
+
+# Helper function to show command error with stderr
+function error_from_command() {
+    local what="$1"        # What failed
+    local stderr="$2"      # Captured stderr from command
+
+    log_error "$what"
+    if [[ -n "$stderr" ]]; then
+        log "  → Error details:"
+        echo "$stderr" | sed 's/^/    /' | tee -a "${LOG_FILE}"
+    fi
+}
+
 function log_phase() {
     log "${MAGENTA}[PHASE]${NC} $*"
+}
+
+# Calculate and validate archive file hashes
+# Sets variables: <prefix>_size, <prefix>_blake2b, <prefix>_sha512
+# Arguments: pkg filepath prefix (e.g., "src" or "crates")
+# Returns: 0 on success, 1 on failure (with error logging)
+function calculate_and_validate_hashes() {
+    local pkg="$1"
+    local filepath="$2"
+    local prefix="$3"
+
+    # Declare variables we'll be setting (indirect reference)
+    local size blake2b sha512
+
+    # Calculate file size
+    size=$(stat -c%s "$filepath") || {
+        log_error "[${pkg}] Failed to get ${prefix} archive size"
+        return 1
+    }
+    [[ -n "$size" && "$size" =~ ^[0-9]+$ ]] || {
+        log_error "[${pkg}] Invalid ${prefix} archive size: $size"
+        return 1
+    }
+
+    # Calculate BLAKE2B hash
+    blake2b=$(b2sum "$filepath" | awk '{print $1}') || {
+        log_error "[${pkg}] Failed to calculate ${prefix} BLAKE2B hash"
+        return 1
+    }
+    [[ -n "$blake2b" && ${#blake2b} -eq 128 ]] || {
+        log_error "[${pkg}] Invalid ${prefix} BLAKE2B hash: $blake2b"
+        return 1
+    }
+
+    # Calculate SHA512 hash
+    sha512=$(sha512sum "$filepath" | awk '{print $1}') || {
+        log_error "[${pkg}] Failed to calculate ${prefix} SHA512 hash"
+        return 1
+    }
+    [[ -n "$sha512" && ${#sha512} -eq 128 ]] || {
+        log_error "[${pkg}] Invalid ${prefix} SHA512 hash: $sha512"
+        return 1
+    }
+
+    # Set caller's variables via indirect reference
+    eval "${prefix}_size='$size'"
+    eval "${prefix}_blake2b='$blake2b'"
+    eval "${prefix}_sha512='$sha512'"
+
+    return 0
 }
 
 function error() {
@@ -487,7 +560,11 @@ function check_environment() {
 
     # Check GitHub CLI auth
     if ! gh auth status &>/dev/null; then
-        errorExit 3 "GitHub CLI not authenticated. Run: gh auth login"
+        error_with_context \
+            "[${pkg}] GitHub CLI not authenticated" \
+            "gh command exists but user not logged in" \
+            "gh auth login"
+        errorExit 3 "Authentication required"
     fi
 
     # Validate repository paths
@@ -510,6 +587,26 @@ function check_environment() {
     fi
 
     log_success "Environment check passed"
+}
+
+# Validate preconditions before processing begins
+function validate_preconditions() {
+    log_phase "Validating preconditions..."
+
+    # Verify GitHub connectivity
+    log_debug "Testing GitHub connectivity..."
+    if ! gh api -H "Accept: application/vnd.github+json" "/repos/${COSMIC_OVERLAY_REPO}" &>/dev/null; then
+        errorExit 7 "Cannot reach GitHub repository ${COSMIC_OVERLAY_REPO}"
+    fi
+
+    # Check DISTDIR has adequate space (needs ~200MB per package)
+    log_debug "Checking DISTDIR space..."
+    local available_space=$(df "${DISTDIR}" | awk 'NR==2 {print $4}')
+    if [[ -z "$available_space" ]] || [[ $available_space -lt 204800 ]]; then
+        errorExit 8 "DISTDIR has insufficient space (need ~200MB per package, have ~${available_space}KB)"
+    fi
+
+    log_success "Preconditions validated"
 }
 
 # Clone or reuse cosmic-epoch repository
@@ -650,7 +747,10 @@ function phase_source_archive() {
         --prefix="${pkg}-${GENTOO_VERSION}/" \
         "${commit_sha}" \
     | zstd --long=31 --ultra -22 -T0 -o "${archive_path}"; then
-        log_error "[${pkg}] Failed to create source archive"
+        error_with_context \
+            "[${pkg}] Failed to create source archive" \
+            "git archive or zstd compression failed" \
+            "Check: disk space in ${TEMP_DIR}, network/git status, zstd availability"
         pop_d
         return 1
     fi
@@ -723,18 +823,29 @@ function phase_crates_tarball() {
     local config_file="config.toml"
     local vendor_failed=0
 
-    if ! cargo vendor 2>/dev/null > "${config_file}"; then
-        log_error "[${pkg}] cargo vendor failed"
+    local cargo_err
+    cargo_err=$(cargo vendor 2>&1 > "${config_file}") || {
+        error_with_context \
+            "[${pkg}] cargo vendor failed" \
+            "Rust dependency vendoring failed" \
+            "Check Cargo.toml syntax, disk space, or run: cd ${TEMP_DIR}/cosmic-epoch/${submodule_path} && cargo vendor"
+        [[ -n "$cargo_err" ]] && log "  Details: $cargo_err"
         vendor_failed=1
-    fi
+    }
 
     # Validate cargo vendor output
     if [[ $vendor_failed -eq 0 ]]; then
         if [[ ! -f "${config_file}" ]] || [[ ! -s "${config_file}" ]]; then
-            log_error "[${pkg}] cargo vendor output is missing or empty"
+            error_with_context \
+                "[${pkg}] cargo vendor output is missing or empty" \
+                "vendor output directory or config.toml not created" \
+                "Check disk space and Cargo.toml validity"
             vendor_failed=1
         elif [[ ! -d "vendor" ]] || [[ -z "$(ls -A vendor 2>/dev/null)" ]]; then
-            log_error "[${pkg}] vendor directory is missing or empty"
+            error_with_context \
+                "[${pkg}] vendor directory is missing or empty" \
+                "Rust crates were not downloaded/vendored" \
+                "Check Cargo.toml has dependencies, network access works"
             vendor_failed=1
         fi
     fi
@@ -848,14 +959,11 @@ function phase_manifest_write() {
 
     # Calculate hashes from TEMP copy (source of truth)
     local src_size src_blake2b src_sha512
-    src_size=$(stat -c%s "${source_path}") || { log_error "[${pkg}] Failed to get source archive size"; release_manifest_lock "$pkg"; pop_d; return 1; }
-    [[ -n "$src_size" && "$src_size" =~ ^[0-9]+$ ]] || { log_error "[${pkg}] Invalid source archive size: $src_size"; release_manifest_lock "$pkg"; pop_d; return 1; }
-
-    src_blake2b=$(b2sum "${source_path}" | awk '{print $1}') || { log_error "[${pkg}] Failed to calculate BLAKE2B hash"; release_manifest_lock "$pkg"; pop_d; return 1; }
-    [[ -n "$src_blake2b" && ${#src_blake2b} -eq 128 ]] || { log_error "[${pkg}] Invalid BLAKE2B hash: $src_blake2b"; release_manifest_lock "$pkg"; pop_d; return 1; }
-
-    src_sha512=$(sha512sum "${source_path}" | awk '{print $1}') || { log_error "[${pkg}] Failed to calculate SHA512 hash"; release_manifest_lock "$pkg"; pop_d; return 1; }
-    [[ -n "$src_sha512" && ${#src_sha512} -eq 128 ]] || { log_error "[${pkg}] Invalid SHA512 hash: $src_sha512"; release_manifest_lock "$pkg"; pop_d; return 1; }
+    if ! calculate_and_validate_hashes "$pkg" "${source_path}" "src"; then
+        release_manifest_lock "$pkg"
+        pop_d
+        return 1
+    fi
 
     # Remove old entry and write new one (using temp file for atomic operation)
     local manifest_temp=$(mktemp)
@@ -893,14 +1001,11 @@ function phase_manifest_write() {
 
         # Calculate hashes from TEMP copy (source of truth)
         local crates_size crates_blake2b crates_sha512
-        crates_size=$(stat -c%s "${crates_path}") || { log_error "[${pkg}] Failed to get crates archive size"; release_manifest_lock "$pkg"; pop_d; return 1; }
-        [[ -n "$crates_size" && "$crates_size" =~ ^[0-9]+$ ]] || { log_error "[${pkg}] Invalid crates archive size: $crates_size"; release_manifest_lock "$pkg"; pop_d; return 1; }
-
-        crates_blake2b=$(b2sum "${crates_path}" | awk '{print $1}') || { log_error "[${pkg}] Failed to calculate crates BLAKE2B hash"; release_manifest_lock "$pkg"; pop_d; return 1; }
-        [[ -n "$crates_blake2b" && ${#crates_blake2b} -eq 128 ]] || { log_error "[${pkg}] Invalid crates BLAKE2B hash: $crates_blake2b"; release_manifest_lock "$pkg"; pop_d; return 1; }
-
-        crates_sha512=$(sha512sum "${crates_path}" | awk '{print $1}') || { log_error "[${pkg}] Failed to calculate crates SHA512 hash"; release_manifest_lock "$pkg"; pop_d; return 1; }
-        [[ -n "$crates_sha512" && ${#crates_sha512} -eq 128 ]] || { log_error "[${pkg}] Invalid crates SHA512 hash: $crates_sha512"; release_manifest_lock "$pkg"; pop_d; return 1; }
+        if ! calculate_and_validate_hashes "$pkg" "${crates_path}" "crates"; then
+            release_manifest_lock "$pkg"
+            pop_d
+            return 1
+        fi
 
         # Remove old entry and write new one (using temp file for atomic operation)
         local manifest_temp=$(mktemp)
@@ -942,7 +1047,10 @@ function upload_and_verify() {
     local upload_exit=${PIPESTATUS[0]}
 
     if [[ $upload_exit -ne 0 ]]; then
-        log_error "Failed to upload ${filename}"
+        error_with_context \
+            "Failed to upload ${filename}" \
+            "gh release upload command failed" \
+            "Check: GitHub release exists (gh release view ${GENTOO_VERSION}), auth valid (gh auth status), network OK"
         return 1
     fi
 
@@ -964,18 +1072,23 @@ function upload_and_verify() {
     local download_exit=${PIPESTATUS[0]}
 
     if [[ $download_exit -ne 0 ]]; then
-        log_error "Failed to download ${filename} for verification"
+        error_with_context \
+            "Failed to download ${filename} for verification" \
+            "gh release download command failed (may be network or auth issue)" \
+            "Check: gh auth status, network connectivity, release visibility"
         rm -rf "${verify_temp}"
         return 1
     fi
 
     # Byte-for-byte comparison (more reliable than hash comparison)
     if ! cmp -s "${local_file}" "${verify_temp}/${filename}"; then
-        log_error "Byte-for-byte verification FAILED for ${filename}"
-        log_error "The file on GitHub differs from the local copy"
+        error_with_context \
+            "Byte-for-byte verification FAILED for ${filename}" \
+            "File on GitHub differs from local copy (data corruption or upload issue)" \
+            "Delete release and retry: gh release delete ${GENTOO_VERSION} --yes"
         # Clean up corrupted file from DISTDIR to prevent reuse
         rm -f "${local_file}"
-        log_info "Removed corrupted file from DISTDIR: ${filename}"
+        log_debug "Removed corrupted file from DISTDIR: ${filename}"
         rm -rf "${verify_temp}"
         return 1
     fi
@@ -1008,7 +1121,10 @@ function phase_upload() {
 
     # Ensure release exists
     if ! ensure_github_release; then
-        log_error "[${pkg}] Failed to ensure GitHub release exists"
+        error_with_context \
+            "[${pkg}] Failed to ensure GitHub release exists" \
+            "GitHub release creation/verification failed" \
+            "Check: gh auth status, network OK, or create manually: gh release create ${GENTOO_VERSION}"
         return 1
     fi
 
@@ -1094,7 +1210,10 @@ function phase_bump() {
         -e '/EGIT_BRANCH=/c\EGIT_COMMIT="'"${ORIGINAL_TAG}"'"' \
         -e 's:^MY_PV=.*:MY_PV="'"${ORIGINAL_TAG}"'":' \
         "${ebuild_file}"; then
-        log_error "[${pkg}] sed transformation failed on ebuild file"
+        error_with_context \
+            "[${pkg}] sed transformation failed on ebuild file" \
+            "ebuild template editing/transformation failed" \
+            "Check template file exists: ${template_file}, check sed syntax"
         pop_d
         return 1
     fi
@@ -1102,7 +1221,10 @@ function phase_bump() {
     # Remove COSMIC_GIT_UNPACK if present
     if grep -q "^COSMIC_GIT_UNPACK=" "${ebuild_file}"; then
         if ! sed -i '/^COSMIC_GIT_UNPACK=/d' "${ebuild_file}"; then
-            log_error "[${pkg}] sed failed to remove COSMIC_GIT_UNPACK"
+            error_with_context \
+                "[${pkg}] sed failed to remove COSMIC_GIT_UNPACK" \
+                "sed expression to remove COSMIC_GIT_UNPACK failed" \
+                "Check: ebuild file writable, sed syntax valid"
             pop_d
             return 1
         fi
@@ -1435,7 +1557,10 @@ function phase_commit() {
 
     # Stage files - verify success before committing
     if ! git add "${ebuild_file}" Manifest 2>&1 | tee -a "${LOG_FILE}"; then
-        log_error "[${pkg}] Failed to stage ${ebuild_file} and Manifest"
+        error_with_context \
+            "[${pkg}] Failed to stage ${ebuild_file} and Manifest" \
+            "git add command failed (file permission or repo issue)" \
+            "Check: git status, files exist, repo is clean: git status"
         pop_d
         return 1
     fi
@@ -1443,7 +1568,10 @@ function phase_commit() {
     # Verify files were actually staged
     local staged_files=$(git diff --cached --name-only 2>/dev/null)
     if [[ -z "${staged_files}" ]]; then
-        log_error "[${pkg}] No files were staged (${ebuild_file} and Manifest may not exist)"
+        error_with_context \
+            "[${pkg}] No files were staged" \
+            "git add did not stage ${ebuild_file} or Manifest" \
+            "Verify files exist: ls -la ${ebuild_file} Manifest, check git status"
         pop_d
         return 1
     fi
@@ -1790,6 +1918,16 @@ function generate_report() {
 }
 
 # Usage
+# Load configuration from file
+function load_config() {
+    local config="${HOME}/.cosmic-bump.conf"
+    if [[ -f "$config" ]]; then
+        log_debug "Loading configuration from: $config"
+        # shellcheck disable=SC1090
+        source "$config"
+    fi
+}
+
 function usage() {
     cat << EOF
 Usage: $0 [OPTIONS] <cosmic-epoch-tag>
@@ -1815,6 +1953,16 @@ ENVIRONMENT VARIABLES:
                          (default: https://github.com/pop-os/cosmic-epoch)
   COSMIC_OVERLAY_REPO    GitHub repo for releasing tarballs
                          (default: fsvm88/cosmic-overlay)
+  DISTDIR                Directory for downloaded files
+                         (default: /var/cache/distfiles)
+
+CONFIGURATION FILE:
+  ~/.cosmic-bump.conf    Optional config file with environment variables
+                         Example:
+                           COSMIC_EPOCH_REPO="https://github.com/myorg/cosmic-epoch"
+                           COSMIC_OVERLAY_REPO="myuser/cosmic-overlay"
+                           DISTDIR="/mnt/distfiles"
+                         CLI arguments override config file settings
 
 EXAMPLES:
   # Process all packages for beta.3
@@ -1834,6 +1982,9 @@ EOF
 
 # Main
 function main() {
+    # Load configuration file first (can be overridden by CLI args)
+    load_config
+
     # Parse arguments
     local args=()
     while [[ $# -gt 0 ]]; do
@@ -1919,6 +2070,7 @@ function main() {
     init_logging
     update_gitignore
     check_environment
+    validate_preconditions
     prepare_cosmic_epoch
 
     # Get package list
