@@ -33,6 +33,7 @@ NO_UPLOAD=0
 NO_COMMIT=0
 DRY_RUN=0
 VERBOSE=0
+DEBUG=0              # Default: disabled (only show on --debug/-d)
 LOG_FILE=""
 TEMP_DIR=""
 DISTDIR=""
@@ -58,9 +59,9 @@ function log() {
     echo -e "${*}" | tee -a "${LOG_FILE:-/dev/null}" >&2
 }
 
-function log_verbose() {
-    if [[ $VERBOSE -eq 1 ]]; then
-        echo -e "${CYAN}[VERBOSE]${NC} ${*}" | tee -a "${LOG_FILE:-/dev/null}" >&2
+function log_debug() {
+    if [[ $DEBUG -eq 1 ]]; then
+        echo -e "${CYAN}[DEBUG]${NC} ${*}" | tee -a "${LOG_FILE:-/dev/null}" >&2
     else
         echo -e "${*}" >> "${LOG_FILE:-/dev/null}"
     fi
@@ -112,7 +113,7 @@ TEMP_FILES_CREATED=()
 function track_temp() {
     local path="$1"
     TEMP_FILES_CREATED+=("$path")
-    log_verbose "Tracking temp file: $path"
+    log_debug "Tracking temp file: $path"
 }
 
 function cleanup() {
@@ -120,7 +121,7 @@ function cleanup() {
         # Clean up all tracked temp files first
         for x in "${TEMP_FILES_CREATED[@]}"; do
             if [[ -e "$x" ]]; then
-                log_verbose "Removing: ${x}"
+                log_debug "Removing: ${x}"
                 rm -rf "${x}"
             fi
         done
@@ -128,7 +129,7 @@ function cleanup() {
         # Then clean up main directories
         for x in "${CLEANUP_DIRS_FILES[@]}"; do
             if [[ -e "$x" ]]; then
-                log_verbose "Removing: ${x}"
+                log_debug "Removing: ${x}"
                 rm -rf "${x}"
             fi
         done
@@ -163,11 +164,11 @@ function convert_version() {
 # Ensures tag follows epoch-X.Y.Z or similar naming convention
 function validate_original_tag() {
     local tag="$1"
-    
+
     if [[ -z "$tag" ]]; then
         errorExit 100 "ORIGINAL_TAG cannot be empty"
     fi
-    
+
     # Tag should start with 'epoch-' followed by version-like pattern
     # Allow: epoch-1.0.0, epoch-1.0.0-alpha.1, epoch-1.0.0-beta.2, etc.
     if ! [[ "$tag" =~ ^epoch-[0-9]+\.[0-9]+\.[0-9]+ ]]; then
@@ -175,37 +176,37 @@ function validate_original_tag() {
 Expected format: epoch-X.Y.Z or epoch-X.Y.Z-{alpha|beta|rc}.N
 Examples: epoch-1.0.0, epoch-1.0.0-alpha.1, epoch-1.0.0-beta.2"
     fi
-    
+
     # Reject tags with suspicious shell metacharacters or control characters
     # Using character class that doesn't need as much escaping
     if [[ "$tag" =~ [\;\|\&\<\>\$\`] ]]; then
         errorExit 100 "Tag contains suspicious characters: ${tag}"
     fi
-    
-    log_verbose "Tag validation passed: ${tag}"
+
+    log_debug "Tag validation passed: ${tag}"
 }
 
 # Validate SINGLE_PACKAGE input
 # Ensures package name is sane and won't cause path traversal issues
 function validate_single_package() {
     local pkg="$1"
-    
+
     if [[ -z "$pkg" ]]; then
         return 0  # Empty is OK, means process all packages
     fi
-    
+
     # Package names should only contain alphanumerics and hyphens
     if ! [[ "$pkg" =~ ^[a-zA-Z0-9._-]+$ ]]; then
         errorExit 101 "Invalid package name: ${pkg}
 Package names must contain only alphanumerics, hyphens, underscores, and dots"
     fi
-    
+
     # Reject suspicious patterns like path traversal
     if [[ "$pkg" =~ \.\. ]] || [[ "$pkg" =~ ^/ ]]; then
         errorExit 101 "Package name cannot contain '..' or start with '/': ${pkg}"
     fi
-    
-    log_verbose "Package validation passed: ${pkg}"
+
+    log_debug "Package validation passed: ${pkg}"
 }
 
 # Validate repository paths for sanity
@@ -213,16 +214,16 @@ Package names must contain only alphanumerics, hyphens, underscores, and dots"
 function validate_repo_path() {
     local path_desc="$1"
     local path="$2"
-    
+
     if [[ -z "$path" ]]; then
         errorExit 102 "${path_desc} cannot be empty"
     fi
-    
+
     # Reject obvious malicious patterns
     if [[ "$path" =~ [\;\|\&\<\>\`\'\"] ]]; then
         errorExit 102 "${path_desc} contains shell metacharacters: ${path}"
     fi
-    
+
     # Check if it's a URL, path should look reasonable
     if [[ "$path" == https://* ]] || [[ "$path" == http://* ]]; then
         # URLs should be well-formed
@@ -230,8 +231,8 @@ function validate_repo_path() {
             errorExit 102 "Invalid repository URL: ${path}"
         fi
     fi
-    
-    log_verbose "${path_desc} validation passed"
+
+    log_debug "${path_desc} validation passed"
 }
 
 # Manifest race condition prevention
@@ -262,24 +263,24 @@ MANIFEST_LOCK_FD=200
 function acquire_manifest_lock() {
     local pkg="$1"
     local lock_dir="${__cosmic_de_dir}/${pkg}"
-    
+
     # Use directory as lock to avoid permission issues with lock files
     if ! mkdir -p "${lock_dir}/.manifest.lock" 2>/dev/null; then
         log_warning "[${pkg}] Could not acquire Manifest lock - proceeding without lock (may cause corruption if concurrent)"
         return 1
     fi
-    
-    log_verbose "[${pkg}] Acquired Manifest lock"
+
+    log_debug "[${pkg}] Acquired Manifest lock"
     return 0
 }
 
 function release_manifest_lock() {
     local pkg="$1"
     local lock_dir="${__cosmic_de_dir}/${pkg}"
-    
+
     if [[ -d "${lock_dir}/.manifest.lock" ]]; then
         if rmdir "${lock_dir}/.manifest.lock" 2>/dev/null; then
-            log_verbose "[${pkg}] Released Manifest lock"
+            log_debug "[${pkg}] Released Manifest lock"
         fi
     fi
 }
@@ -353,7 +354,7 @@ function backup_manifest() {
     push_d "${__cosmic_de_dir}/${pkg}"
     if [[ -f "Manifest" ]]; then
         cp "Manifest" "Manifest.backup"
-        log_verbose "[${pkg}] Manifest backed up"
+        log_debug "[${pkg}] Manifest backed up"
     fi
     pop_d
 }
@@ -363,7 +364,7 @@ function restore_manifest() {
     push_d "${__cosmic_de_dir}/${pkg}"
     if [[ -f "Manifest.backup" ]]; then
         mv "Manifest.backup" "Manifest"
-        log_verbose "[${pkg}] Manifest restored from backup"
+        log_debug "[${pkg}] Manifest restored from backup"
     fi
     pop_d
 }
@@ -372,7 +373,7 @@ function cleanup_manifest_backup() {
     local pkg="$1"
     push_d "${__cosmic_de_dir}/${pkg}"
     rm -f "Manifest.backup"
-    log_verbose "[${pkg}] Manifest backup cleaned up"
+    log_debug "[${pkg}] Manifest backup cleaned up"
     pop_d
 }
 
@@ -386,7 +387,7 @@ function rollback_package() {
     local cleanup_ebuild="${3:-0}"
     local cleanup_workdir="${4:-0}"
 
-    log_verbose "[${pkg}] Rolling back from phase: ${phase}"
+    log_debug "[${pkg}] Rolling back from phase: ${phase}"
 
     # Always restore Manifest if it was modified
     if ! restore_manifest "$pkg" 2>&1; then
@@ -397,7 +398,7 @@ function rollback_package() {
     push_d "${__cosmic_de_dir}/${pkg}"
     if [[ -f "Manifest.backup" ]]; then
         rm -f "Manifest.backup"
-        log_verbose "[${pkg}] Cleaned up Manifest.backup"
+        log_debug "[${pkg}] Cleaned up Manifest.backup"
     fi
     pop_d
 
@@ -416,7 +417,7 @@ function rollback_package() {
         if ! git checkout -- "${pkg}-${GENTOO_VERSION}.ebuild" 2>&1 | tee -a "${LOG_FILE}"; then
             log_warning "[${pkg}] Could not restore ebuild from git (may not be tracked)"
         else
-            log_verbose "[${pkg}] Restored ebuild from git"
+            log_debug "[${pkg}] Restored ebuild from git"
         fi
         pop_d
     fi
@@ -424,7 +425,7 @@ function rollback_package() {
     # Clean up source archive
     local source_archive="${pkg}-${GENTOO_VERSION}.tar.zst"
     if [[ -f "${DISTDIR}/${source_archive}" ]]; then
-        log_verbose "[${pkg}] Cleaning up failed source archive from DISTDIR"
+        log_debug "[${pkg}] Cleaning up failed source archive from DISTDIR"
         rm -f "${DISTDIR}/${source_archive}"
     fi
     rm -f "${TEMP_DIR}/${source_archive}"
@@ -432,7 +433,7 @@ function rollback_package() {
     # Clean up crates tarball
     local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
     if [[ -f "${DISTDIR}/${tarball_zst}" ]]; then
-        log_verbose "[${pkg}] Cleaning up failed crates tarball from DISTDIR"
+        log_debug "[${pkg}] Cleaning up failed crates tarball from DISTDIR"
         rm -f "${DISTDIR}/${tarball_zst}"
     fi
     rm -f "${TEMP_DIR}/${tarball_zst}"
@@ -481,7 +482,7 @@ function check_environment() {
         if ! command -v "$tool" &>/dev/null; then
             errorExit 2 "${tool} not found in PATH - required for this script"
         fi
-        log_verbose "Found: ${tool}"
+        log_debug "Found: ${tool}"
     done
 
     # Check GitHub CLI auth
@@ -622,7 +623,7 @@ function phase_source_archive() {
 
     # Remove existing archive if present
     if [[ -f "${archive_path}" ]]; then
-        log_info "[${pkg}] Removing existing source archive"
+        log_debug "[${pkg}] Removing existing source archive"
         rm -f "${archive_path}"
     fi
 
@@ -636,7 +637,7 @@ function phase_source_archive() {
     # Get the commit SHA for reproducibility (not tag, which can move)
     local commit_sha
     commit_sha=$(git rev-parse HEAD)
-    log_verbose "[${pkg}] Creating archive from commit: ${commit_sha}"
+    log_debug "[${pkg}] Creating archive from commit: ${commit_sha}"
 
     # Create deterministic archive:
     # - git archive produces sorted, reproducible output for same commit
@@ -661,8 +662,8 @@ function phase_source_archive() {
     archive_blake2b=$(b2sum "${archive_path}" | awk '{print $1}')
     archive_sha512=$(sha512sum "${archive_path}" | awk '{print $1}')
     log_success "[${pkg}] Source archive: ${archive_name} (${archive_size} bytes)"
-    log_verbose "[${pkg}] BLAKE2B: ${archive_blake2b}"
-    log_verbose "[${pkg}] SHA512:  ${archive_sha512}"
+    log_debug "[${pkg}] BLAKE2B: ${archive_blake2b}"
+    log_debug "[${pkg}] SHA512:  ${archive_sha512}"
 
     return 0
 }
@@ -682,7 +683,7 @@ function phase_crates_tarball() {
     push_d "${TEMP_DIR}/cosmic-epoch/${submodule_path}"
 
     if [[ ! -f "Cargo.toml" ]]; then
-        log_info "[${pkg}] No Cargo.toml found, skipping tarball generation"
+        log_debug "[${pkg}] No Cargo.toml found, skipping tarball generation"
         pop_d
         return 0
     fi
@@ -699,7 +700,7 @@ function phase_crates_tarball() {
 
     # Remove existing tarball if present (force regeneration)
     if [[ -f "${DISTDIR}/${tarball_zst}" ]]; then
-        log_info "[${pkg}] Removing existing tarball in DISTDIR"
+        log_debug "[${pkg}] Removing existing tarball in DISTDIR"
         rm -f "${DISTDIR}/${tarball_zst}"
     fi
 
@@ -713,12 +714,12 @@ function phase_crates_tarball() {
     local temp_cargo_home
     temp_cargo_home=$(mktemp -d -t "cargo-home-${pkg}-XXXXXX")
     track_temp "${temp_cargo_home}"
-    log_verbose "[${pkg}] Using temporary CARGO_HOME: ${temp_cargo_home}"
+    log_debug "[${pkg}] Using temporary CARGO_HOME: ${temp_cargo_home}"
 
     # Save current CARGO_HOME (if set) and restore after vendor
     local saved_cargo_home="${CARGO_HOME:-}"
     export CARGO_HOME="${temp_cargo_home}"
-    log_info "[${pkg}] Running cargo vendor with isolated CARGO_HOME..."
+    log_debug "[${pkg}] Running cargo vendor with isolated CARGO_HOME..."
     local config_file="config.toml"
     local vendor_failed=0
 
@@ -739,7 +740,7 @@ function phase_crates_tarball() {
     fi
 
     # Restore previous CARGO_HOME
-    log_verbose "[${pkg}] Cleaning up temporary CARGO_HOME: ${temp_cargo_home}"
+    log_debug "[${pkg}] Cleaning up temporary CARGO_HOME: ${temp_cargo_home}"
     rm -rf "${temp_cargo_home}"
     if [[ -n "${saved_cargo_home}" ]]; then
         export CARGO_HOME="${saved_cargo_home}"
@@ -778,8 +779,8 @@ function phase_crates_tarball() {
     tarball_blake2b=$(b2sum "${tarball_path}" | awk '{print $1}')
     tarball_sha512=$(sha512sum "${tarball_path}" | awk '{print $1}')
     log_success "[${pkg}] Crates tarball: ${tarball_zst} (${tarball_size} bytes)"
-    log_verbose "[${pkg}] BLAKE2B: ${tarball_blake2b}"
-    log_verbose "[${pkg}] SHA512:  ${tarball_sha512}"
+    log_debug "[${pkg}] BLAKE2B: ${tarball_blake2b}"
+    log_debug "[${pkg}] SHA512:  ${tarball_sha512}"
     pop_d
     return 0
 }
@@ -826,7 +827,7 @@ function phase_manifest_write() {
     touch "Manifest"
 
     # Process source archive
-    log_info "[${pkg}] Processing source archive: ${source_zst}"
+    log_debug "[${pkg}] Processing source archive: ${source_zst}"
 
     # Copy to DISTDIR
     if ! cp "${source_path}" "${DISTDIR}/"; then
@@ -871,7 +872,7 @@ function phase_manifest_write() {
 
     # Process crates archive if it exists (some packages may not have Cargo.toml)
     if [[ -f "${crates_path}" ]]; then
-        log_info "[${pkg}] Processing crates archive: ${crates_zst}"
+        log_debug "[${pkg}] Processing crates archive: ${crates_zst}"
 
         # Copy to DISTDIR
         if ! cp "${crates_path}" "${DISTDIR}/"; then
@@ -914,7 +915,7 @@ function phase_manifest_write() {
         log_info "  BLAKE2B: ${crates_blake2b}"
         log_info "  SHA512:  ${crates_sha512}"
     else
-        log_info "[${pkg}] No crates archive (non-Rust package)"
+        log_debug "[${pkg}] No crates archive (non-Rust package)"
     fi
 
     # Release lock after all Manifest modifications are complete
@@ -1031,7 +1032,7 @@ function phase_upload() {
             return 1
         fi
     else
-        log_info "[${pkg}] No crates archive to upload (non-Rust package)"
+        log_debug "[${pkg}] No crates archive to upload (non-Rust package)"
     fi
 
     log_success "[${pkg}] All archives uploaded and verified successfully"
@@ -1074,7 +1075,7 @@ function phase_bump() {
         return 1
     fi
 
-    log_info "[${pkg}] Using template: ${template_file}"
+    log_debug "[${pkg}] Using template: ${template_file}"
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log_info "[${pkg}] DRY-RUN: Would create ${ebuild_file}"
@@ -1085,7 +1086,7 @@ function phase_bump() {
     # Copy and transform
     cp "${template_file}" "${ebuild_file}"
 
-    log_info "[${pkg}] Applying transformations..."
+    log_debug "[${pkg}] Applying transformations..."
     if ! sed -i \
         -e 's|KEYWORDS=.*|KEYWORDS="~amd64"|' \
         -e '/^inherit.*live.*/d' \
@@ -1109,7 +1110,7 @@ function phase_bump() {
 
     # Update VERGEN variables if present
     if grep -q "VERGEN_GIT" "${ebuild_file}"; then
-        log_info "[${pkg}] Updating VERGEN variables..."
+        log_debug "[${pkg}] Updating VERGEN variables..."
 
         # Get git information from the submodule
         local submodule_path="${pkg}"
@@ -1127,8 +1128,8 @@ function phase_bump() {
 
             pop_d
 
-            log_verbose "[${pkg}] VERGEN_GIT_COMMIT_DATE='${commit_date}'"
-            log_verbose "[${pkg}] VERGEN_GIT_SHA=${commit_sha}"
+            log_debug "[${pkg}] VERGEN_GIT_COMMIT_DATE='${commit_date}'"
+            log_debug "[${pkg}] VERGEN_GIT_SHA=${commit_sha}"
 
             # Update the variables in the ebuild
             if ! sed -i \
@@ -1225,11 +1226,11 @@ function phase_sysdeps() {
         return 0
     fi
 
-    log_info "[${pkg}] Analyzing cargo dependencies..."
+    log_debug "[${pkg}] Analyzing cargo dependencies..."
     local sys_crates=$(cargo tree 2>/dev/null | grep -oE '[A-Za-z0-9-]+-sys' | sort -u || echo "")
 
     if [[ -z "$sys_crates" ]]; then
-        log_info "[${pkg}] No -sys crates found"
+        log_debug "[${pkg}] No -sys crates found"
         pop_d
         return 0
     fi
@@ -1268,7 +1269,7 @@ function phase_sysdeps() {
         log_warning "[${pkg}] Missing dependencies detected: ${#missing[@]}"
         MISSING_DEPS["$pkg"]="${missing[*]}"
         for dep in "${missing[@]}"; do
-            log_verbose "  - ${dep}"
+            log_debug "  - ${dep}"
         done
     else
         log_success "[${pkg}] All system dependencies accounted for"
@@ -1298,7 +1299,7 @@ function phase_prepare() {
         return 1
     fi
 
-    log_info "[${pkg}] Testing unpack and prepare phases..."
+    log_debug "[${pkg}] Testing unpack and prepare phases..."
 
     # First attempt
     # NOTE: Pipe ebuild output to tee, then check PIPESTATUS[0] for ebuild exit code
@@ -1397,7 +1398,7 @@ function phase_qa() {
         return 0
     fi
 
-    log_info "[${pkg}] Running pkgcheck scan..."
+    log_debug "[${pkg}] Running pkgcheck scan..."
     local qa_output=$(pkgcheck scan --color false "cosmic-base/${pkg}" 2>&1 || true)
 
     if [[ -n "$qa_output" ]]; then
@@ -1542,7 +1543,10 @@ function process_package() {
         phase_commit "$pkg"
 
         COMPLETED_PACKAGES+=("$pkg")
-        log_success "[${pkg}] Meta-package processing completed!"
+        log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        log "${GREEN}[${pkg_num}/${total_pkgs}] ✓ Completed: ${pkg} (meta-package)${NC}"
+        log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        log ""
         return 0
     fi
 
@@ -1621,7 +1625,10 @@ function process_package() {
     phase_commit "$pkg"
 
     COMPLETED_PACKAGES+=("$pkg")
-    log_success "[${pkg}] Package processing completed!"
+    log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    log "${GREEN}[${pkg_num}/${total_pkgs}] ✓ Completed: ${pkg}${NC}"
+    log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    log ""
     return 0
 }
 
@@ -1800,6 +1807,7 @@ OPTIONS:
   --no-commit            Don't commit changes
   -n, --dry-run          Show what would be done
   -v, --verbose          Enable verbose logging
+  -d, --debug            Enable debug logging (detailed info on operations)
   -h, --help             Show this help
 
 ENVIRONMENT VARIABLES:
@@ -1866,6 +1874,10 @@ function main() {
                 VERBOSE=1
                 shift
                 ;;
+            -d|--debug)
+                DEBUG=1
+                shift
+                ;;
             -*)
                 error "Unknown option: $1"
                 usage
@@ -1885,11 +1897,11 @@ function main() {
     fi
 
     ORIGINAL_TAG="${args[0]}"
-    
+
     # Validate inputs early to fail fast on bad inputs
     validate_original_tag "$ORIGINAL_TAG"
     validate_single_package "$SINGLE_PACKAGE"
-    
+
     local base_version=$(convert_version "${ORIGINAL_TAG}")
 
     if [[ -n "$REVISION_BUMP" ]]; then
