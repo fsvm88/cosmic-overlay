@@ -495,21 +495,13 @@ function rollback_package() {
         pop_d
     fi
 
-    # Clean up source archive
-    local source_archive="${pkg}-${GENTOO_VERSION}.tar.zst"
-    if [[ -f "${DISTDIR}/${source_archive}" ]]; then
-        log_debug "[${pkg}] Cleaning up failed source archive from DISTDIR"
-        rm -f "${DISTDIR}/${source_archive}"
+    # Clean up unified archive
+    local unified_archive="${pkg}-${GENTOO_VERSION}.full.tar.zst"
+    if [[ -f "${DISTDIR}/${unified_archive}" ]]; then
+        log_debug "[${pkg}] Cleaning up failed unified archive from DISTDIR"
+        rm -f "${DISTDIR}/${unified_archive}"
     fi
-    rm -f "${TEMP_DIR}/${source_archive}"
-
-    # Clean up crates tarball
-    local tarball_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
-    if [[ -f "${DISTDIR}/${tarball_zst}" ]]; then
-        log_debug "[${pkg}] Cleaning up failed crates tarball from DISTDIR"
-        rm -f "${DISTDIR}/${tarball_zst}"
-    fi
-    rm -f "${TEMP_DIR}/${tarball_zst}"
+    rm -f "${TEMP_DIR}/${unified_archive}"
 }
 
 # Execute a phase with standard error handling
@@ -706,7 +698,7 @@ function phase_source_archive() {
     local pkg="$1"
     local submodule_path="$2"
 
-    log_phase "[${pkg}] Phase 1: Source archive generation"
+    log_phase "[${pkg}] Phase 1: Create unified archive"
 
     local submodule_dir="${TEMP_DIR}/cosmic-epoch/${submodule_path}"
 
@@ -715,12 +707,18 @@ function phase_source_archive() {
         return 1
     fi
 
-    local archive_name="${pkg}-${GENTOO_VERSION}.tar.zst"
+    # Check if this is a meta package (no sources)
+    if [[ ! -f "${submodule_dir}/Cargo.toml" ]] && [[ ! -f "${submodule_dir}/src" ]]; then
+        log_info "[${pkg}] Meta package detected (no sources), skipping archive"
+        return 0
+    fi
+
+    local archive_name="${pkg}-${GENTOO_VERSION}.full.tar.zst"
     local archive_path="${TEMP_DIR}/${archive_name}"
 
     # Remove existing archive if present
     if [[ -f "${archive_path}" ]]; then
-        log_debug "[${pkg}] Removing existing source archive"
+        log_debug "[${pkg}] Removing existing archive"
         rm -f "${archive_path}"
     fi
 
@@ -729,6 +727,12 @@ function phase_source_archive() {
         return 0
     fi
 
+    # Create working directory for archive assembly
+    local work_dir
+    work_dir=$(mktemp -d -t "archive-build-${pkg}-XXXXXX")
+    track_temp "${work_dir}"
+    log_debug "[${pkg}] Archive working directory: ${work_dir}"
+
     push_d "${submodule_dir}"
 
     # Get the commit SHA for reproducibility (not tag, which can move)
@@ -736,21 +740,112 @@ function phase_source_archive() {
     commit_sha=$(git rev-parse HEAD)
     log_debug "[${pkg}] Creating archive from commit: ${commit_sha}"
 
-    # Create deterministic archive:
-    # - git archive produces sorted, reproducible output for same commit
-    # - --prefix ensures consistent directory structure
-    # - SOURCE_DATE_EPOCH (set globally) ensures reproducible timestamps in zstd
-    # - zstd with fixed parameters for reproducible compression
-    log_info "[${pkg}] Creating source archive..."
+    # Extract source code (excludes .git automatically with git archive)
+    log_info "[${pkg}] Extracting source code..."
     if ! git archive \
         --format=tar \
         --prefix="${pkg}-${GENTOO_VERSION}/" \
         "${commit_sha}" \
-    | zstd --long=31 --ultra -22 -T0 -o "${archive_path}"; then
+        | tar -xf - -C "${work_dir}"; then
         error_with_context \
-            "[${pkg}] Failed to create source archive" \
-            "git archive or zstd compression failed" \
-            "Check: disk space in ${TEMP_DIR}, network/git status, zstd availability"
+            "[${pkg}] Failed to extract source code" \
+            "git archive or tar extraction failed" \
+            "Check: git repository status, disk space, tar availability"
+        pop_d
+        return 1
+    fi
+
+    pop_d
+
+    # Now handle Rust vendoring if Cargo.toml exists
+    local pkg_work="${work_dir}/${pkg}-${GENTOO_VERSION}"
+    if [[ -f "${pkg_work}/Cargo.toml" ]]; then
+        log_info "[${pkg}] Processing Rust dependencies (cargo vendor --locked)..."
+
+        # Create temporary CARGO_HOME for this package to avoid conflicts
+        local temp_cargo_home
+        temp_cargo_home=$(mktemp -d -t "cargo-home-${pkg}-XXXXXX")
+        track_temp "${temp_cargo_home}"
+        log_debug "[${pkg}] Using temporary CARGO_HOME: ${temp_cargo_home}"
+
+        # Save current CARGO_HOME (if set) and restore after vendor
+        local saved_cargo_home="${CARGO_HOME:-}"
+        export CARGO_HOME="${temp_cargo_home}"
+
+        push_d "${pkg_work}"
+
+        local vendor_failed=0
+        local cargo_err
+
+        # Run cargo vendor with --locked for reproducibility
+        log_debug "[${pkg}] Running cargo vendor --locked..."
+        cargo_err=$(cargo vendor --locked 2>&1) || {
+            error_with_context \
+                "[${pkg}] cargo vendor failed" \
+                "Rust dependency vendoring failed" \
+                "Check Cargo.toml syntax, disk space, or run: cd ${pkg_work} && cargo vendor --locked"
+            [[ -n "$cargo_err" ]] && log "  Details: $cargo_err"
+            vendor_failed=1
+        }
+
+        # Validate cargo vendor output
+        if [[ $vendor_failed -eq 0 ]]; then
+            if [[ ! -f "config.toml" ]] || [[ ! -s "config.toml" ]]; then
+                error_with_context \
+                    "[${pkg}] cargo vendor output is missing or empty" \
+                    "vendor output or config.toml not created" \
+                    "Check disk space and Cargo.toml validity"
+                vendor_failed=1
+            elif [[ ! -d "vendor" ]] || [[ -z "$(ls -A vendor 2>/dev/null)" ]]; then
+                error_with_context \
+                    "[${pkg}] vendor directory is missing or empty" \
+                    "Rust crates were not downloaded/vendored" \
+                    "Check Cargo.toml has dependencies, network access works"
+                vendor_failed=1
+            fi
+        fi
+
+        # Restore previous CARGO_HOME
+        log_debug "[${pkg}] Cleaning up temporary CARGO_HOME"
+        if [[ $vendor_failed -eq 0 ]]; then
+            # Create .cargo directory and move config into proper location
+            mkdir -p .cargo
+            if ! mv config.toml .cargo/config.toml; then
+                error_with_context \
+                    "[${pkg}] Failed to move config.toml to .cargo/" \
+                    "File move operation failed" \
+                    "Check file permissions and disk space"
+                vendor_failed=1
+            fi
+        fi
+
+        pop_d
+        rm -rf "${temp_cargo_home}"
+        if [[ -n "${saved_cargo_home}" ]]; then
+            export CARGO_HOME="${saved_cargo_home}"
+        else
+            unset CARGO_HOME
+        fi
+
+        if [[ $vendor_failed -eq 1 ]]; then
+            return 1
+        fi
+    fi
+
+    # Create deterministic archive with git excluded
+    log_info "[${pkg}] Creating unified archive..."
+    push_d "${work_dir}"
+
+    if ! tar \
+        --exclude='.git' \
+        --exclude='.gitignore' \
+        --exclude='.gitattributes' \
+        -cf - "${pkg}-${GENTOO_VERSION}" \
+        | zstd --long=31 --ultra -22 -T0 -o "${archive_path}"; then
+        error_with_context \
+            "[${pkg}] Failed to create archive" \
+            "tar or zstd compression failed" \
+            "Check: disk space in ${TEMP_DIR}, zstd availability"
         pop_d
         return 1
     fi
@@ -761,15 +856,26 @@ function phase_source_archive() {
     archive_size=$(stat -c%s "${archive_path}")
     archive_blake2b=$(b2sum "${archive_path}" | awk '{print $1}')
     archive_sha512=$(sha512sum "${archive_path}" | awk '{print $1}')
-    log_success "[${pkg}] Source archive: ${archive_name} (${archive_size} bytes)"
+    log_success "[${pkg}] Unified archive: ${archive_name} (${archive_size} bytes)"
     log_debug "[${pkg}] BLAKE2B: ${archive_blake2b}"
     log_debug "[${pkg}] SHA512:  ${archive_sha512}"
 
     return 0
 }
 
-# PHASE 2: Generate vendored crates tarball
+# PHASE 2: Deprecated - merged into Phase 1
+# This function is kept for compatibility but does nothing
 function phase_crates_tarball() {
+    local pkg="$1"
+    local submodule_path="$2"
+
+    log_debug "[${pkg}] phase_crates_tarball deprecated - functionality merged into phase_source_archive"
+    return 0
+}
+
+# ORIGINAL PHASE 2 LOGIC (now in Phase 1): Generate vendored crates tarball
+# This has been consolidated into phase_source_archive
+function _phase_crates_tarball_original() {
     local pkg="$1"
     local submodule_path="$2"
 
@@ -896,27 +1002,25 @@ function phase_crates_tarball() {
     return 0
 }
 
-# PHASE 3: Write Manifest entries for both archives
+# PHASE 3: Write Manifest entries for unified archive
 # We are the source of truth - these hashes are authoritative
 function phase_manifest_write() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 3: Write Manifest entries"
+    log_phase "[${pkg}] Phase 2: Write Manifest entries"
 
-    local source_zst="${pkg}-${GENTOO_VERSION}.tar.zst"
-    local crates_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
+    local source_zst="${pkg}-${GENTOO_VERSION}.full.tar.zst"
     local source_path="${TEMP_DIR}/${source_zst}"
-    local crates_path="${TEMP_DIR}/${crates_zst}"
 
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would copy archives to DISTDIR and write Manifest"
+        log_info "[${pkg}] DRY-RUN: Would copy archive to DISTDIR and write Manifest"
         return 0
     fi
 
-    # Source archive is required
+    # Check if archive exists (meta packages skip this phase)
     if [[ ! -f "${source_path}" ]]; then
-        log_error "[${pkg}] Source archive not found: ${source_path}"
-        return 1
+        log_debug "[${pkg}] No unified archive found (meta package or Phase 1 skipped)"
+        return 0
     fi
 
     # Verify package directory exists
@@ -978,50 +1082,7 @@ function phase_manifest_write() {
     log_info "  BLAKE2B: ${src_blake2b}"
     log_info "  SHA512:  ${src_sha512}"
 
-    # Process crates archive if it exists (some packages may not have Cargo.toml)
-    if [[ -f "${crates_path}" ]]; then
-        log_debug "[${pkg}] Processing crates archive: ${crates_zst}"
 
-        # Copy to DISTDIR
-        if ! cp "${crates_path}" "${DISTDIR}/"; then
-            log_error "[${pkg}] Failed to copy crates archive to DISTDIR"
-            release_manifest_lock "$pkg"
-            pop_d
-            return 1
-        fi
-
-        # Sanity check: verify DISTDIR copy matches source byte-for-byte
-        if ! cmp -s "${crates_path}" "${DISTDIR}/${crates_zst}"; then
-            log_error "[${pkg}] DISTDIR copy does not match source (byte-for-byte check failed)"
-            rm -f "${DISTDIR}/${crates_zst}"
-            release_manifest_lock "$pkg"
-            pop_d
-            return 1
-        fi
-
-        # Calculate hashes from TEMP copy (source of truth)
-        local crates_size crates_blake2b crates_sha512
-        if ! calculate_and_validate_hashes "$pkg" "${crates_path}" "crates"; then
-            release_manifest_lock "$pkg"
-            pop_d
-            return 1
-        fi
-
-        # Remove old entry and write new one (using temp file for atomic operation)
-        local manifest_temp=$(mktemp)
-        track_temp "${manifest_temp}"
-        grep -v "^DIST ${crates_zst}" "Manifest" > "${manifest_temp}" || true
-        echo "DIST ${crates_zst} ${crates_size} BLAKE2B ${crates_blake2b} SHA512 ${crates_sha512}" >> "${manifest_temp}"
-        mv "${manifest_temp}" "Manifest"
-
-        log_success "[${pkg}] Crates archive entry written:"
-        log_info "  File: ${crates_zst}"
-        log_info "  Size: ${crates_size} bytes"
-        log_info "  BLAKE2B: ${crates_blake2b}"
-        log_info "  SHA512:  ${crates_sha512}"
-    else
-        log_debug "[${pkg}] No crates archive (non-Rust package)"
-    fi
 
     # Release lock after all Manifest modifications are complete
     release_manifest_lock "$pkg"
@@ -1099,13 +1160,14 @@ function upload_and_verify() {
 }
 
 # PHASE 4: Upload both archives to GitHub
+# PHASE 3: Upload unified archive to GitHub (before ebuild fetch!)
 function phase_upload() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 4: Upload archives to GitHub"
+    log_phase "[${pkg}] Phase 3: Upload archive to GitHub"
 
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_info "[${pkg}] DRY-RUN: Would upload archives to GitHub"
+        log_info "[${pkg}] DRY-RUN: Would upload archive to GitHub"
         return 0
     fi
 
@@ -1114,10 +1176,14 @@ function phase_upload() {
         return 0
     fi
 
-    local source_zst="${pkg}-${GENTOO_VERSION}.tar.zst"
-    local crates_zst="${pkg}-${GENTOO_VERSION}-crates.tar.zst"
+    local source_zst="${pkg}-${GENTOO_VERSION}.full.tar.zst"
     local source_path="${DISTDIR}/${source_zst}"
-    local crates_path="${DISTDIR}/${crates_zst}"
+
+    # Check if archive exists (meta packages don't have archives)
+    if [[ ! -f "${source_path}" ]]; then
+        log_debug "[${pkg}] No archive to upload (meta package)"
+        return 0
+    fi
 
     # Ensure release exists
     if ! ensure_github_release; then
@@ -1128,38 +1194,21 @@ function phase_upload() {
         return 1
     fi
 
-    # Upload source archive (required)
-    if [[ ! -f "${source_path}" ]]; then
-        log_error "[${pkg}] Source archive not found in DISTDIR: ${source_path}"
-        return 1
-    fi
-
-    log_info "[${pkg}] Uploading source archive..."
+    log_info "[${pkg}] Uploading unified archive..."
     if ! upload_and_verify "${source_path}" "${source_zst}"; then
-        log_error "[${pkg}] Source archive upload/verification failed"
+        log_error "[${pkg}] Archive upload/verification failed"
         return 1
     fi
 
-    # Upload crates archive if it exists
-    if [[ -f "${crates_path}" ]]; then
-        log_info "[${pkg}] Uploading crates archive..."
-        if ! upload_and_verify "${crates_path}" "${crates_zst}"; then
-            log_error "[${pkg}] Crates archive upload/verification failed"
-            return 1
-        fi
-    else
-        log_debug "[${pkg}] No crates archive to upload (non-Rust package)"
-    fi
-
-    log_success "[${pkg}] All archives uploaded and verified successfully"
+    log_success "[${pkg}] Archive uploaded and verified successfully"
     return 0
 }
 
-# PHASE 5: Bump ebuild
+# PHASE 4: Bump ebuild
 function phase_bump() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 5: Ebuild bump"
+    log_phase "[${pkg}] Phase 4: Ebuild bump"
 
     push_d "${__cosmic_de_dir}/${pkg}"
 
@@ -1282,12 +1331,12 @@ function phase_bump() {
     return 0
 }
 
-# PHASE 6: Verify fetch works with our Manifest entries
+# PHASE 5: Verify fetch works with our Manifest entries
 # We do NOT run 'ebuild digest' - our Manifest entries are authoritative
 function phase_verify_fetch() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 6: Verify fetch"
+    log_phase "[${pkg}] Phase 5: Verify fetch"
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log_info "[${pkg}] DRY-RUN: Would verify ebuild fetch"
@@ -1324,12 +1373,12 @@ function phase_verify_fetch() {
     return 0
 }
 
-# PHASE 7: Check system dependencies
+# PHASE 6: Check system dependencies
 function phase_sysdeps() {
     local pkg="$1"
     local submodule_path="$2"
 
-    log_phase "[${pkg}] Phase 7: System dependency check"
+    log_phase "[${pkg}] Phase 6: System dependency check"
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log_info "[${pkg}] DRY-RUN: Would analyze system dependencies"
@@ -1400,11 +1449,11 @@ function phase_sysdeps() {
     return 0
 }
 
-# PHASE 8: Test src_prepare
+# PHASE 7: Test src_prepare
 function phase_prepare() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 8: Test src_prepare"
+    log_phase "[${pkg}] Phase 7: Test src_prepare"
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log_info "[${pkg}] DRY-RUN: Would test src_prepare"
@@ -1509,11 +1558,11 @@ function phase_prepare() {
     fi
 }
 
-# PHASE 9: QA scan
+# PHASE 8: QA scan
 function phase_qa() {
     local pkg="$1"
 
-    log_phase "[${pkg}] Phase 9: QA scan"
+    log_phase "[${pkg}] Phase 8: QA scan"
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log_info "[${pkg}] DRY-RUN: Would run QA scan"
@@ -1534,12 +1583,12 @@ function phase_qa() {
     return 0
 }
 
-# PHASE 10: Commit changes
+# PHASE 9: Commit changes
 function phase_commit() {
     local pkg="$1"
     local submodule_path="$2"
 
-    log_phase "[${pkg}] Phase 10: Commit changes"
+    log_phase "[${pkg}] Phase 9: Commit changes"
 
     if [[ $NO_COMMIT -eq 1 ]]; then
         log_info "[${pkg}] --no-commit set, skipping commit"
@@ -1690,66 +1739,59 @@ function process_package() {
         fi
     fi
 
-    # Execute phases - 10-phase architecture (Manifest written BEFORE upload to fail fast on hash issues):
-    # 1: Source archive  2: Crates tarball  3: Write Manifest (hashes from TEMP_DIR)
-    # 4: Upload (verify byte-for-byte)  5: Bump  6: Verify fetch  7: Sysdeps  8: Prepare  9: QA  10: Commit
+    # Execute phases - 9-phase architecture (Manifest written BEFORE upload to fail fast on hash issues):
+    # 1: Unified archive (source + crates)  2: Write Manifest (hashes from TEMP_DIR)
+    # 3: Upload (verify byte-for-byte)  4: Bump  5: Verify fetch  6: Sysdeps  7: Prepare  8: QA  9: Commit
 
-    # Phase 1: Source archive
+    # Phase 1: Unified archive
     if ! phase_source_archive "$pkg" "$submodule_path"; then
-        FAILED_PACKAGES+=("$pkg:source_archive")
-        rollback_package "$pkg" "source_archive"
+        FAILED_PACKAGES+=("$pkg:archive")
+        rollback_package "$pkg" "archive"
         return 1
     fi
 
-    # Phase 2: Crates tarball
-    if ! phase_crates_tarball "$pkg" "$submodule_path"; then
-        FAILED_PACKAGES+=("$pkg:crates_tarball")
-        rollback_package "$pkg" "crates_tarball"
-        return 1
-    fi
-
-    # Phase 3: Write Manifest (we are the source of truth)
+    # Phase 2: Write Manifest (we are the source of truth)
     if ! phase_manifest_write "$pkg"; then
         FAILED_PACKAGES+=("$pkg:manifest_write")
         rollback_package "$pkg" "manifest_write"
         return 1
     fi
 
-    # Phase 4: Upload both archives to GitHub (before ebuild fetch!)
+    # Phase 3: Upload unified archive to GitHub (before ebuild fetch!)
     if ! phase_upload "$pkg"; then
         FAILED_PACKAGES+=("$pkg:upload")
         rollback_package "$pkg" "upload"
         return 1
     fi
 
-    # Phase 5: Bump ebuild
+    # Phase 4: Bump ebuild
     if ! phase_bump "$pkg"; then
         FAILED_PACKAGES+=("$pkg:bump")
         rollback_package "$pkg" "bump" 1
         return 1
     fi
 
-    # Phase 6: Verify fetch (validates our Manifest entries work)
+    # Phase 5: Verify fetch (validates our Manifest entries work)
     if ! phase_verify_fetch "$pkg"; then
         FAILED_PACKAGES+=("$pkg:verify_fetch")
         rollback_package "$pkg" "verify_fetch" 1
         return 1
     fi
 
-    # Phase 7: System dependencies (non-fatal)
+    # Phase 6: System dependencies (non-fatal)
     phase_sysdeps "$pkg" "$submodule_path"
 
-    # Phase 8: src_prepare test
+    # Phase 7: src_prepare test
     if ! phase_prepare "$pkg"; then
         FAILED_PACKAGES+=("$pkg:prepare")
         rollback_package "$pkg" "prepare" 1 1
         return 1
     fi
 
-    # Phase 9: QA scan (non-fatal)
+    # Phase 8: QA scan (non-fatal)
     phase_qa "$pkg"
 
-    # Phase 10: Commit
+    # Phase 9: Commit
     phase_commit "$pkg"
 
     COMPLETED_PACKAGES+=("$pkg")
