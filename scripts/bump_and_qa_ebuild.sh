@@ -710,8 +710,15 @@ function phase_source_archive() {
         return 1
     fi
 
-    # Check if this is a meta package (no sources)
-    if [[ ! -f "${submodule_dir}/Cargo.toml" ]] && [[ ! -f "${submodule_dir}/src" ]]; then
+    # Check if this is a meta package (no sources or build files)
+    # A package needs archiving if it has actual content:
+    # - Cargo.toml (Rust packages)
+    # - Makefile or justfile (build system packages)
+    # - src/ directory (C/C++ or other languages)
+    if [[ ! -f "${submodule_dir}/Cargo.toml" ]] && \
+       [[ ! -f "${submodule_dir}/Makefile" ]] && \
+       [[ ! -f "${submodule_dir}/justfile" ]] && \
+       [[ ! -d "${submodule_dir}/src" ]]; then
         log_info "[${pkg}] Meta package detected (no sources), skipping archive"
         return 0
     fi
