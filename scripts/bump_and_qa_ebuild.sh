@@ -835,7 +835,7 @@ function phase_source_archive() {
         --exclude='.gitignore' \
         --exclude='.gitattributes' \
         -cf - "${pkg}-${GENTOO_VERSION}" \
-        | zstd --long=31 --ultra -22 -T0 -o "${archive_path}"; then
+        | zstd --long=31 -17 -T0 -o "${archive_path}"; then
         error_with_context \
             "[${pkg}] Failed to create archive" \
             "tar or zstd compression failed" \
