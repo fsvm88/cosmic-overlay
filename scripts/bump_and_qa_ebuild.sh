@@ -854,6 +854,12 @@ function phase_source_archive() {
     log_debug "[${pkg}] BLAKE2B: ${archive_blake2b}"
     log_debug "[${pkg}] SHA512:  ${archive_sha512}"
 
+    # Clean up intermediate archive build directory to save space
+    if [[ -d "${work_dir}" ]]; then
+        log_debug "[${pkg}] Cleaning up archive build directory: ${work_dir}"
+        rm -rf "${work_dir}"
+    fi
+
     return 0
 }
 
