@@ -9,6 +9,9 @@ set -euo pipefail
 __script_dir="$(dirname "$(dirname "$(realpath "$0")")")"
 __cosmic_de_dir="${__script_dir}/cosmic-base"
 
+# Use /var/tmp instead of /tmp to avoid running out of disk space on tmpfs mounts
+export TMPDIR="${TMPDIR:-/var/tmp}"
+
 # Color codes for output
 if [[ -t 1 ]]; then
     RED='\033[0;31m'
