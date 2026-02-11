@@ -576,6 +576,19 @@ function check_environment() {
 function validate_preconditions() {
     log_phase "Validating preconditions..."
 
+    # Ensure clean git working directory (no uncommitted/staged changes)
+    log_debug "Checking git working directory state..."
+    local dirty=$(git status --porcelain 2>/dev/null)
+    if [[ -n "$dirty" ]]; then
+        log_error "Git working directory has uncommitted or unstaged changes:"
+        echo "$dirty" | sed 's/^/  /'
+        errorExit 9 "Please commit, stash, or clean working directory before running this script"
+    fi
+
+    # Clear any stale staged files from previous interrupted runs (safety measure)
+    git reset HEAD --quiet 2>/dev/null || true
+    log_debug "Git index reset to ensure clean state"
+
     # Verify GitHub connectivity
     log_debug "Testing GitHub connectivity..."
     if ! gh api -H "Accept: application/vnd.github+json" "/repos/${COSMIC_OVERLAY_REPO}" &>/dev/null; then
@@ -1584,6 +1597,13 @@ function process_package() {
     log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     log "${BOLD}[${pkg_num}/${total_pkgs}] Processing: ${pkg}${NC}"
     log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+    # Ensure git index is clean before processing this package
+    # This ensures any failures/interruptions in previous packages cannot affect this one
+    log_debug "[${pkg}] Ensuring clean git index..."
+    if ! git reset HEAD --quiet 2>/dev/null; then
+        log_warning "[${pkg}] Could not reset git index (may be in inconsistent state)"
+    fi
 
     # Validate archive names (safety check)
     if ! validate_archive_names "$pkg"; then
