@@ -775,25 +775,32 @@ function phase_source_archive() {
         push_d "${pkg_work}"
 
         local vendor_failed=0
-        local cargo_err
+
+        # Create .cargo directory for config output
+        mkdir -p .cargo
+
+        # If .cargo/config.toml already exists, add a newline before appending vendor output
+        if [[ -f .cargo/config.toml ]]; then
+            echo >> .cargo/config.toml
+        fi
 
         # Run cargo vendor with --locked for reproducibility
+        # cargo vendor outputs the config.toml to stdout, so we redirect it to the proper location
         log_debug "[${pkg}] Running cargo vendor --locked..."
-        cargo_err=$(cargo vendor --locked 2>&1) || {
+        if ! cargo vendor --locked >> .cargo/config.toml 2>/dev/nu; then
             error_with_context \
                 "[${pkg}] cargo vendor failed" \
                 "Rust dependency vendoring failed" \
                 "Check Cargo.toml syntax, disk space, or run: cd ${pkg_work} && cargo vendor --locked"
-            [[ -n "$cargo_err" ]] && log "  Details: $cargo_err"
             vendor_failed=1
-        }
+        fi
 
         # Validate cargo vendor output
         if [[ $vendor_failed -eq 0 ]]; then
-            if [[ ! -f "config.toml" ]] || [[ ! -s "config.toml" ]]; then
+            if [[ ! -f ".cargo/config.toml" ]] || [[ ! -s ".cargo/config.toml" ]]; then
                 error_with_context \
                     "[${pkg}] cargo vendor output is missing or empty" \
-                    "vendor output or config.toml not created" \
+                    ".cargo/config.toml not created" \
                     "Check disk space and Cargo.toml validity"
                 vendor_failed=1
             elif [[ ! -d "vendor" ]] || [[ -z "$(ls -A vendor 2>/dev/null)" ]]; then
@@ -807,17 +814,6 @@ function phase_source_archive() {
 
         # Restore previous CARGO_HOME
         log_debug "[${pkg}] Cleaning up temporary CARGO_HOME"
-        if [[ $vendor_failed -eq 0 ]]; then
-            # Create .cargo directory and move config into proper location
-            mkdir -p .cargo
-            if ! mv config.toml .cargo/config.toml; then
-                error_with_context \
-                    "[${pkg}] Failed to move config.toml to .cargo/" \
-                    "File move operation failed" \
-                    "Check file permissions and disk space"
-                vendor_failed=1
-            fi
-        fi
 
         pop_d
         rm -rf "${temp_cargo_home}"
@@ -1075,6 +1071,7 @@ function phase_manifest_write() {
     grep -v "^DIST ${source_zst}" "Manifest" > "${manifest_temp}" || true
     echo "DIST ${source_zst} ${src_size} BLAKE2B ${src_blake2b} SHA512 ${src_sha512}" >> "${manifest_temp}"
     mv "${manifest_temp}" "Manifest"
+    chmod 644 "Manifest"
 
     log_success "[${pkg}] Source archive entry written:"
     log_info "  File: ${source_zst}"
@@ -1258,6 +1255,9 @@ function phase_bump() {
         -e '/PROPERTIES=/d' \
         -e '/EGIT_BRANCH=/c\EGIT_COMMIT="'"${ORIGINAL_TAG}"'"' \
         -e 's:^MY_PV=.*:MY_PV="'"${ORIGINAL_TAG}"'":' \
+        -e '/^SRC_URI=/,/^[[:space:]]*"$/c\SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"' \
+        -e 's|inherit cosmic-de|inherit cosmic-de-r2|g' \
+        -e 's|cosmic-de_|cosmic-de-r2_|g' \
         "${ebuild_file}"; then
         error_with_context \
             "[${pkg}] sed transformation failed on ebuild file" \
@@ -1717,7 +1717,7 @@ function process_package() {
 
         phase_qa "$pkg"
 
-        phase_commit "$pkg"
+        phase_commit "$pkg" "$pkg"
 
         COMPLETED_PACKAGES+=("$pkg")
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1792,7 +1792,7 @@ function process_package() {
     phase_qa "$pkg"
 
     # Phase 9: Commit
-    phase_commit "$pkg"
+    phase_commit "$pkg" "$submodule_path"
 
     COMPLETED_PACKAGES+=("$pkg")
     log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
