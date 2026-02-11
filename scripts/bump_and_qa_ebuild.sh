@@ -1123,7 +1123,9 @@ function phase_bump() {
         -e '/^inherit.*live.*/d' \
         -e '/PROPERTIES=/d' \
         -e '/EGIT_BRANCH=/c\EGIT_COMMIT="'"${ORIGINAL_TAG}"'"' \
-        -e 's:^MY_PV=.*:MY_PV="'"${ORIGINAL_TAG}"'":' \
+        -e '/^MY_PV=/d' \
+        -e '/^MY_P=/d' \
+        -e '/^S=/c\S="${WORKDIR}/${PN}-${PVR}"' \
         -e '/^SRC_URI=/,/^[[:space:]]*"$/c\SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"' \
         -e 's|inherit cosmic-de|inherit cosmic-de-r2|g' \
         -e 's|cosmic-de_|cosmic-de-r2_|g' \
