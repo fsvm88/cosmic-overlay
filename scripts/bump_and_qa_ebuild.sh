@@ -1476,13 +1476,26 @@ function phase_commit() {
     local ebuild_file="${pkg}-${GENTOO_VERSION}.ebuild"
 
     # Stage files - verify success before committing
-    if ! git add "${ebuild_file}" Manifest 2>&1 | tee -a "${LOG_FILE}"; then
-        error_with_context \
-            "[${pkg}] Failed to stage ${ebuild_file} and Manifest" \
-            "git add command failed (file permission or repo issue)" \
-            "Check: git status, files exist, repo is clean: git status"
-        pop_d
-        return 1
+    # Note: Meta-packages don't have Manifest (no SRC_URI), so only add if it exists
+    if [[ -f "Manifest" ]]; then
+        if ! git add "${ebuild_file}" Manifest 2>&1 | tee -a "${LOG_FILE}"; then
+            error_with_context \
+                "[${pkg}] Failed to stage ${ebuild_file} and Manifest" \
+                "git add command failed (file permission or repo issue)" \
+                "Check: git status, files exist, repo is clean: git status"
+            pop_d
+            return 1
+        fi
+    else
+        # Meta-package: only stage ebuild
+        if ! git add "${ebuild_file}" 2>&1 | tee -a "${LOG_FILE}"; then
+            error_with_context \
+                "[${pkg}] Failed to stage ${ebuild_file}" \
+                "git add command failed (file permission or repo issue)" \
+                "Check: git status, files exist, repo is clean: git status"
+            pop_d
+            return 1
+        fi
     fi
 
     # Verify files were actually staged
@@ -1490,8 +1503,8 @@ function phase_commit() {
     if [[ -z "${staged_files}" ]]; then
         error_with_context \
             "[${pkg}] No files were staged" \
-            "git add did not stage ${ebuild_file} or Manifest" \
-            "Verify files exist: ls -la ${ebuild_file} Manifest, check git status"
+            "git add did not stage ${ebuild_file}" \
+            "Verify files exist: ls -la ${ebuild_file}, check git status"
         pop_d
         return 1
     fi
