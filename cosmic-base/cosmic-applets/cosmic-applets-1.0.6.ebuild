@@ -52,7 +52,7 @@ _install_button() {
 
 src_install() {
 	# This git project now creates one multicall binary
-	dobin "$(cosmic-de-r2_target_dir)/${PN}"
+	dobin "$(cosmic-common_target_dir)/${PN}"
 
 	# Install applets:
 	# - s-link to multicall binary

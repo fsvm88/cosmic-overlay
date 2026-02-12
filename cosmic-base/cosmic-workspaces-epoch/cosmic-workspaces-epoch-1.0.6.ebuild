@@ -21,7 +21,7 @@ RDEPEND+="
 
 src_install() {
 	# one of the few components with custom binary name, no $PN
-	dobin "$(cosmic-de-r2_target_dir)/cosmic-workspaces"
+	dobin "$(cosmic-common_target_dir)/cosmic-workspaces"
 
 	domenu data/com.system76.CosmicWorkspaces.desktop
 

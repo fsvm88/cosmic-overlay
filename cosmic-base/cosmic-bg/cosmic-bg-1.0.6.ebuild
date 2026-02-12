@@ -16,7 +16,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 src_install() {
-	dobin "$(cosmic-de-r2_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	domenu data/com.system76.CosmicBackground.desktop
 

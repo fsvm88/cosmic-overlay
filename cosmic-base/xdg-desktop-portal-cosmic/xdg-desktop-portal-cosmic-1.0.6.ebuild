@@ -45,7 +45,7 @@ src_configure() {
 
 src_install() {
 	exeinto /usr/libexec
-	doexe "$(cosmic-de-r2_target_dir)/$PN"
+	doexe "$(cosmic-common_target_dir)/$PN"
 
 	systemd_newuserunit data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
 			xdg-desktop-portal-cosmic.service

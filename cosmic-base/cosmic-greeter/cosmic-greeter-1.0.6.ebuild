@@ -34,7 +34,7 @@ src_configure() {
 }
 
 src_install() {
-	local binfile="$(cosmic-de-r2_target_dir)/$PN"
+	local binfile="$(cosmic-common_target_dir)/$PN"
 	dobin "$binfile"
 	dobin "$binfile-daemon"
 	newbin "$PN-start.sh" "$PN-start"

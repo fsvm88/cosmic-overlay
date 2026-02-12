@@ -23,7 +23,7 @@ RDEPEND+="
 "
 
 src_install() {
-	dobin "$(cosmic-de-r2_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	domenu res/com.system76.CosmicStore.desktop
 
