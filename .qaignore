@@ -46,6 +46,9 @@ cosmic-utils/* VisibleVcsPkg
 # We have 1 sed line that replaces one file path with another
 cosmic-base/cosmic-osd ExcessiveLineLength
 
+# IndirectInherits
+cosmic-base/* IndirectInherits
+
 # UnknownRestrict
 # RESTRICT=network-sandbox exists, somehow pkgcheck complains
 cosmic-extra/cutecosmic UnknownRestrict

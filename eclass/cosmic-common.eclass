@@ -78,19 +78,6 @@ $(llvm_gen_dep '
 )
 "
 
-# @ECLASS_VARIABLE: COSMIC_DE_GVFS_IUSE
-# @OUTPUT_VARIABLE
-# @DESCRIPTION:
-# reusable variable to inject gvfs IUSEs
-COSMIC_DE_GVFS_IUSE="afp http nfs samba"
-# @ECLASS_VARIABLE: COSMIC_DE_GVFS_DEPENDS
-# @OUTPUT_VARIABLE
-# @DESCRIPTION:
-# reusable variable to inject gvfs DEPENDs
-COSMIC_DE_GVFS_DEPENDS="
->=gnome-base/gvfs-1.48.0[afp?,http?,nfs?,samba?]
-"
-
 IUSE+=" debug debug-line-tables-only elogind max-opt systemd"
 REQUIRED_USE="
 ${LLVM_REQUIRED_USE}
