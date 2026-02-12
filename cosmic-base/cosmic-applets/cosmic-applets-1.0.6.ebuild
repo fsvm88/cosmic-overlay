@@ -84,7 +84,7 @@ src_install() {
 	_link_applet "cosmic-panel-button"
 
 	# Install metainfo
-	cosmic-de-r2_install_metainfo data/com.system76.CosmicApplets.metainfo.xml
+	cosmic-common_install_metainfo data/com.system76.CosmicApplets.metainfo.xml
 
 	# Install default schema
 	insinto /usr/share/cosmic

@@ -43,7 +43,7 @@ src_install() {
 
 	domenu resources/applications/*.desktop
 
-	cosmic-de-r2_install_metainfo resources/com.system76.CosmicSettings.metainfo.xml
+	cosmic-common_install_metainfo resources/com.system76.CosmicSettings.metainfo.xml
 
 	insinto /usr/share/cosmic
 	doins -r resources/default_schema/*

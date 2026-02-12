@@ -24,7 +24,7 @@ src_install() {
 
 	domenu data/com.system76.CosmicNotifications.desktop
 
-	cosmic-de-r2_install_metainfo data/com.system76.CosmicNotifications.metainfo.xml
+	cosmic-common_install_metainfo data/com.system76.CosmicNotifications.metainfo.xml
 
 	insinto /usr/share/icons/hicolor/scalable/apps
 	doins data/icons/com.system76.CosmicNotifications.svg

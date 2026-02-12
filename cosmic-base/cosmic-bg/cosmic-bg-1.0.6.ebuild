@@ -20,7 +20,7 @@ src_install() {
 
 	domenu data/com.system76.CosmicBackground.desktop
 
-	cosmic-de-r2_install_metainfo data/com.system76.CosmicBackground.metainfo.xml
+	cosmic-common_install_metainfo data/com.system76.CosmicBackground.metainfo.xml
 
 	insinto /usr/share/cosmic/com.system76.CosmicBackground/v1
 	doins data/v1/*

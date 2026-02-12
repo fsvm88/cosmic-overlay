@@ -27,7 +27,7 @@ src_install() {
 
 	domenu data/com.system76.CosmicLauncher.desktop
 
-	cosmic-de-r2_install_metainfo data/com.system76.CosmicLauncher.metainfo.xml
+	cosmic-common_install_metainfo data/com.system76.CosmicLauncher.metainfo.xml
 
 	insinto /usr/share/icons/hicolor/scalable/apps
 	doins data/icons/com.system76.CosmicLauncher.svg

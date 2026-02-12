@@ -28,7 +28,7 @@ src_install() {
 
 	domenu res/com.system76.CosmicEdit.desktop
 
-	cosmic-de-r2_install_metainfo res/com.system76.CosmicEdit.metainfo.xml
+	cosmic-common_install_metainfo res/com.system76.CosmicEdit.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*
