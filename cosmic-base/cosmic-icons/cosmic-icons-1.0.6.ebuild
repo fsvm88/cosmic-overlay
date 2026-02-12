@@ -6,7 +6,6 @@ EAPI=8
 DESCRIPTION="icon set COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-icons"
 
-
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
 S="${WORKDIR}/${PN}-${PVR}"
 

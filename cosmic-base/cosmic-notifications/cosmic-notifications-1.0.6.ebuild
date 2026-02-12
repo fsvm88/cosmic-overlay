@@ -8,7 +8,6 @@ inherit cosmic-de-r2 desktop
 DESCRIPTION="layer shell notifications daemon for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-notifications"
 
-
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture

@@ -8,22 +8,21 @@ inherit cosmic-de-r2 desktop
 DESCRIPTION="file manager from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-files"
 
-
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE+=" ${COSMIC_DE_GVFS_IUSE}"
+IUSE+=" afp http nfs samba"
 
 BDEPEND+="
 	dev-libs/glib:2
-	${COSMIC_DE_GVFS_DEPENDS}
+	>=gnome-base/gvfs-1.48.0[afp?,http?,nfs?,samba?]
 "
 RDEPEND+="
 	x11-misc/xdg-utils
-	${COSMIC_DE_GVFS_DEPENDS}
+	>=gnome-base/gvfs-1.48.0[afp?,http?,nfs?,samba?]
 "
 
 src_configure() {
