@@ -40,11 +40,14 @@ cosmic-base/pop-fonts VisibleVcsPkg
 cosmic-base/pop-gtk-theme VisibleVcsPkg
 cosmic-base/pop-icon-theme VisibleVcsPkg
 # these are mostly 9999 ebuilds
-cosmic-utils/* VisibleVcsPkg
+cosmic-utils VisibleVcsPkg
 
 # ExcessiveLineLength
 # We have 1 sed line that replaces one file path with another
 cosmic-base/cosmic-osd ExcessiveLineLength
+
+# IndirectInherits
+cosmic-base IndirectInherits
 
 # UnknownRestrict
 # RESTRICT=network-sandbox exists, somehow pkgcheck complains
