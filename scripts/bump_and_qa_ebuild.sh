@@ -845,8 +845,6 @@ function phase_source_archive() {
 
     if ! tar \
         --exclude='.git' \
-        --exclude='.gitignore' \
-        --exclude='.gitattributes' \
         -cf - "${pkg}-${GENTOO_VERSION}" \
         | zstd --long=31 -17 -T0 -o "${archive_path}"; then
         error_with_context \
