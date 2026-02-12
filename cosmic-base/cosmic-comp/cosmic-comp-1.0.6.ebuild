@@ -33,7 +33,7 @@ src_configure() {
 }
 
 src_install() {
-	dobin "$(cosmic-de-r2_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	# Default keybindings
 	insinto /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1
