@@ -798,7 +798,7 @@ function phase_source_archive() {
         # Run cargo vendor with --locked for reproducibility
         # cargo vendor outputs the config.toml to stdout, so we redirect it to the proper location
         log_debug "[${pkg}] Running cargo vendor --locked..."
-        if ! cargo vendor --locked >> .cargo/config.toml 2>/dev/nu; then
+        if ! cargo vendor >> .cargo/config.toml 2>/dev/null; then
             error_with_context \
                 "[${pkg}] cargo vendor failed" \
                 "Rust dependency vendoring failed" \
