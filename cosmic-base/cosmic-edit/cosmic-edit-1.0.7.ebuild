@@ -26,9 +26,9 @@ src_configure() {
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
-	domenu res/com.system76.CosmicEdit.desktop
+	domenu target/xdgen/com.system76.CosmicEdit.desktop
 
-	cosmic-common_install_metainfo res/com.system76.CosmicEdit.metainfo.xml
+	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicEdit.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*

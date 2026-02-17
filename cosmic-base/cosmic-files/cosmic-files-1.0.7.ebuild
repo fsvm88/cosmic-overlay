@@ -42,9 +42,9 @@ src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 	dobin "$(cosmic-common_target_dir)/$PN-applet"
 
-	domenu res/com.system76.CosmicFiles.desktop
+	domenu target/xdgen/com.system76.CosmicFiles.desktop
 
-	cosmic-common_install_metainfo res/com.system76.CosmicFiles.metainfo.xml
+	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicFiles.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*
