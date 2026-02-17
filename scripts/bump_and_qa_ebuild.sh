@@ -1134,39 +1134,6 @@ function phase_bump() {
     # Copy and transform
     cp "${template_file}" "${ebuild_file}"
 
-    log_debug "[${pkg}] Applying transformations..."
-    if ! sed -i \
-        -e 's|KEYWORDS=.*|KEYWORDS="~amd64"|' \
-        -e '/^inherit.*live.*/d' \
-        -e '/PROPERTIES=/d' \
-        -e '/EGIT_BRANCH=/c\EGIT_COMMIT="'"${ORIGINAL_TAG}"'"' \
-        -e '/^MY_PV=/d' \
-        -e '/^MY_P=/d' \
-        -e '/^S=/c\S="${WORKDIR}/${PN}-${PVR}"' \
-        -e '/^SRC_URI=/,/^[[:space:]]*"$/c\SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"' \
-        -e 's|inherit cosmic-de|inherit cosmic-de-r2|g' \
-        -e 's|cosmic-de_|cosmic-de-r2_|g' \
-        "${ebuild_file}"; then
-        error_with_context \
-            "[${pkg}] sed transformation failed on ebuild file" \
-            "ebuild template editing/transformation failed" \
-            "Check template file exists: ${template_file}, check sed syntax"
-        pop_d
-        return 1
-    fi
-
-    # Remove COSMIC_GIT_UNPACK if present
-    if grep -q "^COSMIC_GIT_UNPACK=" "${ebuild_file}"; then
-        if ! sed -i '/^COSMIC_GIT_UNPACK=/d' "${ebuild_file}"; then
-            error_with_context \
-                "[${pkg}] sed failed to remove COSMIC_GIT_UNPACK" \
-                "sed expression to remove COSMIC_GIT_UNPACK failed" \
-                "Check: ebuild file writable, sed syntax valid"
-            pop_d
-            return 1
-        fi
-    fi
-
     # Update VERGEN variables if present
     if grep -q "VERGEN_GIT" "${ebuild_file}"; then
         log_debug "[${pkg}] Updating VERGEN variables..."
