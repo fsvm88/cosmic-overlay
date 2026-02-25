@@ -3,25 +3,25 @@
 
 EAPI=8
 
-DESCRIPTION="icon set COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-icons"
+DESCRIPTION="Wallpapers for the COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-wallpapers"
 
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
-S="${WORKDIR}/${PN}-${PVR}"
 
-# use cargo-license for a more accurate license picture
+# As of 2024-11-01, the git repo now provides a LICENSE
 LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
-RDEPEND+="
-	>=cosmic-base/pop-icon-theme-3.5.1
+BDEPEND="
+	media-gfx/imagemagick
 "
 
 src_unpack() {
 	debug-print-function ${FUNCNAME} "$@"
 
 	pushd "${DISTDIR}" >/dev/null || die
+
 	mkdir -p "${S}" || die
 
 	for archive in ${A}; do
@@ -34,12 +34,11 @@ src_unpack() {
 			;;
 		esac
 	done
+
 	popd >/dev/null || die
 }
 
 src_install() {
-	insinto /usr/share/icons/Cosmic
-	doins -r freedesktop/scalable
-	doins -r extra/scalable
-	doins index.theme
+	insinto /usr/share/backgrounds/cosmic
+	doins original/*
 }

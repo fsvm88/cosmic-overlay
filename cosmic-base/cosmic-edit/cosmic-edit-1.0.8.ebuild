@@ -5,8 +5,8 @@ EAPI=8
 
 inherit cosmic-de-r2 desktop
 
-DESCRIPTION="app store from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-store"
+DESCRIPTION="text editor from COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-edit"
 
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
 
@@ -15,19 +15,20 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-RDEPEND+="
-	>=dev-libs/openssl-3.0.13-r2
-	>=sys-apps/flatpak-1.14.4-r3
-	~cosmic-base/pop-appstream-data-9999
-	~cosmic-base/cosmic-icons-${PV}
-"
+src_configure() {
+	# Required for some crates to build properly due to build.rs scripts
+	export VERGEN_GIT_COMMIT_DATE='Tue Feb 24 10:22:44 2026 -0700'
+	export VERGEN_GIT_SHA=7b511d737f1ee35eee675f9169a0d06775d0c306
+
+	cosmic-de-r2_src_configure
+}
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
-	domenu res/com.system76.CosmicStore.desktop
+	domenu target/xdgen/com.system76.CosmicEdit.desktop
 
-	cosmic-common_install_metainfo res/com.system76.CosmicStore.metainfo.xml
+	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicEdit.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*

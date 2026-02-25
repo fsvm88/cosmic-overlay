@@ -27,8 +27,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Feb 10 11:06:03 2026 -0700'
-	export VERGEN_GIT_SHA=d668d04e1200ef5826a2eb2af043e85f0ae4af3a
+	export VERGEN_GIT_COMMIT_DATE='Tue Feb 24 10:25:16 2026 -0700'
+	export VERGEN_GIT_SHA=f645c55a3876e9e2edcf88d2d852c40e9468a7ec
 
 	cosmic-de-r2_src_configure
 }
@@ -42,9 +42,9 @@ src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 	dobin "$(cosmic-common_target_dir)/$PN-applet"
 
-	domenu res/com.system76.CosmicFiles.desktop
+	domenu target/xdgen/com.system76.CosmicFiles.desktop
 
-	cosmic-common_install_metainfo res/com.system76.CosmicFiles.metainfo.xml
+	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicFiles.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*
