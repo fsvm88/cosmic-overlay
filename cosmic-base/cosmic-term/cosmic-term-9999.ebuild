@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="terminal emulator (built using alacritty_terminal) from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-term"
