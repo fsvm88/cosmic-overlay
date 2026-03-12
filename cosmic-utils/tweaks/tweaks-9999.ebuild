@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="A tweaking tool offering access to advanced settings and features for COSMIC DE"
 HOMEPAGE="https://github.com/cosmic-utils/tweaks"
