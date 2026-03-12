@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop systemd
+inherit cosmic-de-r2 desktop systemd
 
 DESCRIPTION="Online account management service for the COSMIC desktop"
 HOMEPAGE="https://github.com/cosmic-utils/accounts"
