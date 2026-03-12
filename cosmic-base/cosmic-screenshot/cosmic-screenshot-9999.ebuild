@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="utility for capturing screenshots via XDG Desktop Portal from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-screenshot"
