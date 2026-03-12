@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de-r2
 
 DESCRIPTION="compositor for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-comp"
