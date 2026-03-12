@@ -6,7 +6,7 @@ EAPI=8
 EGIT_LFS=1
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de pam systemd tmpfiles
+inherit cosmic-de-r2 pam systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
