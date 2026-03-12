@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de-r2
 
 DESCRIPTION="OSD daemon for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-osd"
