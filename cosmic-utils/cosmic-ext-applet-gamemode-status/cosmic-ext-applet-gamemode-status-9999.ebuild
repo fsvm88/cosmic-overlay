@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="GameMode Status COSMIC DE Applet"
 HOMEPAGE="https://github.com/D-Brox/cosmic-ext-applet-gamemode-status"
