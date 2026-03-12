@@ -5,7 +5,7 @@ EAPI=8
 
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
