@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="Classic style customizable application launcher for COSMIC DE"
 HOMEPAGE="https://github.com/championpeak87/cosmic-ext-classic-menu"
