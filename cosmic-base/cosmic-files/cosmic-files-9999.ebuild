@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="file manager from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-files"
