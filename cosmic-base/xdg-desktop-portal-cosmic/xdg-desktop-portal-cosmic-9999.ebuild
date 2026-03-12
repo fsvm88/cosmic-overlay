@@ -5,7 +5,7 @@ EAPI=8
 
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de systemd
+inherit cosmic-de-r2 systemd
 
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
