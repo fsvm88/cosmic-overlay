@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="Minimon COSMIC DE Applet"
 HOMEPAGE="https://github.com/cosmic-utils/minimon-applet"
