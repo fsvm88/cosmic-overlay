@@ -4,7 +4,7 @@
 EAPI=8
 
 COSMIC_GIT_UNPACK=1
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="initial setup program for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-initial-setup"
