@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop systemd
+inherit cosmic-de-r2 desktop systemd
 
 DESCRIPTION="sessions manager for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-session"
