@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="Caffeine Applet for the COSMIC DE"
 HOMEPAGE="https://github.com/tropicbliss/cosmic-ext-applet-caffeine"
