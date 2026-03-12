@@ -5,7 +5,7 @@
 # for now it's too in flux, 9999 is easier
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de-r2
 
 DESCRIPTION="Modular IPC-based desktop launcher service"
 HOMEPAGE="https://github.com/pop-os/launcher"
