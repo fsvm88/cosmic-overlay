@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-de-r2
 
 DESCRIPTION="CLI utility for displaying and configuring wayland outputs from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-randr"
