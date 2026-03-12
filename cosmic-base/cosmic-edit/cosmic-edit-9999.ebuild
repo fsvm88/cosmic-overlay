@@ -4,7 +4,7 @@
 EAPI=8
 
 EGIT_LFS=1
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="text editor from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-edit"
