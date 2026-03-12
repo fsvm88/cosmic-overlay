@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="COSMIC DE Privacy Indicator"
 HOMEPAGE="https://github.com/D-Brox/cosmic-ext-applet-privacy-indicator"
