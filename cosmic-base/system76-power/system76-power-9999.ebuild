@@ -6,7 +6,7 @@
 
 EAPI=8
 
-inherit cosmic-de systemd
+inherit cosmic-de-r2 systemd
 
 DESCRIPTION="system76-power is a utility for managing graphics and power profiles"
 HOMEPAGE="https://github.com/pop-os/system76-power"
