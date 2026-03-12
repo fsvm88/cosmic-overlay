@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="A system information viewer for the COSMIC DE"
 HOMEPAGE="https://github.com/cosmic-utils/examine"
