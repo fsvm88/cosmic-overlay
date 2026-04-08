@@ -5,7 +5,7 @@ EAPI=8
 
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de systemd
+inherit cosmic-live systemd
 
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
@@ -28,7 +28,7 @@ RDEPEND+="
 "
 
 src_prepare() {
-	cosmic-de_src_prepare
+	cosmic-live_src_prepare
 
 	sed \
 		-i 's|@libexecdir@/|/usr/libexec/|' \
@@ -42,12 +42,12 @@ src_configure() {
 	export VERGEN_GIT_COMMIT_DATE='Fri Oct 17 11:58:46 2025 -0700'
 	export VERGEN_GIT_SHA=56da80f1b4bb8ae84dc4aee50c191bcd6b2ec118
 
-	cosmic-de_src_configure
+	cosmic-live_src_configure
 }
 
 src_install() {
 	exeinto /usr/libexec
-	doexe "$(cosmic-de_target_dir)/$PN"
+	doexe "$(cosmic-common_target_dir)/$PN"
 
 	systemd_newuserunit data/org.freedesktop.impl.portal.desktop.cosmic.service.in \
 			xdg-desktop-portal-cosmic.service

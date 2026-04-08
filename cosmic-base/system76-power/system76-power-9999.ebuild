@@ -6,7 +6,7 @@
 
 EAPI=8
 
-inherit cosmic-de systemd
+inherit cosmic-live systemd
 
 DESCRIPTION="system76-power is a utility for managing graphics and power profiles"
 HOMEPAGE="https://github.com/pop-os/system76-power"
@@ -34,7 +34,7 @@ RDEPEND+="
 "
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	local appid="com.system76.PowerDaemon"
 

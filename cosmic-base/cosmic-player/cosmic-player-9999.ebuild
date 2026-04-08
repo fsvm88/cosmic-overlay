@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="player for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-player"
@@ -22,11 +22,11 @@ RDEPEND+="
 "
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	domenu res/com.system76.CosmicPlayer.desktop
 
-	cosmic-de_install_metainfo res/com.system76.CosmicPlayer.metainfo.xml
+	cosmic-common_install_metainfo res/com.system76.CosmicPlayer.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*

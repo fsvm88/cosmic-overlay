@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="applets for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-applets"
@@ -53,7 +53,7 @@ _install_button() {
 
 src_install() {
 	# This git project now creates one multicall binary
-	dobin "$(cosmic-de_target_dir)/${PN}"
+	dobin "$(cosmic-common_target_dir)/${PN}"
 
 	# Install applets:
 	# - s-link to multicall binary
@@ -85,7 +85,7 @@ src_install() {
 	_link_applet "cosmic-panel-button"
 
 	# Install metainfo
-	cosmic-de_install_metainfo data/com.system76.CosmicApplets.metainfo.xml
+	cosmic-common_install_metainfo data/com.system76.CosmicApplets.metainfo.xml
 
 	# Install default schema
 	insinto /usr/share/cosmic

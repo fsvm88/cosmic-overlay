@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop systemd
+inherit cosmic-live desktop systemd
 
 DESCRIPTION="sessions manager for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-session"
@@ -51,7 +51,7 @@ RDEPEND+="
 
 src_prepare() {
 	use elogind && eapply "${FILESDIR}/no_journald-systemctl.patch"
-	cosmic-de_src_prepare
+	cosmic-live_src_prepare
 
 	# patch for dconf profile as done in justfile upstream
 	# no more need for workaround in src_install
@@ -71,14 +71,14 @@ src_configure() {
 		# Based on the original PR, this could be enabled without harm also for systemd systems,
 		# because it does auto-detection, but since we already have a conditional for this, lets just add it
 		# https://github.com/pop-os/cosmic-session/pull/109
-		cosmic-de_src_configure --no-default-features --features autostart
+		cosmic-live_src_configure --no-default-features --features autostart
 	else
-		cosmic-de_src_configure
+		cosmic-live_src_configure
 	fi
 }
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	dobin data/start-cosmic
 

@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="A tweaking tool offering access to advanced settings and features for COSMIC DE"
 HOMEPAGE="https://github.com/cosmic-utils/tweaks"
@@ -25,7 +25,7 @@ src_install() {
 	export APPID="dev.edfloreshz.CosmicTweaks"
 
 	exeinto /usr/bin
-	doexe "$(cosmic-de_target_dir)/cosmic-ext-tweaks"
+	doexe "$(cosmic-common_target_dir)/cosmic-ext-tweaks"
 
 	newicon -s scalable res/icons/hicolor/scalable/apps/icon.svg ${APPID}.svg
 

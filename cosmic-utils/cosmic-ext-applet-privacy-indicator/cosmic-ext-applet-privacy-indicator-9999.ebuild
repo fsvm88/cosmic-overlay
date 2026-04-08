@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="COSMIC DE Privacy Indicator"
 HOMEPAGE="https://github.com/D-Brox/cosmic-ext-applet-privacy-indicator"
@@ -23,11 +23,11 @@ BDEPEND+="
 
 src_install() {
 	exeinto /usr/bin
-	doexe "$(cosmic-de_target_dir)/${PN}"
+	doexe "$(cosmic-common_target_dir)/${PN}"
 
 	export APPID="dev.DBrox.CosmicPrivacyIndicator"
 
 	domenu res/${APPID}.desktop
 
-	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
+	cosmic-common_install_metainfo res/${APPID}.metainfo.xml
 }

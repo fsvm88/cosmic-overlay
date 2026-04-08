@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-live
 
 DESCRIPTION="settings daemon for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings-daemon"
@@ -26,7 +26,7 @@ RDEPEND+="
 "
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	insinto /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1/
 	newins data/system_actions.ron system_actions

@@ -4,7 +4,7 @@
 EAPI=8
 
 COSMIC_GIT_UNPACK=1
-inherit cosmic-de
+inherit cosmic-live
 
 DESCRIPTION="screen idle daemon for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-idle"
@@ -18,9 +18,9 @@ SLOT="0"
 KEYWORDS=""
 
 src_configure() {
-	cosmic-de_src_configure --all
+	cosmic-live_src_configure --all
 }
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 }

@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="Classic style customizable application launcher for COSMIC DE"
 HOMEPAGE="https://github.com/championpeak87/cosmic-ext-classic-menu"
@@ -23,14 +23,14 @@ BDEPEND+="
 
 src_install() {
 	exeinto /usr/bin
-	doexe "$(cosmic-de_target_dir)/cosmic-ext-classic-menu-applet"
-	doexe "$(cosmic-de_target_dir)/cosmic-ext-classic-menu-settings"
+	doexe "$(cosmic-common_target_dir)/cosmic-ext-classic-menu-applet"
+	doexe "$(cosmic-common_target_dir)/cosmic-ext-classic-menu-settings"
 
 	export APPID="com.championpeak87.cosmic-ext-classic-menu"
 
 	domenu res/${APPID}.desktop
 
-	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
+	cosmic-common_install_metainfo res/${APPID}.metainfo.xml
 
 	doicon -s scalable res/icons/hicolor/scalable/apps/${APPID}.svg
 

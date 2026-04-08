@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="file manager from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-files"
@@ -27,17 +27,17 @@ RDEPEND+="
 "
 
 src_compile() {
-	cosmic-de_src_compile
-	cosmic-de_src_compile --package "$PN-applet"
+	cosmic-live_src_compile
+	cosmic-live_src_compile --package "$PN-applet"
 }
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
-	dobin "$(cosmic-de_target_dir)/$PN-applet"
+	dobin "$(cosmic-common_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN-applet"
 
 	domenu res/com.system76.CosmicFiles.desktop
 
-	cosmic-de_install_metainfo res/com.system76.CosmicFiles.metainfo.xml
+	cosmic-common_install_metainfo res/com.system76.CosmicFiles.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*
