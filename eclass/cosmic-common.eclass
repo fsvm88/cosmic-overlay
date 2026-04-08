@@ -87,6 +87,10 @@ max-opt? ( !debug )
 ^^ ( elogind systemd )
 "
 
+# @FUNCTION: cosmic-common_inject_release_max_opt
+# @DESCRIPTION:
+# Injects the profile "release-max-opt" into Cargo.toml
+# if Cargo.toml exists and package has USE=max-opt and it is set
 cosmic-common_inject_release_max_opt() {
     if has max-opt $USE && use max-opt && [ -f Cargo.toml ]; then
 		{
@@ -117,6 +121,10 @@ cosmic-common_install_metainfo() {
 	)
 }
 
+# @FUNCTION: cosmic-common_target_dir
+# @DESCRIPTION:
+# Prints to stdout the target dir of a built release depending on the profile name used
+# expects ${profile_name} to be defined
 cosmic-common_target_dir() {
 	# For other profiles, profile_name == tdir
 	local tdir="${profile_name}"
