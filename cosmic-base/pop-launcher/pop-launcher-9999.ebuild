@@ -24,7 +24,7 @@ LICENSE="MPL-2.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
-BDEPENDS+="
+BDEPEND+="
 >=x11-misc/xdg-utils-1.2.1-r1
 "
 # most of these are used by the plugins

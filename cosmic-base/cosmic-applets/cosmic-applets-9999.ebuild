@@ -40,7 +40,7 @@ _install_applet() {
 	_install_icons "$1"
 
 	# Insert desktop file
-	domenu "${1}/data/${2}.desktop"
+	domenu "target/xdgen/${2}.desktop"
 }
 
 _install_button() {
@@ -48,7 +48,7 @@ _install_button() {
 	_install_icons "$1"
 
 	# Insert desktop file
-	domenu "${1}/data/${2}.desktop"
+	domenu "target/xdgen/${2}.desktop"
 }
 
 src_install() {
