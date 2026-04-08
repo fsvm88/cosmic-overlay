@@ -42,7 +42,7 @@ RDEPEND+="
 src_install() {
 	dobin "$(cosmic-de_target_dir)/$PN"
 
-	domenu resources/applications/*.desktop
+	domenu target/xdgen/*.desktop
 
 	cosmic-de_install_metainfo resources/com.system76.CosmicSettings.metainfo.xml
 
