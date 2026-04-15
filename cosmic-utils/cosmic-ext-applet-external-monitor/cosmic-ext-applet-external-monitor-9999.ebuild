@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="External Monitor Brightness Applet for the COSMIC DE"
 HOMEPAGE="https://github.com/cosmic-utils/cosmic-ext-applet-external-monitor-brightness"
@@ -30,7 +30,7 @@ src_install() {
 	export APPID="io.github.cosmic_utils.cosmic-ext-applet-external-monitor-brightness"
 
 	exeinto /usr/bin
-	doexe "$(cosmic-de_target_dir)/${PN}"
+	doexe "$(cosmic-common_target_dir)/${PN}"
 
 	doicon -s symbolic res/icons/display-symbolic.svg
 

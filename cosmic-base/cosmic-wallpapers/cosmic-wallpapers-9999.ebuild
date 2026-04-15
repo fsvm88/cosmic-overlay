@@ -10,7 +10,7 @@ EGIT_LFS=1
 inherit git-r3
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
-# Look for COSMIC_GIT_UNPACK variable in cosmic-de.eclass.
+# Look for EGIT_MIN_CLONE_TYPE variable in cosmic-live.eclass.
 # TL;DR: this costs some additional DISTDIR space,
 # but is the only way to re-use the same DISTDIR for multiple ebuilds.
 EGIT_MIN_CLONE_TYPE=mirror

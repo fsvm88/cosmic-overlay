@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="GameMode Status COSMIC DE Applet"
 HOMEPAGE="https://github.com/D-Brox/cosmic-ext-applet-gamemode-status"
@@ -30,9 +30,9 @@ src_install() {
 	export APPID="dev.DBrox.CosmicGameModeStatus"
 
 	exeinto /usr/bin
-	doexe "$(cosmic-de_target_dir)/${PN}"
+	doexe "$(cosmic-common_target_dir)/${PN}"
 
 	domenu res/${APPID}.desktop
 
-	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
+	cosmic-common_install_metainfo res/${APPID}.metainfo.xml
 }

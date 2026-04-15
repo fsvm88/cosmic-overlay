@@ -4,7 +4,7 @@
 EAPI=8
 
 COSMIC_GIT_UNPACK=1
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="initial setup program for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-initial-setup"
@@ -24,7 +24,7 @@ RDEPEND+="
 "
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	domenu res/*.desktop
 

@@ -5,7 +5,7 @@
 # for now it's too in flux, 9999 is easier
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-live
 
 DESCRIPTION="Modular IPC-based desktop launcher service"
 HOMEPAGE="https://github.com/pop-os/launcher"
@@ -39,7 +39,7 @@ sci-libs/libqalculate
 "
 
 src_configure() {
-	cosmic-de_src_configure -p pop-launcher-bin
+	cosmic-live_src_configure -p pop-launcher-bin
 }
 
 _install_plugin() {
@@ -50,7 +50,7 @@ _install_plugin() {
 }
 
 src_install() {
-	newbin "$(cosmic-de_target_dir)/$PN-bin" "$PN"
+	newbin "$(cosmic-common_target_dir)/$PN-bin" "$PN"
 
 	_install_plugin "calc"
 	_install_plugin "cosmic_toplevel"

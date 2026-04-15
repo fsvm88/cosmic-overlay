@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop systemd
+inherit cosmic-live desktop systemd
 
 DESCRIPTION="Online account management service for the COSMIC desktop"
 HOMEPAGE="https://github.com/cosmic-utils/accounts"
@@ -26,17 +26,17 @@ BDEPEND="
 "
 
 src_configure() {
-	cosmic-de_src_configure --all
+	cosmic-live_src_configure --all
 }
 
 src_install() {
 	export APPID="dev.edfloreshz.Accounts"
 
 	# Install daemon
-	dobin "$(cosmic-de_target_dir)/accounts-daemon"
+	dobin "$(cosmic-common_target_dir)/accounts-daemon"
 
 	# Install GUI application
-	dobin "$(cosmic-de_target_dir)/accounts-ui"
+	dobin "$(cosmic-common_target_dir)/accounts-ui"
 
 	# Install systemd user service
 	systemd_douserunit accounts-daemon/data/cosmic-accounts.service
@@ -70,7 +70,7 @@ src_install() {
 }
 
 pkg_postinst() {
-	cosmic-de_pkg_postinst
+	cosmic-live_pkg_postinst
 
 	elog "To use the accounts daemon, you may need to configure OAuth2 credentials"
 	elog "in the provider configuration files at /etc/accounts/providers/"

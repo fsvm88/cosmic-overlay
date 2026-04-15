@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-live
 
 DESCRIPTION="OSD daemon for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-osd"
@@ -23,9 +23,9 @@ RDEPEND+="
 
 src_prepare() {
 	sed -i 's|.unwrap_or("/usr/libexec/polkit-agent-helper-1")|.unwrap_or("/usr/lib/polkit-1/polkit-agent-helper-1")|' src/subscriptions/polkit_agent_helper.rs || die 'Failed to patch polkit path'
-	cosmic-de_src_prepare
+	cosmic-live_src_prepare
 }
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 }

@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="display background service for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-bg"
@@ -17,11 +17,11 @@ SLOT="0"
 KEYWORDS=""
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	domenu data/com.system76.CosmicBackground.desktop
 
-	cosmic-de_install_metainfo data/com.system76.CosmicBackground.metainfo.xml
+	cosmic-common_install_metainfo data/com.system76.CosmicBackground.metainfo.xml
 
 	insinto /usr/share/cosmic/com.system76.CosmicBackground/v1
 	doins data/v1/*

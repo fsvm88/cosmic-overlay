@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-live
 
 DESCRIPTION="panel for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-panel"
@@ -17,7 +17,7 @@ SLOT="0"
 KEYWORDS=""
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	insinto /usr/share/cosmic
 	doins -r data/default_schema/*

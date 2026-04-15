@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-live
 
 DESCRIPTION="compositor for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-comp"
@@ -27,14 +27,14 @@ RDEPEND+="
 
 src_configure() {
 	if use elogind; then
-		cosmic-de_src_configure --no-default-features
+		cosmic-live_src_configure --no-default-features
 	else
-		cosmic-de_src_configure
+		cosmic-live_src_configure
 	fi
 }
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	# Default keybindings
 	insinto /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1

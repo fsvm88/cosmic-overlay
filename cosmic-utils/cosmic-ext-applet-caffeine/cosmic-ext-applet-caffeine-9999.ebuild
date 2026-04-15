@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="Caffeine Applet for the COSMIC DE"
 HOMEPAGE="https://github.com/tropicbliss/cosmic-ext-applet-caffeine"
@@ -29,7 +29,7 @@ BDEPEND+="
 "
 
 src_prepare() {
-	cosmic-de_src_prepare
+	cosmic-live_src_prepare
 
 	# Fix wrong desktop file categories
 	sed -i 's/Categories=.*/Categories=COSMIC;/' res/net.tropicbliss.CosmicExtAppletCaffeine.desktop
@@ -39,12 +39,12 @@ src_install() {
 	export APPID="net.tropicbliss.CosmicExtAppletCaffeine"
 
 	exeinto /usr/bin
-	doexe "$(cosmic-de_target_dir)/${PN}"
+	doexe "$(cosmic-common_target_dir)/${PN}"
 
 	doicon -s scalable res/${APPID}-empty.svg
 	doicon -s scalable res/${APPID}-full.svg
 
 	domenu res/${APPID}.desktop
 
-	cosmic-de_install_metainfo res/${APPID}.metainfo.xml
+	cosmic-common_install_metainfo res/${APPID}.metainfo.xml
 }

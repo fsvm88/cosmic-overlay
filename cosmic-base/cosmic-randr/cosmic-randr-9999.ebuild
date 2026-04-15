@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de
+inherit cosmic-live
 
 DESCRIPTION="CLI utility for displaying and configuring wayland outputs from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-randr"
@@ -17,5 +17,5 @@ SLOT="0"
 KEYWORDS=""
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 }

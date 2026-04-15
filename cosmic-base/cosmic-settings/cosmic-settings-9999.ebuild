@@ -5,7 +5,7 @@ EAPI=8
 
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de desktop
+inherit cosmic-live desktop
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
@@ -40,11 +40,11 @@ RDEPEND+="
 "
 
 src_install() {
-	dobin "$(cosmic-de_target_dir)/$PN"
+	dobin "$(cosmic-common_target_dir)/$PN"
 
 	domenu target/xdgen/*.desktop
 
-	cosmic-de_install_metainfo resources/com.system76.CosmicSettings.metainfo.xml
+	cosmic-common_install_metainfo resources/com.system76.CosmicSettings.metainfo.xml
 
 	insinto /usr/share/cosmic
 	doins -r resources/default_schema/*

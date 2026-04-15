@@ -6,7 +6,7 @@ EAPI=8
 EGIT_LFS=1
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de pam systemd tmpfiles
+inherit cosmic-live pam systemd tmpfiles
 
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
@@ -28,11 +28,11 @@ RDEPEND+="
 "
 
 src_configure() {
-	cosmic-de_src_configure --all
+	cosmic-live_src_configure --all
 }
 
 src_install() {
-	local binfile="$(cosmic-de_target_dir)/$PN"
+	local binfile="$(cosmic-common_target_dir)/$PN"
 	dobin "$binfile"
 	dobin "$binfile-daemon"
 	newbin "$PN-start.sh" "$PN-start"
