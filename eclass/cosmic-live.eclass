@@ -167,7 +167,7 @@ cosmic-live_src_test() {
 	debug-print-function "${FUNCNAME}" "$@"
 
 	[[ ${_CARGO_GEN_CONFIG_HAS_RUN} ]] ||
-		die "FATAL: please call cosmic-live_src_test before using ${FUNCNAME}"
+		die "FATAL: please call cosmic-live_src_configure before using ${FUNCNAME}"
 
 	set -- cargo test "${ECARGO_ARGS[@]}" "$@"
 	einfo "${@}"
