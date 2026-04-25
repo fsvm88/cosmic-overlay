@@ -89,9 +89,13 @@ src_install() {
 
 pkg_postinst() {
 	if use bluetooth; then
-		elog "In order for bluetooth to function, you must start and add"
-		elog "bluetooth to your default runlevel:"
-		elog "  rc-service bluetooth start"
-		elog "  rc-update add bluetooth default"
+		elog "In order for bluetooth to function, you must start and enable"
+		elog "bluetooth:"
+		if use systemd; then
+			elog "  systemctl enable --now bluetooth"
+		else
+			elog "  rc-service bluetooth start"
+			elog "  rc-update add bluetooth default"
+		fi
 	fi
 }
