@@ -17,9 +17,10 @@ EGIT_BRANCH=master
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
-IUSE+=" +networkmanager openvpn"
+IUSE+=" +networkmanager openvpn bluetooth"
 
 RDEPEND+="
+	bluetooth? ( >=net-wireless/bluez-5.86 )
 	~cosmic-base/cosmic-icons-${PV}
 	~cosmic-base/cosmic-randr-${PV}
 	>=app-text/iso-codes-4.16.0
@@ -39,6 +40,34 @@ RDEPEND+="
 	>=x11-misc/xkeyboard-config-2.41
 "
 
+src_configure() {
+	local myfeatures=(
+		"a11y"
+		"cosmic-comp-config"
+		"page-accessibility"
+		"page-about"
+		$(usev bluetooth "page-bluetooth")
+		"page-date"
+		"page-default-apps"
+		"page-display"
+		"page-input"
+		"page-legacy-applications"
+		"page-networking"
+		"page-power"
+		"page-region"
+		"page-sound"
+		"page-users"
+		"page-window-management"
+		"page-workspaces"
+		"xdg-portal"
+		"wayland"
+		"single-instance"
+		"wgpu"
+	)
+
+	cosmic-de-r2_src_configure --no-default-features
+}
+
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
@@ -57,4 +86,13 @@ src_install() {
 
 	insinto /usr/share/polkit-1/actions
 	doins resources/polkit-1/actions/com.system76.CosmicSettings.Users.policy
+}
+
+pkg_postinst() {
+	if use bluetooth; then
+		elog "In order for bluetooth to function, you must start and add"
+		elog "bluetooth to your default runlevel:"
+		elog "  rc-service bluetooth start"
+		elog "  rc-update add bluetooth default"
+	fi
 }
