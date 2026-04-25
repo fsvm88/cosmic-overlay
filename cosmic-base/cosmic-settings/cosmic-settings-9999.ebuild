@@ -17,11 +17,12 @@ EGIT_BRANCH=master
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
-IUSE+=" +networkmanager openvpn"
+IUSE+=" +networkmanager openvpn systemd"
 
 RDEPEND+="
 	~cosmic-base/cosmic-icons-${PV}
 	~cosmic-base/cosmic-randr-${PV}
+	!systemd? ( >=app-admin/openrc-settingsd-1.4.0-r1 )
 	>=app-text/iso-codes-4.16.0
 	>=dev-libs/expat-2.5.0
 	>=dev-util/desktop-file-utils-0.27
@@ -57,4 +58,13 @@ src_install() {
 
 	insinto /usr/share/polkit-1/actions
 	doins resources/polkit-1/actions/com.system76.CosmicSettings.Users.policy
+}
+
+pkg_postinst() {
+	if ! use systemd; then
+		elog "To allow COSMIC to change system settings such as your locale,"
+		elog "you must start and add openrc-settingsd to your default runlevel:"
+		elog "  rc-service openrc-settingsd start"
+		elog "  rc-update add openrc-settingsd default"
+	fi
 }
