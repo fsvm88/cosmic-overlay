@@ -19,16 +19,6 @@ KEYWORDS=""
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
-	domenu data/com.system76.CosmicBackground.desktop
-
-	cosmic-common_install_metainfo data/com.system76.CosmicBackground.metainfo.xml
-
 	insinto /usr/share/cosmic/com.system76.CosmicBackground/v1
 	doins data/v1/*
-
-	insinto /usr/share/icons/hicolor/symbolic/apps/
-	doins data/icons/com.system76.CosmicBackground-symbolic.svg
-
-	insinto /usr/share/icons/hicolor/scalable/apps/
-	doins data/icons/com.system76.CosmicBackground.svg
 }
