@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-live desktop
+inherit cosmic-live
 
 DESCRIPTION="display background service for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-bg"

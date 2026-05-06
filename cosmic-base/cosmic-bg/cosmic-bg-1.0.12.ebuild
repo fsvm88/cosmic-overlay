@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de-r2 desktop
+inherit cosmic-de-r2
 
 DESCRIPTION="display background service for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-bg"
