@@ -67,7 +67,7 @@ pkg_postinst() {
 		elog "you must start and add openrc-settingsd to your default runlevel:"
 		elog "  rc-service openrc-settingsd start"
 		elog "  rc-update add openrc-settingsd default"
-  fi
+	fi
 	if use bluetooth; then
 		elog "In order for bluetooth to function, you must start and enable"
 		elog "bluetooth:"
