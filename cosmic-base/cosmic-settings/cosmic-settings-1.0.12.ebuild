@@ -40,6 +40,34 @@ RDEPEND+="
 	>=x11-misc/xkeyboard-config-2.41
 "
 
+src_configure() {
+	local myfeatures=(
+		"a11y"
+		"cosmic-comp-config"
+		"page-accessibility"
+		"page-about"
+		$(usev bluetooth "page-bluetooth")
+		"page-date"
+		"page-default-apps"
+		"page-display"
+		"page-input"
+		"page-legacy-applications"
+		"page-networking"
+		"page-power"
+		"page-region"
+		"page-sound"
+		"page-users"
+		"page-window-management"
+		"page-workspaces"
+		"xdg-portal"
+		"wayland"
+		"single-instance"
+		"wgpu"
+	)
+
+	cosmic-de-r2_src_configure --no-default-features
+}
+
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
