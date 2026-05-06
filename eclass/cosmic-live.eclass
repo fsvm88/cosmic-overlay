@@ -30,13 +30,13 @@ esac
 # @DESCRIPTION:
 # See description in rust.eclass from main tree.
 # This is set to specify the minimum Rust version
-RUST_MIN_VER="1.90.0"
+RUST_MIN_VER="1.93.0"
 
 # @ECLASS_VARIABLE: LLVM_COMPAT
 # @DESCRIPTION:
 # See description in llvm-r1.eclass from main tree.
 # This is set to specify which LLVM versions we support.
-LLVM_COMPAT=({20..22})
+LLVM_COMPAT=({21..22})
 # @ECLASS_VARIABLE: LLVM_OPTIONAL
 # @DESCRIPTION:
 # See description in llvm-r1.eclass from main tree.

@@ -3,23 +3,22 @@
 
 EAPI=8
 
-inherit cosmic-live desktop systemd
+inherit cosmic-de-r2 desktop systemd
 
 DESCRIPTION="sessions manager for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-session"
+
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
-
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 IUSE+=" accessibility +greeter cups"
 
 PATCHES=(
 	"${FILESDIR}"/cosmic-session-1.0.12-backport-137.patch
 )
-
-EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
 
 RDEPEND+="
 	~cosmic-base/cosmic-applets-${PV}
@@ -40,7 +39,7 @@ RDEPEND+="
 	~cosmic-base/cosmic-wallpapers-${PV}
 	~cosmic-base/cosmic-workspaces-epoch-${PV}
 	~cosmic-base/xdg-desktop-portal-cosmic-${PV}
-	~cosmic-base/pop-fonts-${PV}
+	~cosmic-base/pop-fonts-9999
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
 	>=sys-power/switcheroo-control-2.6-r2
@@ -51,14 +50,14 @@ RDEPEND+="
 
 src_prepare() {
 	use elogind && eapply "${FILESDIR}/no_journald-systemctl.patch"
-	cosmic-live_src_prepare
+	cosmic-de-r2_src_prepare
 
 	# patch for dconf profile as done in justfile upstream
 	# no more need for workaround in src_install
 	# https://github.com/pop-os/cosmic-session/pull/95/files
 	sed \
 		-i "s|DCONF_PROFILE=cosmic|DCONF_PROFILE=/usr/share/dconf/profile/cosmic|" \
-		data/start-cosmic
+		data/start-cosmic || die "failed to patch data/start-cosmic via sed"
 }
 
 src_configure() {
@@ -71,9 +70,9 @@ src_configure() {
 		# Based on the original PR, this could be enabled without harm also for systemd systems,
 		# because it does auto-detection, but since we already have a conditional for this, lets just add it
 		# https://github.com/pop-os/cosmic-session/pull/109
-		cosmic-live_src_configure --no-default-features --features autostart
+		cosmic-de-r2_src_configure --no-default-features --features autostart
 	else
-		cosmic-live_src_configure
+		cosmic-de-r2_src_configure
 	fi
 }
 

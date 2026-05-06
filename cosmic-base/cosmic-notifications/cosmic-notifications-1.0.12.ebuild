@@ -3,18 +3,17 @@
 
 EAPI=8
 
-inherit cosmic-live
+inherit cosmic-de-r2
 
 DESCRIPTION="layer shell notifications daemon for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-notifications"
 
-EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 
 BDEPEND+="
 	>=dev-util/intltool-0.51.0-r3

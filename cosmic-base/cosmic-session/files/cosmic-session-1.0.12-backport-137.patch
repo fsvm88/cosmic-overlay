@@ -1,0 +1,35 @@
+diff '--color=auto' -Nuar cosmic-session-1.0.12.orig/src/main.rs cosmic-session-1.0.12/src/main.rs
+--- cosmic-session-1.0.12.orig/src/main.rs	2026-05-02 15:35:47.000000000 +0100
++++ cosmic-session-1.0.12/src/main.rs	2026-05-06 16:09:53.215376820 +0100
+@@ -24,8 +24,9 @@
+ #[cfg(feature = "autostart")]
+ use std::process::{Command, Stdio};
+ use std::sync::Arc;
++use systemd::is_systemd_used;
+ #[cfg(feature = "systemd")]
+-use systemd::{get_systemd_env, is_systemd_used, spawn_scope};
++use systemd::{get_systemd_env, spawn_scope};
+ use tokio::signal::unix::{SignalKind, signal};
+ use tokio::sync::mpsc::{Receiver, Sender};
+ use tokio::sync::{Mutex, oneshot};
+diff '--color=auto' -Nuar cosmic-session-1.0.12.orig/src/systemd.rs cosmic-session-1.0.12/src/systemd.rs
+--- cosmic-session-1.0.12.orig/src/systemd.rs	2026-05-02 15:35:47.000000000 +0100
++++ cosmic-session-1.0.12/src/systemd.rs	2026-05-06 16:11:00.806313176 +0100
+@@ -48,11 +48,17 @@
+ 
+ /// Determine if systemd is used as the init system. This should work on all
+ /// linux distributions.
++#[cfg(feature = "systemd")]
+ pub fn is_systemd_used() -> &'static bool {
+ 	static IS_SYSTEMD_USED: OnceLock<bool> = OnceLock::new();
+ 	IS_SYSTEMD_USED.get_or_init(|| Path::new("/run/systemd/system").exists())
+ }
+ 
++#[cfg(not(feature = "systemd"))]
++pub fn is_systemd_used() -> &'static bool {
++	&false
++}
++
+ #[cfg(feature = "systemd")]
+ pub async fn get_systemd_env() -> Result<Vec<EnvVar>, zbus::Error> {
+ 	let connection = Connection::session().await?;

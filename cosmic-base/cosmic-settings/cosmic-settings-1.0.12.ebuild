@@ -5,18 +5,17 @@ EAPI=8
 
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-live desktop systemd
+inherit cosmic-de-r2 desktop systemd
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
 
-EGIT_REPO_URI="${HOMEPAGE}"
-EGIT_BRANCH=master
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 IUSE+=" bluetooth +networkmanager openvpn systemd"
 
 RDEPEND+="
