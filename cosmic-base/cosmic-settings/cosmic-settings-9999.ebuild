@@ -5,7 +5,7 @@ EAPI=8
 
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-live desktop
+inherit cosmic-live desktop systemd
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
@@ -17,9 +17,10 @@ EGIT_BRANCH=master
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
-IUSE+=" +networkmanager openvpn systemd"
+IUSE+=" bluetooth +networkmanager openvpn systemd"
 
 RDEPEND+="
+	bluetooth? ( >=net-wireless/bluez-5.86 )
 	~cosmic-base/cosmic-icons-${PV}
 	~cosmic-base/cosmic-randr-${PV}
 	!systemd? ( >=app-admin/openrc-settingsd-1.4.0-r1 )
@@ -66,5 +67,18 @@ pkg_postinst() {
 		elog "you must start and add openrc-settingsd to your default runlevel:"
 		elog "  rc-service openrc-settingsd start"
 		elog "  rc-update add openrc-settingsd default"
+  fi
+	if use bluetooth; then
+		elog "In order for bluetooth to function, you must start and enable"
+		elog "bluetooth:"
+		if systemd_is_booted; then
+			elog "  systemctl enable --now bluetooth"
+		elif [[ -d /run/openrc ]]; then
+			elog "  rc-service bluetooth start"
+			elog "  rc-update add bluetooth default"
+		else
+			elog "  Please use your init system's standard tools to start"
+			elog "  and enable the 'bluetooth' service."
+		fi
 	fi
 }

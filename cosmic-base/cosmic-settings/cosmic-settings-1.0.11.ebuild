@@ -5,7 +5,7 @@ EAPI=8
 
 RUST_NEEDS_LLVM=1
 
-inherit cosmic-de-r2 desktop
+inherit cosmic-de-r2 desktop systemd
 
 DESCRIPTION="settings application for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings"
@@ -16,9 +16,10 @@ SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE+=" +networkmanager openvpn"
+IUSE+=" +networkmanager openvpn bluetooth"
 
 RDEPEND+="
+	bluetooth? ( >=net-wireless/bluez-5.86 )
 	~cosmic-base/cosmic-icons-${PV}
 	~cosmic-base/cosmic-randr-${PV}
 	>=app-text/iso-codes-4.16.0
@@ -56,4 +57,20 @@ src_install() {
 
 	insinto /usr/share/polkit-1/actions
 	doins resources/polkit-1/actions/com.system76.CosmicSettings.Users.policy
+}
+
+pkg_postinst() {
+	if use bluetooth; then
+		elog "In order for bluetooth to function, you must start and enable"
+		elog "bluetooth:"
+		if systemd_is_booted; then
+			elog "  systemctl enable --now bluetooth"
+		elif [[ -d /run/openrc ]]; then
+			elog "  rc-service bluetooth start"
+			elog "  rc-update add bluetooth default"
+		else
+			elog "  Please use your init system's standard tools to start"
+			elog "  and enable the 'bluetooth' service."
+		fi
+	fi
 }
