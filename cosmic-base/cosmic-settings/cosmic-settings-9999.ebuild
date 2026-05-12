@@ -66,7 +66,7 @@ src_configure() {
 		"wgpu"
 	)
 
-	cosmic-de-r2_src_configure --no-default-features
+	cosmic-live_src_configure --no-default-features
 }
 
 src_install() {
