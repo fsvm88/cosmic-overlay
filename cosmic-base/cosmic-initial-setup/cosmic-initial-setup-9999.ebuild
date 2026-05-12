@@ -16,11 +16,13 @@ EGIT_BRANCH=master
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
+IUSE+=" systemd"
 
 RDEPEND+="
 	acct-user/cosmic-initial-setup
 	~cosmic-base/pop-appstream-data-9999
 	~cosmic-base/cosmic-icons-${PV}
+	!systemd? ( >=app-admin/openrc-settingsd-1.4.0-r1 )
 "
 
 src_install() {
