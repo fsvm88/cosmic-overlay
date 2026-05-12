@@ -17,7 +17,7 @@ KEYWORDS="~amd64"
 IUSE+=" accessibility +greeter cups"
 
 PATCHES=(
-	"${FILESDIR}"/cosmic-session-1.0.0-beta5-backport-137.patch
+	"${FILESDIR}"/cosmic-session-1.0.12-backport-137.patch
 )
 
 RDEPEND+="

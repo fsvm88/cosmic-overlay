@@ -16,12 +16,13 @@ SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE+=" +networkmanager openvpn bluetooth"
+IUSE+=" bluetooth +networkmanager openvpn systemd"
 
 RDEPEND+="
 	bluetooth? ( >=net-wireless/bluez-5.86 )
 	~cosmic-base/cosmic-icons-${PV}
 	~cosmic-base/cosmic-randr-${PV}
+	!systemd? ( >=app-admin/openrc-settingsd-1.4.0-r1 )
 	>=app-text/iso-codes-4.16.0
 	>=dev-libs/expat-2.5.0
 	>=dev-util/desktop-file-utils-0.27
@@ -38,6 +39,34 @@ RDEPEND+="
 	>=sys-devel/gettext-0.22.4
 	>=x11-misc/xkeyboard-config-2.41
 "
+
+src_configure() {
+	local myfeatures=(
+		"a11y"
+		"cosmic-comp-config"
+		"page-accessibility"
+		"page-about"
+		$(usev bluetooth "page-bluetooth")
+		"page-date"
+		"page-default-apps"
+		"page-display"
+		"page-input"
+		"page-legacy-applications"
+		"page-networking"
+		"page-power"
+		"page-region"
+		"page-sound"
+		"page-users"
+		"page-window-management"
+		"page-workspaces"
+		"xdg-portal"
+		"wayland"
+		"single-instance"
+		"wgpu"
+	)
+
+	cosmic-de-r2_src_configure --no-default-features
+}
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
@@ -60,6 +89,12 @@ src_install() {
 }
 
 pkg_postinst() {
+	if ! use systemd; then
+		elog "To allow COSMIC to change system settings such as your locale,"
+		elog "you must start and add openrc-settingsd to your default runlevel:"
+		elog "  rc-service openrc-settingsd start"
+		elog "  rc-update add openrc-settingsd default"
+	fi
 	if use bluetooth; then
 		elog "In order for bluetooth to function, you must start and enable"
 		elog "bluetooth:"
