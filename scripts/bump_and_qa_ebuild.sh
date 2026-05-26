@@ -37,6 +37,7 @@ NO_COMMIT=0
 DRY_RUN=0
 VERBOSE=0
 DEBUG=0              # Default: disabled (only show on --debug/-d)
+ALLOW_NON_FROZEN_VENDORING=0
 LOG_FILE=""
 TEMP_DIR=""
 DISTDIR=""
@@ -797,8 +798,15 @@ function phase_source_archive() {
 
         # Run cargo vendor with --locked for reproducibility
         # cargo vendor outputs the config.toml to stdout, so we redirect it to the proper location
-        log_debug "[${pkg}] Running cargo vendor --locked..."
-        if ! cargo vendor --locked >> .cargo/config.toml 2>/dev/null; then
+        local vendor_lock_flag="--locked"
+        if [[ $ALLOW_NON_FROZEN_VENDORING -eq 1 ]]; then
+            log_warning "[${pkg}] Running cargo vendor WITHOUT --locked (--allow-non-frozen-vendoring active)"
+            vendor_lock_flag=""
+        fi
+
+        log_debug "[${pkg}] Running cargo vendor ${vendor_lock_flag}..."
+        # shellcheck disable=SC2086
+        if ! cargo vendor ${vendor_lock_flag} >> .cargo/config.toml 2>/dev/null; then
             error_with_context \
                 "[${pkg}] cargo vendor failed" \
                 "Rust dependency vendoring failed" \
@@ -1855,15 +1863,18 @@ ARGUMENTS:
   <cosmic-epoch-tag>    Tag from cosmic-epoch repo (e.g., epoch-1.0.0-beta.3)
 
 OPTIONS:
-  -r<N>, --revision <N>  Gentoo revision bump (e.g., -r1)
-  -p, --package <pkg>    Process single package only
-  --clean-temp           Remove temp directory on exit
-  --no-upload            Skip GitHub release upload
-  --no-commit            Don't commit changes
-  -n, --dry-run          Show what would be done
-  -v, --verbose          Enable verbose logging
-  -d, --debug            Enable debug logging (detailed info on operations)
-  -h, --help             Show this help
+  -r<N>, --revision <N>       Gentoo revision bump (e.g., -r1)
+  -p, --package <pkg>         Process single package only
+  --allow-non-frozen-vendoring
+                              Run cargo vendor without --locked (requires -p).
+                              Use when upstream forgot to bump Cargo.lock.
+  --clean-temp                Remove temp directory on exit
+  --no-upload                 Skip GitHub release upload
+  --no-commit                 Don't commit changes
+  -n, --dry-run               Show what would be done
+  -v, --verbose               Enable verbose logging
+  -d, --debug                 Enable debug logging (detailed info on operations)
+  -h, --help                  Show this help
 
 ENVIRONMENT VARIABLES:
   COSMIC_EPOCH_REPO      URL to cosmic-epoch repository
@@ -1887,6 +1898,9 @@ EXAMPLES:
 
   # Process single package
   $0 epoch-1.0.0-beta.3 -p cosmic-edit
+
+  # Bump a package whose Cargo.lock was not updated by upstream
+  $0 epoch-1.0.0-beta.3 -p cosmic-edit --allow-non-frozen-vendoring
 
   # Dry-run to see what would happen
   $0 -n epoch-1.0.0-beta.3
@@ -1946,6 +1960,10 @@ function main() {
                 DEBUG=1
                 shift
                 ;;
+            --allow-non-frozen-vendoring)
+                ALLOW_NON_FROZEN_VENDORING=1
+                shift
+                ;;
             -*)
                 error "Unknown option: $1"
                 usage
@@ -1969,6 +1987,10 @@ function main() {
     # Validate inputs early to fail fast on bad inputs
     validate_original_tag "$ORIGINAL_TAG"
     validate_single_package "$SINGLE_PACKAGE"
+
+    if [[ $ALLOW_NON_FROZEN_VENDORING -eq 1 ]] && [[ -z "$SINGLE_PACKAGE" ]]; then
+        errorExit 1 "--allow-non-frozen-vendoring requires -p/--package to target exactly one package"
+    fi
 
     local base_version=$(convert_version "${ORIGINAL_TAG}")
 
