@@ -23,6 +23,7 @@ BDEPEND+="
 RDEPEND+="
 	x11-misc/xdg-utils
 	>=gnome-base/gvfs-1.48.0[afp?,http?,nfs?,samba?]
+	~cosmic-base/cosmic-icons-${PV}
 "
 
 src_configure() {
