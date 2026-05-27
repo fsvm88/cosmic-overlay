@@ -23,12 +23,13 @@ BDEPEND+="
 RDEPEND+="
 	x11-misc/xdg-utils
 	>=gnome-base/gvfs-1.48.0[afp?,http?,nfs?,samba?]
+	~cosmic-base/cosmic-icons-${PV}
 "
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue May 5 12:03:22 2026 -0600'
-	export VERGEN_GIT_SHA=750c92c8412acc6a8082bf01c0c4256acd971013
+	export VERGEN_GIT_COMMIT_DATE='Tue May 26 13:36:10 2026 -0600'
+	export VERGEN_GIT_SHA=18eb41930a5ec7844387e48fe4fd111335f5d36b
 
 	cosmic-de-r2_src_configure
 }
