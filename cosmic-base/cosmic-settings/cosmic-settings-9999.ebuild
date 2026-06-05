@@ -48,7 +48,6 @@ src_configure() {
 		"page-accessibility"
 		"page-about"
 		$(usev bluetooth "page-bluetooth")
-		$(usex systemd "systemd" "openrc")
 		"page-date"
 		"page-default-apps"
 		"page-display"
@@ -61,6 +60,7 @@ src_configure() {
 		"page-users"
 		"page-window-management"
 		"page-workspaces"
+		$(usex systemd "systemd" "openrc")
 		"xdg-portal"
 		"wayland"
 		"single-instance"
