@@ -51,6 +51,13 @@ _install_button() {
 	domenu "target/xdgen/${2}.desktop"
 }
 
+src_prepare() {
+	# Prepare status notifier watcher services (dbus + systemd)
+	sed "s|@bindir@|${EPREFIX}/usr/bin|" cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service.in > cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service
+	sed "s|@bindir@|${EPREFIX}/usr/bin|" cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service.in > cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service
+	cosmic-live_src_prepare
+}
+
 src_install() {
 	# This git project now creates one multicall binary
 	dobin "$(cosmic-common_target_dir)/${PN}"
@@ -90,4 +97,9 @@ src_install() {
 	# Install default schema
 	insinto /usr/share/cosmic
 	doins -r cosmic-app-list/data/default_schema/*
+
+	# Install status notifier watcher services (dbus + systemd)
+	insinto /usr/share/dbus-1/services
+	doins cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service
+	systemd_douserunit cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service
 }
