@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-live desktop
+inherit cosmic-live desktop systemd
 
 DESCRIPTION="applets for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-applets"
