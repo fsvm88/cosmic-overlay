@@ -52,8 +52,12 @@ _install_button() {
 
 src_prepare() {
 	# Prepare status notifier watcher services (dbus + systemd)
-	sed "s|@bindir@|${EPREFIX}/usr/bin|" cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service.in > cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service
-	sed "s|@bindir@|${EPREFIX}/usr/bin|" cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service.in > cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service
+	sed "s|@bindir@|${EPREFIX}/usr/bin|" \
+		cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service.in \
+		> cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service
+	sed "s|@bindir@|${EPREFIX}/usr/bin|" \
+		cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service.in \
+		> cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service
 	cosmic-de-r2_src_prepare
 }
 

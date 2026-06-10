@@ -48,6 +48,7 @@ cosmic-base/cosmic-osd ExcessiveLineLength
 
 # IndirectInherits
 cosmic-base/* IndirectInherits
+cosmic-utils/* IndirectInherits
 
 # UnknownRestrict
 # RESTRICT=network-sandbox exists, somehow pkgcheck complains

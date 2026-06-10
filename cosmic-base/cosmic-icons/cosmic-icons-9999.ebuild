@@ -3,6 +3,8 @@
 
 EAPI=8
 
+inherit xdg
+
 DESCRIPTION="icon set COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-icons"
 

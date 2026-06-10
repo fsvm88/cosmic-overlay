@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-live desktop
+inherit cosmic-live desktop systemd
 
 DESCRIPTION="applets for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-applets"
@@ -53,8 +53,12 @@ _install_button() {
 
 src_prepare() {
 	# Prepare status notifier watcher services (dbus + systemd)
-	sed "s|@bindir@|${EPREFIX}/usr/bin|" cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service.in > cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service
-	sed "s|@bindir@|${EPREFIX}/usr/bin|" cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service.in > cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service
+	sed "s|@bindir@|${EPREFIX}/usr/bin|" \
+		cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service.in \
+		> cosmic-applet-status-area/data/dbus-1/com.system76.CosmicStatusNotifierWatcher.service
+	sed "s|@bindir@|${EPREFIX}/usr/bin|" \
+		cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service.in \
+		> cosmic-applet-status-area/data/com.system76.CosmicStatusNotifierWatcher.service
 	cosmic-live_src_prepare
 }
 
