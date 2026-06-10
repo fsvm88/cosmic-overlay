@@ -59,6 +59,7 @@ src_configure() {
 		"page-users"
 		"page-window-management"
 		"page-workspaces"
+		$(usex systemd "systemd" "openrc")
 		"xdg-portal"
 		"wayland"
 		"single-instance"
