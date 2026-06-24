@@ -13,7 +13,7 @@ LICENSE="CC-BY-SA-4.0 GPL-3 GPL-3+ MPL-2.0"
 
 SLOT="0"
 KEYWORDS=""
-IUSE="+fonts +gnome-keyring +greeter store"
+IUSE="+fonts +gnome-keyring +greeter +monitor store"
 
 RDEPEND="
 ~cosmic-base/cosmic-applets-${PV}
@@ -27,6 +27,7 @@ greeter? ( ~cosmic-base/cosmic-greeter-${PV} )
 ~cosmic-base/cosmic-idle-${PV}
 ~cosmic-base/cosmic-initial-setup-${PV}
 ~cosmic-base/cosmic-launcher-${PV}
+monitor? ( ~cosmic-base/cosmic-monitor-${PV} )
 ~cosmic-base/cosmic-notifications-${PV}
 ~cosmic-base/cosmic-osd-${PV}
 ~cosmic-base/cosmic-panel-${PV}

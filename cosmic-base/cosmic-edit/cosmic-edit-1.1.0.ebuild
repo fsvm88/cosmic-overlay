@@ -5,8 +5,8 @@ EAPI=8
 
 inherit cosmic-de-r2 desktop
 
-DESCRIPTION="terminal emulator (built using alacritty_terminal) from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-term"
+DESCRIPTION="text editor from COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-edit"
 
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
 
@@ -15,14 +15,10 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-RDEPEND+="
-	>=cosmic-base/cosmic-icons-${PV}
-"
-
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Jun 2 14:33:52 2026 -0600'
-	export VERGEN_GIT_SHA=3832971d04076c873370cc9a993b7b3178e3d2e3
+	export VERGEN_GIT_COMMIT_DATE='Tue Jun 23 10:24:19 2026 -0600'
+	export VERGEN_GIT_SHA=6ce200c84b763ff2e8faf47be715365bd0442271
 
 	cosmic-de-r2_src_configure
 }
@@ -30,9 +26,9 @@ src_configure() {
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
-	domenu target/xdgen/com.system76.CosmicTerm.desktop
+	domenu target/xdgen/com.system76.CosmicEdit.desktop
 
-	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicTerm.metainfo.xml
+	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicEdit.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*
