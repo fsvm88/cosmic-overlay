@@ -25,11 +25,11 @@ RDEPEND+="
 "
 
 src_configure() {
-	if use elogind; then
-		cosmic-de-r2_src_configure --no-default-features
-	else
-		cosmic-de-r2_src_configure
-	fi
+	local myfeatures=(
+		$(usev elogind "logind")
+		$(usev systemd)
+	)
+	cosmic-de-r2_src_configure --no-default-features
 }
 
 src_install() {
