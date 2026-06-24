@@ -26,11 +26,11 @@ RDEPEND+="
 "
 
 src_configure() {
-	if use elogind; then
-		cosmic-live_src_configure --no-default-features
-	else
-		cosmic-live_src_configure
-	fi
+	local myfeatures=(
+		$(usev elogind "logind")
+		$(usev systemd)
+	)
+	cosmic-live_src_configure --no-default-features
 }
 
 src_install() {
