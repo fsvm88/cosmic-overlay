@@ -19,10 +19,6 @@ KEYWORDS=""
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
-	# Default keybindings
-	insinto /usr/share/cosmic/com.system76.Cosmics.Shortcuts/v1
-	newins data/keybindings.ron defaults
-
 	domenu target/xdgen/com.system76.CosmicMonitor.desktop
 
 	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicMonitor.metainfo.xml
