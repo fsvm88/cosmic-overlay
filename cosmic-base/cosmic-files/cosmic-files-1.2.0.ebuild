@@ -28,8 +28,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Wed Jun 10 11:17:32 2026 -0600'
-	export VERGEN_GIT_SHA=54f77f95a6b42f80bfaa30206e2be74dd748bb61
+	export VERGEN_GIT_COMMIT_DATE='Tue Jun 30 13:13:13 2026 -0600'
+	export VERGEN_GIT_SHA=3ef7913abdcbadf13af0884a76287f19052a4469
 
 	cosmic-de-r2_src_configure
 }

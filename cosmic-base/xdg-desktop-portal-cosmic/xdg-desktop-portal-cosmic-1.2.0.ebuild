@@ -37,8 +37,8 @@ src_prepare() {
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Jun 9 15:38:40 2026 -0600'
-	export VERGEN_GIT_SHA=4bf00a2a89a5a1710c2248ab666fe490646e3026
+	export VERGEN_GIT_COMMIT_DATE='Fri Jun 26 14:58:43 2026 -0400'
+	export VERGEN_GIT_SHA=2948dd491cfc183a57ff930ada48623038dcf94d
 
 	cosmic-de-r2_src_configure
 }
