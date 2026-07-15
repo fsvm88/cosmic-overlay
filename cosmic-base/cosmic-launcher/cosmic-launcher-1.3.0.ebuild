@@ -19,7 +19,7 @@ BDEPEND+="
 	>=dev-util/intltool-0.51.0-r3
 "
 RDEPEND+="
-	~cosmic-base/pop-launcher-9999
+	~cosmic-base/pop-launcher-${PV}
 "
 
 src_install() {
