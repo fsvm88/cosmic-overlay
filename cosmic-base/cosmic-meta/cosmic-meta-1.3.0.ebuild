@@ -40,7 +40,7 @@ monitor? ( ~cosmic-base/cosmic-monitor-${PV} )
 store? ( ~cosmic-base/cosmic-store-${PV} )
 ~cosmic-base/cosmic-term-${PV}
 ~cosmic-base/cosmic-workspaces-epoch-${PV}
-~cosmic-base/pop-launcher-9999
+~cosmic-base/pop-launcher-${PV}
 ~cosmic-base/pop-theme-meta-9999
 ~cosmic-base/xdg-desktop-portal-cosmic-${PV}
 fonts? (
