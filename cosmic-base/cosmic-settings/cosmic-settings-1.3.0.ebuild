@@ -16,7 +16,7 @@ SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE+=" bluetooth +networkmanager openvpn systemd"
+IUSE+=" +avif bluetooth +networkmanager openvpn systemd"
 
 RDEPEND+="
 	bluetooth? ( >=net-wireless/bluez-5.86 )
@@ -28,7 +28,7 @@ RDEPEND+="
 	>=dev-util/desktop-file-utils-0.27
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
-	>=media-libs/dav1d-1.4.2
+	avif? ( >=media-libs/dav1d-1.4.2 )
 	>=media-libs/fontconfig-2.14.2-r3
 	>=media-libs/freetype-2.13.2
 	networkmanager? (
@@ -44,6 +44,7 @@ RDEPEND+="
 src_configure() {
 	local myfeatures=(
 		"a11y"
+		$(usev avif "avif")
 		"cosmic-comp-config"
 		"page-accessibility"
 		"page-about"

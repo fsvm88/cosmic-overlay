@@ -14,10 +14,19 @@ SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-
 LICENSE="MPL-2.0"
 SLOT="0"
 KEYWORDS="~amd64"
+IUSE+=" +avif"
 
 RDEPEND+="
-	>=media-libs/dav1d-1.4.2
+	avif? ( >=media-libs/dav1d-1.4.2 )
 "
+
+src_configure() {
+	local myfeatures=(
+		$(usev avif "avif")
+	)
+
+	cosmic-de-r2_src_configure --no-default-features
+}
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"

@@ -7,6 +7,7 @@
     <description>Primary maintainer</description>
   </maintainer>
   <use>
+    <flag name="avif">Add AV1 Image Format (AVIF) support.</flag>
     <flag name="debug-line-tables-only">When compiling in release or debug mode, only add line-tables, not full debug info.</flag>
     <flag name="max-opt">Compile in release-maximum-optimization injected profile (codegen-units=1). Still compatible with debug-line-tables-only.</flag>
   </use>

@@ -15,10 +15,19 @@ EGIT_BRANCH=master
 LICENSE="MPL-2.0"
 SLOT="0"
 KEYWORDS=""
+IUSE+=" +avif"
 
 RDEPEND+="
-	>=media-libs/dav1d-1.4.2
+	avif? ( >=media-libs/dav1d-1.4.2 )
 "
+
+src_configure() {
+	local myfeatures=(
+		$(usev avif "avif")
+	)
+
+	cosmic-live_src_configure --no-default-features
+}
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
