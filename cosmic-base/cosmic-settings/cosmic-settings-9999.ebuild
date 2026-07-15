@@ -29,6 +29,7 @@ RDEPEND+="
 	>=dev-util/desktop-file-utils-0.27
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202
+	>=media-libs/dav1d-1.4.2
 	>=media-libs/fontconfig-2.14.2-r3
 	>=media-libs/freetype-2.13.2
 	networkmanager? (

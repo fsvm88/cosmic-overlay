@@ -15,6 +15,10 @@ LICENSE="MPL-2.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
+RDEPEND+="
+	>=media-libs/dav1d-1.4.2
+"
+
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
