@@ -1,0 +1,22 @@
+From 5fea114e74e39b4b887c0436a44551b7d466d6e3 Mon Sep 17 00:00:00 2001
+From: Victoria Brekenfeld <victoria@system76.com>
+Date: Thu, 16 Jul 2026 11:40:58 +0200
+Subject: [PATCH] chore: Fix feature gate for logind
+
+---
+ src/input/mod.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/input/mod.rs b/src/input/mod.rs
+index 6398e1846..1c35a97f9 100644
+--- a/src/input/mod.rs
++++ b/src/input/mod.rs
+@@ -35,7 +35,7 @@ use calloop::{
+ use cosmic_comp_config::{NumlockState, workspace::WorkspaceLayout};
+ use cosmic_settings_config::shortcuts;
+ use cosmic_settings_config::shortcuts::action::{Direction, ResizeDirection};
+-#[cfg(feature = "systemd")]
++#[cfg(feature = "logind")]
+ use smithay::backend::input::{Switch, SwitchState, SwitchToggleEvent};
+ use smithay::{
+     backend::input::{
