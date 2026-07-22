@@ -11,7 +11,7 @@ HOMEPAGE="https://github.com/pop-os/cosmic-sound-theme"
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
-LICENSE="GPL-3"
+LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
