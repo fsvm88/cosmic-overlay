@@ -36,7 +36,11 @@ src_configure() {
 	export VERGEN_GIT_COMMIT_DATE='Mon Jul 20 14:43:08 2026 -0700'
 	export VERGEN_GIT_SHA=969f3ca5995d157f78da60231af9e59641dae44d
 
-	cosmic-de-r2_src_configure
+	local myfeatures=(
+		$(usev systemd)
+	)
+
+	cosmic-de-r2_src_configure --no-default-features
 }
 
 src_install() {
