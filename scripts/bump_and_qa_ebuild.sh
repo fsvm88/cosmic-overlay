@@ -689,7 +689,7 @@ function get_package_list() {
     fi
 
     push_d "${__cosmic_de_dir}"
-    for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
+    for pkg_dir in cosmic-* xdg-desktop-portal-cosmic pop-launcher; do
         if [[ -d "${pkg_dir}" ]]; then
             echo "${pkg_dir}"
         fi
@@ -1148,11 +1148,6 @@ function phase_bump() {
 
         # Get git information from the submodule
         local submodule_path="${pkg}"
-        if [[ ! -d "${TEMP_DIR}/cosmic-epoch/${pkg}" ]]; then
-            if [[ "$pkg" == "xdg-desktop-portal-cosmic" ]] && [[ -d "${TEMP_DIR}/cosmic-epoch/xdg-desktop-portal-cosmic" ]]; then
-                submodule_path="xdg-desktop-portal-cosmic"
-            fi
-        fi
 
         if [[ -d "${TEMP_DIR}/cosmic-epoch/${submodule_path}" ]]; then
             push_d "${TEMP_DIR}/cosmic-epoch/${submodule_path}"
@@ -1613,13 +1608,8 @@ function process_package() {
     # Find submodule path (for regular packages with source code)
     local submodule_path="$pkg"
     if [[ ! -d "${TEMP_DIR}/cosmic-epoch/${pkg}" ]]; then
-        # Try xdg-desktop-portal-cosmic
-        if [[ "$pkg" == "xdg-desktop-portal-cosmic" ]] && [[ -d "${TEMP_DIR}/cosmic-epoch/xdg-desktop-portal-cosmic" ]]; then
-            submodule_path="xdg-desktop-portal-cosmic"
-        else
-            log_warning "[${pkg}] Submodule not found in cosmic-epoch, skipping"
-            return 0
-        fi
+        log_warning "[${pkg}] Submodule not found in cosmic-epoch, skipping"
+        return 0
     fi
 
     # Execute phases - 9-phase architecture (Manifest written BEFORE upload to fail fast on hash issues):
