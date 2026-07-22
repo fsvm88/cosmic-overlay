@@ -8,7 +8,7 @@ inherit xdg
 DESCRIPTION="icon set COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-icons"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="CC-BY-SA-4.0"

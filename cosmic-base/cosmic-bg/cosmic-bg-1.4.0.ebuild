@@ -8,7 +8,7 @@ inherit cosmic-de-r2
 DESCRIPTION="display background service for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-bg"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="MPL-2.0"
