@@ -8,7 +8,7 @@ inherit cosmic-de-r2 desktop
 DESCRIPTION="terminal emulator (built using alacritty_terminal) from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-term"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
@@ -21,8 +21,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Jun 30 13:20:35 2026 -0600'
-	export VERGEN_GIT_SHA=1d3d8837dfd0402fc50c6cc20b4585765384609a
+	export VERGEN_GIT_COMMIT_DATE='Mon Jul 20 16:36:09 2026 -0600'
+	export VERGEN_GIT_SHA=117644e9c1bd525034e5c24570584f7b1d3478de
 
 	cosmic-de-r2_src_configure
 }

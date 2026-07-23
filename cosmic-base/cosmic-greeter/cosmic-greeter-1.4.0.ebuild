@@ -10,7 +10,7 @@ inherit cosmic-de-r2 pam systemd tmpfiles
 DESCRIPTION="libcosmic greeter for greetd from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-greeter"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
@@ -27,8 +27,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Wed Jun 24 19:12:46 2026 +0200'
-	export VERGEN_GIT_SHA=953478f801eb0c67062b6e1d540c6d6bf5edc992
+	export VERGEN_GIT_COMMIT_DATE='Thu Jul 9 17:51:17 2026 -0600'
+	export VERGEN_GIT_SHA=2290aae5e2e078a1d79c6ec1a27cdf3ccc366a45
 
 	cosmic-de-r2_src_configure --all
 }

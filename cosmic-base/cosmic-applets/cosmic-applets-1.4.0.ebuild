@@ -8,7 +8,7 @@ inherit cosmic-de-r2 desktop systemd
 DESCRIPTION="applets for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-applets"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"

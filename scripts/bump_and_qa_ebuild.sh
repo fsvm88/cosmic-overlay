@@ -31,6 +31,8 @@ ORIGINAL_TAG=""
 GENTOO_VERSION=""
 REVISION_BUMP=""
 SINGLE_PACKAGE=""
+CREATE_PACKAGE=""
+DESCRIPTION_ARG=""
 KEEP_TEMP=1          # Default: enabled
 NO_UPLOAD=0
 NO_COMMIT=0
@@ -272,6 +274,26 @@ Package names must contain only alphanumerics, hyphens, underscores, and dots"
     fi
 
     log_debug "Package validation passed: ${pkg}"
+}
+
+# Escape a string for safe use as a sed replacement (right-hand side of s///)
+function sed_escape_replacement() {
+    printf '%s' "$1" | sed -e 's/[\/&\\]/\\&/g'
+}
+
+# Validate a new package's DESCRIPTION text
+# It ends up inside DESCRIPTION="..." in the generated ebuild, so reject
+# characters that would break out of that bash string
+function validate_description() {
+    local desc="$1"
+
+    if [[ -z "$desc" ]]; then
+        errorExit 22 "Description cannot be empty"
+    fi
+
+    if [[ "$desc" =~ [\"\`\$\\] ]]; then
+        errorExit 22 "Description contains characters not allowed (\", \`, \$, \\\\): ${desc}"
+    fi
 }
 
 # Validate repository paths for sanity
@@ -674,6 +696,99 @@ function prepare_cosmic_epoch() {
     log_success "cosmic-epoch prepared at ${TEMP_DIR}/cosmic-epoch"
 }
 
+# Create a brand-new package skeleton (9999 live ebuild + metadata.xml) from the
+# templates under scripts/ebuild_template/, then commit it as its own commit.
+# The versioned ebuild for GENTOO_VERSION is generated later, from the release
+# template, by phase_bump_new() as part of the normal per-package pipeline.
+function create_package_skeleton() {
+    local pkg="$CREATE_PACKAGE"
+    local pkg_dir="${__cosmic_de_dir}/${pkg}"
+    local template_dir="${__script_dir}/scripts/ebuild_template"
+
+    log_phase "[${pkg}] Creating new package skeleton..."
+
+    if [[ ! -d "${TEMP_DIR}/cosmic-epoch/${pkg}" ]]; then
+        errorExit 20 "Cannot create package '${pkg}': not found as a cosmic-epoch submodule at tag ${ORIGINAL_TAG}
+This tool can only create packages that are genuine cosmic-epoch submodules."
+    fi
+
+    if [[ -e "$pkg_dir" ]]; then
+        errorExit 21 "Cannot create package '${pkg}': ${pkg_dir} already exists"
+    fi
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[${pkg}] DRY-RUN: Would create package skeleton (9999 ebuild + metadata.xml)"
+        return 0
+    fi
+
+    local desc_escaped pkg_escaped
+    desc_escaped=$(sed_escape_replacement "$DESCRIPTION_ARG")
+    pkg_escaped=$(sed_escape_replacement "$pkg")
+
+    mkdir -p "$pkg_dir"
+
+    sed -e "s/@PKGNAME@/${pkg_escaped}/g" -e "s/@DESCRIPTION@/${desc_escaped}/g" \
+        "${template_dir}/TEMPLATE-9999.ebuild" > "${pkg_dir}/${pkg}-9999.ebuild"
+
+    sed -e "s/@PKGNAME@/${pkg_escaped}/g" \
+        "${template_dir}/TEMPLATE-metadata.xml" > "${pkg_dir}/metadata.xml"
+
+    push_d "$pkg_dir"
+    git add "${pkg}-9999.ebuild" metadata.xml
+
+    if [[ $NO_COMMIT -eq 1 ]]; then
+        log_info "[${pkg}] --no-commit set, skeleton staged but not committed"
+    else
+        if git commit -m "cosmic-base/${pkg}: add package skeleton" -- "${pkg}-9999.ebuild" metadata.xml 2>&1 | tee -a "${LOG_FILE}"; then
+            log_success "[${pkg}] Skeleton committed"
+        else
+            log_warning "[${pkg}] Skeleton commit failed, but files are staged"
+        fi
+    fi
+    pop_d
+
+    log_success "[${pkg}] Package skeleton created: ${pkg}-9999.ebuild, metadata.xml"
+}
+
+# PHASE 4 (new-package variant): Generate the versioned ebuild directly from the
+# release template, instead of phase_bump's find-existing-candidate logic (there
+# is no prior versioned ebuild to use as a template for a brand-new package).
+function phase_bump_new() {
+    local pkg="$1"
+
+    log_phase "[${pkg}] Phase 4: Ebuild bump (new package, from release template)"
+
+    push_d "${__cosmic_de_dir}/${pkg}"
+
+    local ebuild_file="${pkg}-${GENTOO_VERSION}.ebuild"
+    local template_dir="${__script_dir}/scripts/ebuild_template"
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_info "[${pkg}] DRY-RUN: Would create ${ebuild_file} from release template"
+        pop_d
+        return 0
+    fi
+
+    local desc_escaped
+    desc_escaped=$(sed_escape_replacement "$DESCRIPTION_ARG")
+
+    sed -e "s/@DESCRIPTION@/${desc_escaped}/g" \
+        "${template_dir}/TEMPLATE-release.ebuild" > "${ebuild_file}"
+
+    if ! grep -q "SRC_URI=" "${ebuild_file}"; then
+        log_error "[${pkg}] No SRC_URI found in generated ebuild"
+        rm -f "${ebuild_file}"
+        pop_d
+        return 1
+    fi
+
+    git add "${ebuild_file}" || log_warning "[${pkg}] Could not git add ebuild"
+
+    log_success "[${pkg}] Ebuild created: ${ebuild_file}"
+    pop_d
+    return 0
+}
+
 # Check if a package is a meta-package (no source, just dependencies)
 function is_meta_package() {
     local pkg="$1"
@@ -689,7 +804,7 @@ function get_package_list() {
     fi
 
     push_d "${__cosmic_de_dir}"
-    for pkg_dir in cosmic-* xdg-desktop-portal-cosmic; do
+    for pkg_dir in cosmic-* xdg-desktop-portal-cosmic pop-launcher; do
         if [[ -d "${pkg_dir}" ]]; then
             echo "${pkg_dir}"
         fi
@@ -1148,11 +1263,6 @@ function phase_bump() {
 
         # Get git information from the submodule
         local submodule_path="${pkg}"
-        if [[ ! -d "${TEMP_DIR}/cosmic-epoch/${pkg}" ]]; then
-            if [[ "$pkg" == "xdg-desktop-portal-cosmic" ]] && [[ -d "${TEMP_DIR}/cosmic-epoch/xdg-desktop-portal-cosmic" ]]; then
-                submodule_path="xdg-desktop-portal-cosmic"
-            fi
-        fi
 
         if [[ -d "${TEMP_DIR}/cosmic-epoch/${submodule_path}" ]]; then
             push_d "${TEMP_DIR}/cosmic-epoch/${submodule_path}"
@@ -1613,13 +1723,8 @@ function process_package() {
     # Find submodule path (for regular packages with source code)
     local submodule_path="$pkg"
     if [[ ! -d "${TEMP_DIR}/cosmic-epoch/${pkg}" ]]; then
-        # Try xdg-desktop-portal-cosmic
-        if [[ "$pkg" == "xdg-desktop-portal-cosmic" ]] && [[ -d "${TEMP_DIR}/cosmic-epoch/xdg-desktop-portal-cosmic" ]]; then
-            submodule_path="xdg-desktop-portal-cosmic"
-        else
-            log_warning "[${pkg}] Submodule not found in cosmic-epoch, skipping"
-            return 0
-        fi
+        log_warning "[${pkg}] Submodule not found in cosmic-epoch, skipping"
+        return 0
     fi
 
     # Execute phases - 9-phase architecture (Manifest written BEFORE upload to fail fast on hash issues):
@@ -1647,11 +1752,20 @@ function process_package() {
         return 1
     fi
 
-    # Phase 4: Bump ebuild
-    if ! phase_bump "$pkg"; then
-        FAILED_PACKAGES+=("$pkg:bump")
-        rollback_package "$pkg" "bump" 1
-        return 1
+    # Phase 4: Bump ebuild (new packages generate directly from the release
+    # template; there is no prior versioned ebuild to use as a candidate)
+    if [[ "$pkg" == "$CREATE_PACKAGE" ]]; then
+        if ! phase_bump_new "$pkg"; then
+            FAILED_PACKAGES+=("$pkg:bump")
+            rollback_package "$pkg" "bump" 1
+            return 1
+        fi
+    else
+        if ! phase_bump "$pkg"; then
+            FAILED_PACKAGES+=("$pkg:bump")
+            rollback_package "$pkg" "bump" 1
+            return 1
+        fi
     fi
 
     # Phase 5: Verify fetch (validates our Manifest entries work)
@@ -1775,6 +1889,21 @@ function generate_report() {
         done
     fi
 
+    if [[ -n "$CREATE_PACKAGE" ]]; then
+        log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        log "${YELLOW}⚠ NEW PACKAGE CREATED (Manual Review Required)${NC}"
+        log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        log ""
+        log "  • ${CREATE_PACKAGE}"
+        log "    The generated ebuild's src_install/src_configure are copied from the"
+        log "    template as a starting guess - the pipeline only validates through"
+        log "    src_prepare, never an actual compile/install. Review and adjust:"
+        log "      cosmic-base/${CREATE_PACKAGE}/${CREATE_PACKAGE}-${GENTOO_VERSION}.ebuild"
+        log "    If this package should be installed by default, add it to"
+        log "    cosmic-meta's RDEPEND."
+        log ""
+    fi
+
     local missing_deps_count=${#MISSING_DEPS[@]}
     if [[ ${missing_deps_count} -gt 0 ]]; then
         log "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1865,6 +1994,13 @@ ARGUMENTS:
 OPTIONS:
   -r<N>, --revision <N>       Gentoo revision bump (e.g., -r1)
   -p, --package <pkg>         Process single package only
+  -c, --create <pkg>          Create a brand-new package (requires --description).
+                              Package must exist as a cosmic-epoch submodule at
+                              <cosmic-epoch-tag>. Generates the 9999 live ebuild
+                              and metadata.xml from scripts/ebuild_template/,
+                              commits them, then runs the normal pipeline to
+                              produce the versioned ebuild, Manifest, and upload.
+  --description <text>       Description for the new package (required with -c)
   --allow-non-frozen-vendoring
                               Run cargo vendor without --locked (requires -p).
                               Use when upstream forgot to bump Cargo.lock.
@@ -1902,6 +2038,9 @@ EXAMPLES:
   # Bump a package whose Cargo.lock was not updated by upstream
   $0 epoch-1.0.0-beta.3 -p cosmic-edit --allow-non-frozen-vendoring
 
+  # Create a brand-new package
+  $0 epoch-1.4.0 -c cosmic-newthing --description "new thing for COSMIC DE"
+
   # Dry-run to see what would happen
   $0 -n epoch-1.0.0-beta.3
 
@@ -1934,6 +2073,14 @@ function main() {
                 ;;
             -p|--package)
                 SINGLE_PACKAGE="$2"
+                shift 2
+                ;;
+            -c|--create)
+                CREATE_PACKAGE="$2"
+                shift 2
+                ;;
+            --description)
+                DESCRIPTION_ARG="$2"
                 shift 2
                 ;;
             --clean-temp)
@@ -1992,6 +2139,22 @@ function main() {
         errorExit 1 "--allow-non-frozen-vendoring requires -p/--package to target exactly one package"
     fi
 
+    if [[ -n "$CREATE_PACKAGE" ]]; then
+        validate_single_package "$CREATE_PACKAGE"
+
+        if [[ -z "$DESCRIPTION_ARG" ]]; then
+            errorExit 1 "-c/--create requires --description \"<text>\" to be set"
+        fi
+        validate_description "$DESCRIPTION_ARG"
+
+        if [[ -n "$SINGLE_PACKAGE" ]] && [[ "$SINGLE_PACKAGE" != "$CREATE_PACKAGE" ]]; then
+            errorExit 1 "-c/--create and -p/--package cannot target different packages"
+        fi
+
+        # Restrict processing to only the newly created package
+        SINGLE_PACKAGE="$CREATE_PACKAGE"
+    fi
+
     local base_version=$(convert_version "${ORIGINAL_TAG}")
 
     if [[ -n "$REVISION_BUMP" ]]; then
@@ -2011,6 +2174,10 @@ function main() {
     check_environment
     validate_preconditions
     prepare_cosmic_epoch
+
+    if [[ -n "$CREATE_PACKAGE" ]]; then
+        create_package_skeleton
+    fi
 
     # Get package list
     local packages=()

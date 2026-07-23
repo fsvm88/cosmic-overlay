@@ -10,16 +10,12 @@ inherit cosmic-de-r2 systemd
 DESCRIPTION="Cosmic backend for xdg-desktop-portal"
 HOMEPAGE="https://github.com/pop-os/xdg-desktop-portal-cosmic"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
-
-PATCHES=(
-	"${FILESDIR}/xdg-desktop-portal-1.0.0_beta3-add-SystemdService-directive.patch"
-)
 
 RDEPEND+="
 	>=media-libs/mesa-24.0.4
@@ -37,10 +33,14 @@ src_prepare() {
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Fri Jun 26 14:58:43 2026 -0400'
-	export VERGEN_GIT_SHA=2948dd491cfc183a57ff930ada48623038dcf94d
+	export VERGEN_GIT_COMMIT_DATE='Mon Jul 20 14:43:08 2026 -0700'
+	export VERGEN_GIT_SHA=969f3ca5995d157f78da60231af9e59641dae44d
 
-	cosmic-de-r2_src_configure
+	local myfeatures=(
+		$(usev systemd)
+	)
+
+	cosmic-de-r2_src_configure --no-default-features
 }
 
 src_install() {

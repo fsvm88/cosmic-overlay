@@ -5,15 +5,19 @@ EAPI=8
 
 inherit cosmic-de-r2
 
-DESCRIPTION="CLI utility for displaying and configuring wayland outputs from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-randr"
+DESCRIPTION="layer shell notifications daemon for COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-notifications"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
-LICENSE="MPL-2.0"
+LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
+
+BDEPEND+="
+	>=dev-util/intltool-0.51.0-r3
+"
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"

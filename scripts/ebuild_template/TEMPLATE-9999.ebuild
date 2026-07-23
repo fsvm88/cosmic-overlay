@@ -3,20 +3,22 @@
 
 EAPI=8
 
-inherit cosmic-de-r2
+COSMIC_GIT_UNPACK=1
+inherit cosmic-live
 
-DESCRIPTION="screen idle daemon for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-idle"
+DESCRIPTION="@DESCRIPTION@"
+HOMEPAGE="https://github.com/pop-os/${PN}"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+EGIT_REPO_URI="${HOMEPAGE}"
+EGIT_BRANCH=master
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64"
+KEYWORDS=""
 
 src_configure() {
-	cosmic-de-r2_src_configure --all
+	cosmic-live_src_configure --all
 }
 
 src_install() {

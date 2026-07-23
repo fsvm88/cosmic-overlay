@@ -8,7 +8,7 @@ inherit cosmic-de-r2 desktop
 DESCRIPTION="text editor from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-edit"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
@@ -17,8 +17,8 @@ KEYWORDS="~amd64"
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Jun 30 15:58:35 2026 -0400'
-	export VERGEN_GIT_SHA=dfcef22632d682bf01badd1756d442619c9db131
+	export VERGEN_GIT_COMMIT_DATE='Mon Jul 20 18:07:47 2026 -0600'
+	export VERGEN_GIT_SHA=a3d492028574af878fbe300a29ca9533fa063531
 
 	cosmic-de-r2_src_configure
 }

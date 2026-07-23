@@ -8,7 +8,7 @@ inherit cosmic-de-r2
 DESCRIPTION="settings daemon for the COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-settings-daemon"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
 SLOT="0"

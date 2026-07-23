@@ -8,7 +8,7 @@ inherit cosmic-de-r2 desktop
 DESCRIPTION="file manager from COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-files"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
@@ -28,8 +28,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Jun 30 13:13:13 2026 -0600'
-	export VERGEN_GIT_SHA=3ef7913abdcbadf13af0884a76287f19052a4469
+	export VERGEN_GIT_COMMIT_DATE='Tue Jul 21 06:55:26 2026 -0600'
+	export VERGEN_GIT_SHA=9a21542825af92811b622a58ace5f25f962506d7
 
 	cosmic-de-r2_src_configure
 }

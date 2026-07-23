@@ -37,6 +37,7 @@ monitor? ( ~cosmic-base/cosmic-monitor-${PV} )
 ~cosmic-base/cosmic-session-${PV}[greeter=]
 ~cosmic-base/cosmic-settings-${PV}
 ~cosmic-base/cosmic-settings-daemon-${PV}
+~cosmic-base/cosmic-sound-theme-${PV}
 store? ( ~cosmic-base/cosmic-store-${PV} )
 ~cosmic-base/cosmic-term-${PV}
 ~cosmic-base/cosmic-workspaces-epoch-${PV}

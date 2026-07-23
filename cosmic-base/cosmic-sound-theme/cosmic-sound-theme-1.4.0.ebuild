@@ -3,26 +3,21 @@
 
 EAPI=8
 
-inherit xdg
+DESCRIPTION="COSMIC DE Sound Theme"
+HOMEPAGE="https://github.com/pop-os/cosmic-sound-theme"
 
-DESCRIPTION="icon set COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-icons"
-
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PVR}.full.tar.zst"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
-RDEPEND+="
-	>=cosmic-base/pop-icon-theme-3.5.1
-"
-
 src_unpack() {
 	debug-print-function ${FUNCNAME} "$@"
 
 	pushd "${DISTDIR}" >/dev/null || die
+
 	mkdir -p "${S}" || die
 
 	for archive in ${A}; do
@@ -35,12 +30,18 @@ src_unpack() {
 			;;
 		esac
 	done
+
 	popd >/dev/null || die
 }
 
+src_prepare() {
+	default
+
+	sed -e 's/@ThemeName@/COSMIC/' src/index.theme.in > src/index.theme
+}
+
 src_install() {
-	insinto /usr/share/icons/Cosmic
-	doins -r freedesktop/scalable
-	doins -r extra/scalable
-	doins index.theme
+	insinto /usr/share/sounds/COSMIC
+	doins src/index.theme
+	doins -r src/stereo
 }
