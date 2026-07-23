@@ -3,8 +3,6 @@
 
 EAPI=8
 
-inherit cosmic-de-r2
-
 DESCRIPTION="COSMIC DE Sound Theme"
 HOMEPAGE="https://github.com/pop-os/cosmic-sound-theme"
 
@@ -15,9 +13,31 @@ LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 KEYWORDS="~amd64"
 
+src_unpack() {
+	debug-print-function ${FUNCNAME} "$@"
+
+	pushd "${DISTDIR}" >/dev/null || die
+
+	mkdir -p "${S}" || die
+
+	for archive in ${A}; do
+		case "${archive}" in
+		*.full.tar.zst)
+			tar -x -I 'zstd --long=31' -C "${S}" -f "${archive}" --strip-components=1
+			;;
+		*)
+			tar -x -C "${S}" -f "${archive}" --strip-components=1
+			;;
+		esac
+	done
+
+	popd >/dev/null || die
+}
+
 src_prepare() {
-	cosmic-de-r2_src_prepare
-	sed -e 's/@ThemeName@/COSMIC' src/index.theme.in > src/index.theme
+	default
+
+	sed -e 's/@ThemeName@/COSMIC/' src/index.theme.in > src/index.theme
 }
 
 src_install() {
