@@ -15,15 +15,15 @@ EGIT_BRANCH=master
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS=""
-IUSE+=" ${COSMIC_DE_GVFS_IUSE}"
+IUSE+=" afp http mtp nfs samba"
 
-BDEPEND+="
+DEPEND+="
 	dev-libs/glib:2
-	${COSMIC_DE_GVFS_DEPENDS}
 "
 RDEPEND+="
 	x11-misc/xdg-utils
-	${COSMIC_DE_GVFS_DEPENDS}
+	>=gnome-base/gvfs-1.48.0[afp?,http?,mtp?,nfs?,samba?]
+	~cosmic-base/cosmic-icons-${PV}
 "
 
 src_compile() {

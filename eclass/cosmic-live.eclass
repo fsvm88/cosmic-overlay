@@ -66,19 +66,6 @@ EGIT_MIN_CLONE_TYPE=mirror
 EGIT_LFS_CLONE_TYPE=mirror
 inherit git-r3
 
-# @ECLASS_VARIABLE: COSMIC_DE_GVFS_IUSE
-# @OUTPUT_VARIABLE
-# @DESCRIPTION:
-# reusable variable to inject gvfs IUSEs
-COSMIC_DE_GVFS_IUSE="afp http nfs samba"
-# @ECLASS_VARIABLE: COSMIC_DE_GVFS_DEPENDS
-# @OUTPUT_VARIABLE
-# @DESCRIPTION:
-# reusable variable to inject gvfs DEPENDs
-COSMIC_DE_GVFS_DEPENDS="
->=gnome-base/gvfs-1.48.0[afp?,http?,nfs?,samba?]
-"
-
 # @FUNCTION: cosmic-live_pkg_setup
 # @DESCRIPTION:
 # Sets up rust and LLVM environment.
