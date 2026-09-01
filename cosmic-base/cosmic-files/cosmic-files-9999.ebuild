@@ -21,6 +21,7 @@ DEPEND+="
 	dev-libs/glib:2
 "
 RDEPEND+="
+	${DEPEND}
 	x11-misc/xdg-utils
 	>=gnome-base/gvfs-1.48.0[afp?,http?,mtp?,nfs?,samba?]
 	~cosmic-base/cosmic-icons-${PV}
