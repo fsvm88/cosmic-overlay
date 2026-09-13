@@ -142,7 +142,7 @@ cosmic-live_src_compile() {
 	filter-lto
 	tc-export AR CC CXX PKG_CONFIG
 
-	set -- cargo build "${ECARGO_ARGS[@]}" "$@"
+	set -- env LOCKSTEP_XML_PATH="${S}/vendor/atspi-common/xml" cargo build "${ECARGO_ARGS[@]}" "$@"
 	einfo "${@}"
 	"${@}" || die "failed to compile"
 }
