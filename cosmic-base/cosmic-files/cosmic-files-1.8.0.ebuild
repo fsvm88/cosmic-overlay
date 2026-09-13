@@ -14,22 +14,22 @@ SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE+=" afp http nfs samba"
+IUSE+=" afp http mtp nfs samba"
 
-BDEPEND+="
+DEPEND+="
 	dev-libs/glib:2
-	>=gnome-base/gvfs-1.48.0[afp?,http?,nfs?,samba?]
 "
 RDEPEND+="
+	${DEPEND}
 	x11-misc/xdg-utils
-	>=gnome-base/gvfs-1.48.0[afp?,http?,nfs?,samba?]
+	>=gnome-base/gvfs-1.48.0[afp?,http?,mtp?,nfs?,samba?]
 	~cosmic-base/cosmic-icons-${PV}
 "
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Aug 18 15:27:42 2026 -0600'
-	export VERGEN_GIT_SHA=e96b915f631cb92262300a6ed761dbeafeae2c68
+	export VERGEN_GIT_COMMIT_DATE='Wed Sep 2 13:02:27 2026 -0600'
+	export VERGEN_GIT_SHA=089ad2b417edded26385029166e5b49c13432bf8
 
 	cosmic-de-r2_src_configure
 }
