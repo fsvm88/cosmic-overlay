@@ -32,6 +32,7 @@ RDEPEND+="
 	~cosmic-base/cosmic-launcher-${PV}
 	~cosmic-base/cosmic-notifications-${PV}
 	~cosmic-base/cosmic-osd-${PV}
+	~cosmic-base/cosmic-osk-${PV}
 	~cosmic-base/cosmic-panel-${PV}
 	~cosmic-base/cosmic-randr-${PV}
 	~cosmic-base/cosmic-screenshot-${PV}
