@@ -16,10 +16,6 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE+=" accessibility +greeter cups"
 
-PATCHES=(
-	"${FILESDIR}"/cosmic-session-1.0.12-backport-137.patch
-)
-
 RDEPEND+="
 	~cosmic-base/cosmic-applets-${PV}
 	~cosmic-base/cosmic-applibrary-${PV}
@@ -31,6 +27,7 @@ RDEPEND+="
 	~cosmic-base/cosmic-launcher-${PV}
 	~cosmic-base/cosmic-notifications-${PV}
 	~cosmic-base/cosmic-osd-${PV}
+	~cosmic-base/cosmic-osk-${PV}
 	~cosmic-base/cosmic-panel-${PV}
 	~cosmic-base/cosmic-randr-${PV}
 	~cosmic-base/cosmic-screenshot-${PV}

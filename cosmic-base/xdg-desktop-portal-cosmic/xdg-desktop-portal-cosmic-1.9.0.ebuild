@@ -33,8 +33,8 @@ src_prepare() {
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Mon Aug 24 20:47:22 2026 +0200'
-	export VERGEN_GIT_SHA=853bfab7b4bd7a16be80619914abd6c6e7a62790
+	export VERGEN_GIT_COMMIT_DATE='Tue Sep 15 21:52:46 2026 +0200'
+	export VERGEN_GIT_SHA=2f41161176368840c67e2de9b8a24786accb100c
 
 	local myfeatures=(
 		$(usev systemd)

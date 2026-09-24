@@ -28,8 +28,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Aug 25 02:33:15 2026 +0200'
-	export VERGEN_GIT_SHA=935891e36bf265a3c65906694badc1e66cfc091d
+	export VERGEN_GIT_COMMIT_DATE='Tue Sep 22 17:10:59 2026 -0600'
+	export VERGEN_GIT_SHA=b87331f4eb17baf964f2a5b087f66f97f857fae6
 
 	cosmic-de-r2_src_configure --all
 }
@@ -47,6 +47,7 @@ src_install() {
 	doins cosmic-greeter.toml
 
 	systemd_dounit debian/cosmic-greeter-daemon.service
+	newinitd "${FILESDIR}"/${PN}-daemon.init ${PN}-daemon
 
 	newpamd "${FILESDIR}"/cosmic-greeter.pam cosmic-greeter
 
@@ -62,4 +63,11 @@ src_install() {
 
 pkg_postinst() {
 	tmpfiles_process "${PN}.conf"
+
+	if [[ ! -d /run/systemd/system ]]; then
+		elog "On OpenRC the greeter daemon must be enabled manually:"
+		elog "    rc-update add ${PN}-daemon default"
+		elog "Without it the greeter cannot read per-user configuration and"
+		elog "falls back to the default background and theme."
+	fi
 }

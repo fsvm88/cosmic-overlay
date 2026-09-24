@@ -13,7 +13,7 @@ LICENSE="CC-BY-SA-4.0 GPL-3 GPL-3+ MPL-2.0"
 
 SLOT="0"
 KEYWORDS=""
-IUSE="+fonts +gnome-keyring +greeter +monitor store"
+IUSE="+fonts +gnome-keyring +greeter +monitor store +viewer"
 
 RDEPEND="
 ~cosmic-base/cosmic-applets-${PV}
@@ -40,6 +40,7 @@ monitor? ( ~cosmic-base/cosmic-monitor-${PV} )
 ~cosmic-base/cosmic-sound-theme-${PV}
 store? ( ~cosmic-base/cosmic-store-${PV} )
 ~cosmic-base/cosmic-term-${PV}
+viewer? ( ~cosmic-base/cosmic-viewer-${PV} )
 ~cosmic-base/cosmic-workspaces-epoch-${PV}
 ~cosmic-base/pop-launcher-${PV}
 ~cosmic-base/pop-theme-meta-9999

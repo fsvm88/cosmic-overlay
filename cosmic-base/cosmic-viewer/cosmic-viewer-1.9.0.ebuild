@@ -5,8 +5,8 @@ EAPI=8
 
 inherit cosmic-de-r2 desktop
 
-DESCRIPTION="text editor from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-edit"
+DESCRIPTION="image viewer for COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/${PN}"
 
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
@@ -16,19 +16,15 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 src_configure() {
-	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Aug 25 11:39:01 2026 -0600'
-	export VERGEN_GIT_SHA=13b1d4aac02505932a2bb610487720ad045ba0e6
-
-	cosmic-de-r2_src_configure
+	cosmic-de-r2_src_configure --all
 }
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
-	domenu target/xdgen/com.system76.CosmicEdit.desktop
+	domenu res/com.system76.CosmicViewer.desktop
 
-	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicEdit.metainfo.xml
+	cosmic-common_install_metainfo res/com.system76.CosmicViewer.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*

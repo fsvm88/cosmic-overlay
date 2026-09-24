@@ -10,8 +10,9 @@
     <flag name="fonts">Pull in media-fonts/open-sans and media-fonts/noto to theme-sync GTK apps to COSMIC defaults.</flag>
     <flag name="gnome-keyring">Enable support for storing passwords via gnome-keyring.</flag>
     <flag name="greeter">Enable cosmic-greeter dependency.</flag>
-    <flag name="monitor">Enable cosmic-monitor dependency.</flag>
+    <flag name="monitor">Enable cosmic-monitor system monitor dependency.</flag>
     <flag name="store">Enable cosmic-store dependency.</flag>
+    <flag name="viewer">Enable cosmic-viewer image viewer dependency.</flag>
   </use>
   <upstream>
     <remote-id type="github">pop-os/cosmic-epoch</remote-id>

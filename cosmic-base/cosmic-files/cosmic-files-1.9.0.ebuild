@@ -28,8 +28,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Tue Aug 25 11:28:07 2026 -0600'
-	export VERGEN_GIT_SHA=67af455898d7ee6098c98083a330c883272b7734
+	export VERGEN_GIT_COMMIT_DATE='Wed Sep 23 10:44:56 2026 -0600'
+	export VERGEN_GIT_SHA=d1f0af78e64f9e8ddb52c486913d53a234ce3cf2
 
 	cosmic-de-r2_src_configure
 }
@@ -37,11 +37,13 @@ src_configure() {
 src_compile() {
 	cosmic-de-r2_src_compile
 	cosmic-de-r2_src_compile --package "$PN-applet"
+	cosmic-de-r2_src_compile --package "$PN-thumbnailer"
 }
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 	dobin "$(cosmic-common_target_dir)/$PN-applet"
+	dobin "$(cosmic-common_target_dir)/$PN-thumbnailer"
 
 	domenu target/xdgen/com.system76.CosmicFiles.desktop
 
@@ -49,4 +51,7 @@ src_install() {
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*
+
+	insinto /usr/share/thumbnailers
+	doins res/com.system76.CosmicFiles.thumbnailer
 }
