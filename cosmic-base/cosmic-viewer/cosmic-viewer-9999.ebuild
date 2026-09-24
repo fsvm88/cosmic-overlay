@@ -4,7 +4,7 @@
 EAPI=8
 
 COSMIC_GIT_UNPACK=1
-inherit cosmic-live
+inherit cosmic-live desktop
 
 DESCRIPTION="image viewer for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/${PN}"
