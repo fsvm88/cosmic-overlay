@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-de-r2
+inherit cosmic-de-r2 desktop
 
 DESCRIPTION="image viewer for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/${PN}"
@@ -21,4 +21,11 @@ src_configure() {
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
+
+	domenu res/com.system76.CosmicViewer.desktop
+
+	cosmic-common_install_metainfo res/com.system76.CosmicViewer.metainfo.xml
+
+	insinto /usr/share/icons/hicolor
+	doins -r res/icons/hicolor/*
 }
