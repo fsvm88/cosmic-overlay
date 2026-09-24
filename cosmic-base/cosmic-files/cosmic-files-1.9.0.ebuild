@@ -37,11 +37,13 @@ src_configure() {
 src_compile() {
 	cosmic-de-r2_src_compile
 	cosmic-de-r2_src_compile --package "$PN-applet"
+	cosmic-de-r2_src_compile --package "$PN-thumbnailer"
 }
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 	dobin "$(cosmic-common_target_dir)/$PN-applet"
+	dobin "$(cosmic-common_target_dir)/$PN-thumbnailer"
 
 	domenu target/xdgen/com.system76.CosmicFiles.desktop
 
@@ -49,4 +51,7 @@ src_install() {
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*
+
+	insinto /usr/share/thumbnailers
+	doins res/com.system76.CosmicFiles.thumbnailer
 }
