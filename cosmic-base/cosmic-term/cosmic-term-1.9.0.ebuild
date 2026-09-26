@@ -16,7 +16,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND+="
-	>=cosmic-base/cosmic-icons-${PV}
+	=cosmic-base/cosmic-icons-$(ver_cut 1-2)*
 "
 
 src_configure() {

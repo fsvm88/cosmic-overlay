@@ -16,35 +16,35 @@ KEYWORDS="~amd64"
 IUSE="+fonts +gnome-keyring +greeter +monitor store +viewer"
 
 RDEPEND="
-~cosmic-base/cosmic-applets-${PV}
-~cosmic-base/cosmic-applibrary-${PV}
-~cosmic-base/cosmic-bg-${PV}
-~cosmic-base/cosmic-comp-${PV}
-~cosmic-base/cosmic-edit-${PV}
-~cosmic-base/cosmic-files-${PV}
-greeter? ( ~cosmic-base/cosmic-greeter-${PV} )
-~cosmic-base/cosmic-icons-${PV}
-~cosmic-base/cosmic-idle-${PV}
-~cosmic-base/cosmic-initial-setup-${PV}
-~cosmic-base/cosmic-launcher-${PV}
-monitor? ( ~cosmic-base/cosmic-monitor-${PV} )
-~cosmic-base/cosmic-notifications-${PV}
-~cosmic-base/cosmic-osd-${PV}
-~cosmic-base/cosmic-panel-${PV}
-~cosmic-base/cosmic-player-${PV}
-~cosmic-base/cosmic-randr-${PV}
-~cosmic-base/cosmic-screenshot-${PV}
-~cosmic-base/cosmic-session-${PV}[greeter=]
-~cosmic-base/cosmic-settings-${PV}
-~cosmic-base/cosmic-settings-daemon-${PV}
-~cosmic-base/cosmic-sound-theme-${PV}
-store? ( ~cosmic-base/cosmic-store-${PV} )
-~cosmic-base/cosmic-term-${PV}
-viewer? ( ~cosmic-base/cosmic-viewer-${PV} )
-~cosmic-base/cosmic-workspaces-epoch-${PV}
-~cosmic-base/pop-launcher-${PV}
+=cosmic-base/cosmic-applets-$(ver_cut 1-2)*
+=cosmic-base/cosmic-applibrary-$(ver_cut 1-2)*
+=cosmic-base/cosmic-bg-$(ver_cut 1-2)*
+=cosmic-base/cosmic-comp-$(ver_cut 1-2)*
+=cosmic-base/cosmic-edit-$(ver_cut 1-2)*
+=cosmic-base/cosmic-files-$(ver_cut 1-2)*
+greeter? ( =cosmic-base/cosmic-greeter-$(ver_cut 1-2)* )
+=cosmic-base/cosmic-icons-$(ver_cut 1-2)*
+=cosmic-base/cosmic-idle-$(ver_cut 1-2)*
+=cosmic-base/cosmic-initial-setup-$(ver_cut 1-2)*
+=cosmic-base/cosmic-launcher-$(ver_cut 1-2)*
+monitor? ( =cosmic-base/cosmic-monitor-$(ver_cut 1-2)* )
+=cosmic-base/cosmic-notifications-$(ver_cut 1-2)*
+=cosmic-base/cosmic-osd-$(ver_cut 1-2)*
+=cosmic-base/cosmic-panel-$(ver_cut 1-2)*
+=cosmic-base/cosmic-player-$(ver_cut 1-2)*
+=cosmic-base/cosmic-randr-$(ver_cut 1-2)*
+=cosmic-base/cosmic-screenshot-$(ver_cut 1-2)*
+=cosmic-base/cosmic-session-$(ver_cut 1-2)*[greeter=]
+=cosmic-base/cosmic-settings-$(ver_cut 1-2)*
+=cosmic-base/cosmic-settings-daemon-$(ver_cut 1-2)*
+=cosmic-base/cosmic-sound-theme-$(ver_cut 1-2)*
+store? ( =cosmic-base/cosmic-store-$(ver_cut 1-2)* )
+=cosmic-base/cosmic-term-$(ver_cut 1-2)*
+viewer? ( =cosmic-base/cosmic-viewer-$(ver_cut 1-2)* )
+=cosmic-base/cosmic-workspaces-epoch-$(ver_cut 1-2)*
+=cosmic-base/pop-launcher-$(ver_cut 1-2)*
 ~cosmic-base/pop-theme-meta-9999
-~cosmic-base/xdg-desktop-portal-cosmic-${PV}
+=cosmic-base/xdg-desktop-portal-cosmic-$(ver_cut 1-2)*
 fonts? (
 	media-fonts/open-sans:0
 	media-fonts/noto:0

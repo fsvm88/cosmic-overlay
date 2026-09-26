@@ -18,7 +18,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND+="
-	~cosmic-base/cosmic-comp-${PV}
+	=cosmic-base/cosmic-comp-$(ver_cut 1-2)*
 	>=acct-user/cosmic-greeter-0
 	>=dev-libs/libinput-1.26.1
 	>=gui-libs/greetd-0.9.0
