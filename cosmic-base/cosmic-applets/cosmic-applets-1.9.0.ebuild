@@ -17,7 +17,7 @@ KEYWORDS="~amd64"
 IUSE="+upower"
 
 RDEPEND+="
-~cosmic-base/cosmic-icons-${PV}
+=cosmic-base/cosmic-icons-$(ver_cut 1-2)*
 upower? ( >=sys-power/upower-1.90.0 )
 "
 

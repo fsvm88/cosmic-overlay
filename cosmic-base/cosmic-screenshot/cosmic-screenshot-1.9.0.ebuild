@@ -16,7 +16,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND+="
-	>=cosmic-base/xdg-desktop-portal-cosmic-${PV}
+	=cosmic-base/xdg-desktop-portal-cosmic-$(ver_cut 1-2)*
 "
 
 src_install() {

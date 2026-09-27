@@ -37,6 +37,7 @@ KEEP_TEMP=1          # Default: enabled
 NO_UPLOAD=0
 NO_COMMIT=0
 DRY_RUN=0
+STANDALONE=0
 VERBOSE=0
 DEBUG=0              # Default: disabled (only show on --debug/-d)
 ALLOW_NON_FROZEN_VENDORING=0
@@ -556,7 +557,7 @@ function retry_with_backoff() {
 function check_environment() {
     log_phase "Checking environment..."
 
-    local tools=("git" "git-lfs" "gh" "cargo" "just" "ebuild" "pkgdev" "pkgcheck" "zstd" "b2sum" "sha512sum" "jq")
+    local tools=("git" "git-lfs" "gh" "cargo" "just" "ebuild" "pkgdev" "pkgcheck" "zstd" "b2sum" "sha512sum" "jq" "curl")
     for tool in "${tools[@]}"; do
         if ! command -v "$tool" &>/dev/null; then
             errorExit 2 "${tool} not found in PATH - required for this script"
@@ -694,6 +695,64 @@ function prepare_cosmic_epoch() {
     pop_d # TEMP_DIR
 
     log_success "cosmic-epoch prepared at ${TEMP_DIR}/cosmic-epoch"
+}
+
+# Look up the upstream repository URL of a cosmic-epoch submodule by its path,
+# using cosmic-epoch's .gitmodules on master (repo names do not always match
+# the package name, e.g. pop-launcher -> pop-os/launcher).
+# Prints the URL on stdout.
+function resolve_submodule_url() {
+    local pkg="$1"
+    local gitmodules="${TEMP_DIR}/epoch.gitmodules"
+
+    curl -fsSL "${COSMIC_EPOCH_REPO}/raw/master/.gitmodules" -o "${gitmodules}" || return 1
+
+    local key path name=""
+    while read -r key path; do
+        if [[ "${path}" == "${pkg}" ]]; then
+            name="${key#submodule.}"
+            name="${name%.path}"
+            break
+        fi
+    done < <(git config -f "${gitmodules}" --get-regexp '^submodule\..*\.path$')
+    [[ -z "${name}" ]] && return 1
+
+    local url
+    url=$(git config -f "${gitmodules}" --get "submodule.${name}.url") || return 1
+    url="${url%/}"
+    url="${url%.git}"
+    echo "${url}"
+}
+
+# Standalone mode: clone only the package's own repository at ORIGINAL_TAG, laid out
+# like a cosmic-epoch submodule so that all later phases work unchanged.
+function prepare_single_repo() {
+    log_phase "Preparing single repository for ${SINGLE_PACKAGE} (standalone mode)..."
+
+    TEMP_DIR=$(mktemp -d -t cosmic-bump.XXXXXX)
+    log_info "Created temp directory: ${TEMP_DIR}"
+
+    if [[ ! -w "${TEMP_DIR}" ]]; then
+        errorExit 11 "TEMP_DIR (${TEMP_DIR}) is not writable"
+    fi
+
+    CLEANUP_DIRS_FILES+=("${TEMP_DIR}")
+    mkdir -p "${TEMP_DIR}/cosmic-epoch"
+
+    local repo_url
+    repo_url=$(resolve_submodule_url "${SINGLE_PACKAGE}") || \
+        errorExit 16 "could not find ${SINGLE_PACKAGE} in cosmic-epoch .gitmodules"
+    log_info "Upstream repository: ${repo_url}"
+
+    git ls-remote --exit-code --tags "${repo_url}" "refs/tags/${ORIGINAL_TAG}" >/dev/null || \
+        errorExit 15 "Tag ${ORIGINAL_TAG} does not exist in ${repo_url}"
+
+    log_info "Cloning ${repo_url} at ${ORIGINAL_TAG}..."
+    git clone --depth 1 --branch "${ORIGINAL_TAG}" --recurse-submodules --shallow-submodules \
+        "${repo_url}" "${TEMP_DIR}/cosmic-epoch/${SINGLE_PACKAGE}" || \
+        errorExit 12 "could not clone ${repo_url}"
+
+    log_success "${SINGLE_PACKAGE} prepared at ${TEMP_DIR}/cosmic-epoch/${SINGLE_PACKAGE}"
 }
 
 # Create a brand-new package skeleton (9999 live ebuild + metadata.xml) from the
@@ -2021,6 +2080,11 @@ OPTIONS:
   --allow-non-frozen-vendoring
                               Run cargo vendor without --locked (requires -p).
                               Use when upstream forgot to bump Cargo.lock.
+  --standalone                Bump a single package (requires -p) from a tag in its
+                              own upstream repo, without cloning cosmic-epoch. Use
+                              when upstream tags one repo (e.g. epoch-1.9.1) with no
+                              matching cosmic-epoch tag. Relies on sibling pins
+                              being minor-series (=cosmic-base/X-\$(ver_cut 1-2)*).
   --clean-temp                Remove temp directory on exit
   --no-upload                 Skip GitHub release upload
   --no-commit                 Don't commit changes
@@ -2054,6 +2118,9 @@ EXAMPLES:
 
   # Bump a package whose Cargo.lock was not updated by upstream
   $0 epoch-1.0.0-beta.3 -p cosmic-edit --allow-non-frozen-vendoring
+
+  # Bump one package from its own repo tag (no cosmic-epoch tag exists)
+  $0 --standalone -p cosmic-greeter epoch-1.9.1
 
   # Create a brand-new package
   $0 epoch-1.4.0 -c cosmic-newthing --description "new thing for COSMIC DE"
@@ -2128,6 +2195,10 @@ function main() {
                 ALLOW_NON_FROZEN_VENDORING=1
                 shift
                 ;;
+            --standalone)
+                STANDALONE=1
+                shift
+                ;;
             -*)
                 error "Unknown option: $1"
                 usage
@@ -2151,6 +2222,13 @@ function main() {
     # Validate inputs early to fail fast on bad inputs
     validate_original_tag "$ORIGINAL_TAG"
     validate_single_package "$SINGLE_PACKAGE"
+
+    if [[ $STANDALONE -eq 1 ]] && [[ -z "$SINGLE_PACKAGE" ]]; then
+        errorExit 1 "--standalone requires -p/--package"
+    fi
+    if [[ $STANDALONE -eq 1 ]] && [[ -n "$CREATE_PACKAGE" ]]; then
+        errorExit 1 "--standalone cannot be combined with -c/--create"
+    fi
 
     if [[ $ALLOW_NON_FROZEN_VENDORING -eq 1 ]] && [[ -z "$SINGLE_PACKAGE" ]]; then
         errorExit 1 "--allow-non-frozen-vendoring requires -p/--package to target exactly one package"
@@ -2190,7 +2268,11 @@ function main() {
     update_gitignore
     check_environment
     validate_preconditions
-    prepare_cosmic_epoch
+    if [[ $STANDALONE -eq 1 ]]; then
+        prepare_single_repo
+    else
+        prepare_cosmic_epoch
+    fi
 
     if [[ -n "$CREATE_PACKAGE" ]]; then
         create_package_skeleton

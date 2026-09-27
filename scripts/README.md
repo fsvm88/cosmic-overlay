@@ -37,6 +37,9 @@ This directory contains scripts for testing, validating, and managing the COSMIC
 **Advanced Options:**
 
 ```bash
+# Single-repo bump when upstream tagged only one repo (no cosmic-epoch tag)
+./scripts/bump_and_qa_ebuild.sh --standalone -p cosmic-greeter epoch-1.9.1
+
 # Add Gentoo revision bump (-r1, -r2, etc.)
 ./scripts/bump_and_qa_ebuild.sh epoch-1.0.0-beta.3 -r1
 

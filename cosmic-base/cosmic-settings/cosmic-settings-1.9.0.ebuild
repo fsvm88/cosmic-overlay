@@ -20,8 +20,8 @@ IUSE+=" +avif bluetooth +networkmanager openvpn systemd"
 
 RDEPEND+="
 	bluetooth? ( >=net-wireless/bluez-5.86 )
-	~cosmic-base/cosmic-icons-${PV}
-	~cosmic-base/cosmic-randr-${PV}
+	=cosmic-base/cosmic-icons-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-randr-$(ver_cut 1-2)*
 	!systemd? ( >=app-admin/openrc-settingsd-1.4.0-r1 )
 	>=app-text/iso-codes-4.16.0
 	>=dev-libs/expat-2.5.0

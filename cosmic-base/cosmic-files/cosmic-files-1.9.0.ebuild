@@ -23,7 +23,7 @@ RDEPEND+="
 	${DEPEND}
 	x11-misc/xdg-utils
 	>=gnome-base/gvfs-1.48.0[afp?,http?,mtp?,nfs?,samba?]
-	~cosmic-base/cosmic-icons-${PV}
+	=cosmic-base/cosmic-icons-$(ver_cut 1-2)*
 "
 
 src_configure() {
