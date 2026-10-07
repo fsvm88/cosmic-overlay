@@ -23,7 +23,7 @@ EGIT_BRANCH=master
 
 RDEPEND+="
 	~cosmic-base/cosmic-applets-${PV}
-	~cosmic-base/cosmic-applibrary-${PV}
+	~cosmic-base/cosmic-app-library-${PV}
 	~cosmic-base/cosmic-bg-${PV}
 	~cosmic-base/cosmic-comp-${PV}
 	greeter? ( ~cosmic-base/cosmic-greeter-${PV} )

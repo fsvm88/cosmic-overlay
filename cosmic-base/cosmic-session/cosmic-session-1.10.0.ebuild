@@ -18,7 +18,7 @@ IUSE+=" accessibility +greeter cups"
 
 RDEPEND+="
 	=cosmic-base/cosmic-applets-$(ver_cut 1-2)*
-	=cosmic-base/cosmic-applibrary-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-app-library-$(ver_cut 1-2)*
 	=cosmic-base/cosmic-bg-$(ver_cut 1-2)*
 	=cosmic-base/cosmic-comp-$(ver_cut 1-2)*
 	greeter? ( =cosmic-base/cosmic-greeter-$(ver_cut 1-2)* )

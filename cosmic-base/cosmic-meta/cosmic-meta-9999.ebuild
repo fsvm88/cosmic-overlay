@@ -17,7 +17,7 @@ IUSE="+fonts +gnome-keyring +greeter +monitor store +viewer"
 
 RDEPEND="
 ~cosmic-base/cosmic-applets-${PV}
-~cosmic-base/cosmic-applibrary-${PV}
+~cosmic-base/cosmic-app-library-${PV}
 ~cosmic-base/cosmic-bg-${PV}
 ~cosmic-base/cosmic-comp-${PV}
 ~cosmic-base/cosmic-edit-${PV}
