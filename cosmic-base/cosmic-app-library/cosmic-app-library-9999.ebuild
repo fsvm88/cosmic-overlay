@@ -6,7 +6,7 @@ EAPI=8
 inherit cosmic-live desktop
 
 DESCRIPTION="app library for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-applibrary"
+HOMEPAGE="https://github.com/pop-os/cosmic-app-library"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
@@ -17,7 +17,7 @@ SLOT="0"
 KEYWORDS=""
 
 src_install() {
-	# One of the few where $PN does not apply (would be cosmic-applibrary)
+	# One of the few where $PN does not apply (would be cosmic-app-library)
 	dobin "$(cosmic-common_target_dir)/cosmic-app-library"
 
 	domenu data/com.system76.CosmicAppLibrary.desktop

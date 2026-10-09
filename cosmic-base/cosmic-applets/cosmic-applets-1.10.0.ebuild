@@ -17,7 +17,7 @@ KEYWORDS="~amd64"
 IUSE="+upower"
 
 RDEPEND+="
-~cosmic-base/cosmic-icons-${PV}
+=cosmic-base/cosmic-icons-$(ver_cut 1-2)*
 upower? ( >=sys-power/upower-1.90.0 )
 "
 
@@ -80,6 +80,7 @@ src_install() {
 	_install_applet "cosmic-applet-minimize" "com.system76.CosmicAppletMinimize"
 	_install_applet "cosmic-applet-network" "com.system76.CosmicAppletNetwork"
 	_install_applet "cosmic-applet-notifications" "com.system76.CosmicAppletNotifications"
+	_install_applet "cosmic-applet-osk" "com.system76.CosmicAppletOsk"
 	_install_applet "cosmic-applet-power" "com.system76.CosmicAppletPower"
 	_install_applet "cosmic-applet-status-area" "com.system76.CosmicAppletStatusArea"
 	_install_applet "cosmic-applet-tiling" "com.system76.CosmicAppletTiling"

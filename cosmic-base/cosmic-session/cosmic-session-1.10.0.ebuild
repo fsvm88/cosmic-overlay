@@ -16,29 +16,26 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE+=" accessibility +greeter cups"
 
-PATCHES=(
-	"${FILESDIR}"/cosmic-session-1.0.12-backport-137.patch
-)
-
 RDEPEND+="
-	~cosmic-base/cosmic-applets-${PV}
-	~cosmic-base/cosmic-applibrary-${PV}
-	~cosmic-base/cosmic-bg-${PV}
-	~cosmic-base/cosmic-comp-${PV}
-	greeter? ( ~cosmic-base/cosmic-greeter-${PV} )
-	~cosmic-base/cosmic-icons-${PV}
-	~cosmic-base/cosmic-idle-${PV}
-	~cosmic-base/cosmic-launcher-${PV}
-	~cosmic-base/cosmic-notifications-${PV}
-	~cosmic-base/cosmic-osd-${PV}
-	~cosmic-base/cosmic-panel-${PV}
-	~cosmic-base/cosmic-randr-${PV}
-	~cosmic-base/cosmic-screenshot-${PV}
-	~cosmic-base/cosmic-settings-${PV}
-	~cosmic-base/cosmic-settings-daemon-${PV}
-	~cosmic-base/cosmic-wallpapers-${PV}
-	~cosmic-base/cosmic-workspaces-epoch-${PV}
-	~cosmic-base/xdg-desktop-portal-cosmic-${PV}
+	=cosmic-base/cosmic-applets-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-app-library-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-bg-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-comp-$(ver_cut 1-2)*
+	greeter? ( =cosmic-base/cosmic-greeter-$(ver_cut 1-2)* )
+	=cosmic-base/cosmic-icons-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-idle-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-launcher-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-notifications-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-osd-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-osk-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-panel-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-randr-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-screenshot-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-settings-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-settings-daemon-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-wallpapers-$(ver_cut 1-2)*
+	=cosmic-base/cosmic-workspaces-epoch-$(ver_cut 1-2)*
+	=cosmic-base/xdg-desktop-portal-cosmic-$(ver_cut 1-2)*
 	~cosmic-base/pop-fonts-9999
 	>=media-fonts/fira-mono-4.202
 	>=media-fonts/fira-sans-4.202

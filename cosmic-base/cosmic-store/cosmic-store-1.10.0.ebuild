@@ -5,8 +5,8 @@ EAPI=8
 
 inherit cosmic-de-r2 desktop
 
-DESCRIPTION="utility for capturing screenshots via XDG Desktop Portal from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-screenshot"
+DESCRIPTION="app store from COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/cosmic-store"
 
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
@@ -16,14 +16,19 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND+="
-	>=cosmic-base/xdg-desktop-portal-cosmic-${PV}
+	>=dev-libs/openssl-3.0.13-r2
+	>=sys-apps/flatpak-1.14.4-r3
+	~cosmic-base/pop-appstream-data-9999
+	=cosmic-base/cosmic-icons-$(ver_cut 1-2)*
 "
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
-	domenu resources/com.system76.CosmicScreenshot.desktop
+	domenu target/xdgen/com.system76.CosmicStore.desktop
+
+	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicStore.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
-	doins -r resources/icons/hicolor/*
+	doins -r res/icons/hicolor/*
 }

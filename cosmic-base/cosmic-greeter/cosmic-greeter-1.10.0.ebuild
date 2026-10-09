@@ -18,7 +18,7 @@ SLOT="0"
 KEYWORDS="~amd64"
 
 RDEPEND+="
-	~cosmic-base/cosmic-comp-${PV}
+	=cosmic-base/cosmic-comp-$(ver_cut 1-2)*
 	>=acct-user/cosmic-greeter-0
 	>=dev-libs/libinput-1.26.1
 	>=gui-libs/greetd-0.9.0
@@ -28,8 +28,8 @@ RDEPEND+="
 
 src_configure() {
 	# Required for some crates to build properly due to build.rs scripts
-	export VERGEN_GIT_COMMIT_DATE='Wed Sep 9 10:01:53 2026 -0600'
-	export VERGEN_GIT_SHA=ff31b59b7d0b3f2e219c4bc3598a5bac02ac4e6e
+	export VERGEN_GIT_COMMIT_DATE='Wed Oct 7 21:19:02 2026 +0200'
+	export VERGEN_GIT_SHA=98df07df93df1cb091c95451f7162dca1a2ae2dd
 
 	cosmic-de-r2_src_configure --all
 }

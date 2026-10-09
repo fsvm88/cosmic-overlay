@@ -5,8 +5,8 @@ EAPI=8
 
 inherit cosmic-de-r2 desktop
 
-DESCRIPTION="app store from COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/cosmic-store"
+DESCRIPTION="image viewer for COSMIC DE"
+HOMEPAGE="https://github.com/pop-os/${PN}"
 
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
@@ -15,19 +15,16 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-RDEPEND+="
-	>=dev-libs/openssl-3.0.13-r2
-	>=sys-apps/flatpak-1.14.4-r3
-	~cosmic-base/pop-appstream-data-9999
-	~cosmic-base/cosmic-icons-${PV}
-"
+src_configure() {
+	cosmic-de-r2_src_configure --all
+}
 
 src_install() {
 	dobin "$(cosmic-common_target_dir)/$PN"
 
-	domenu target/xdgen/com.system76.CosmicStore.desktop
+	domenu res/com.system76.CosmicViewer.desktop
 
-	cosmic-common_install_metainfo target/xdgen/com.system76.CosmicStore.metainfo.xml
+	cosmic-common_install_metainfo res/com.system76.CosmicViewer.metainfo.xml
 
 	insinto /usr/share/icons/hicolor
 	doins -r res/icons/hicolor/*

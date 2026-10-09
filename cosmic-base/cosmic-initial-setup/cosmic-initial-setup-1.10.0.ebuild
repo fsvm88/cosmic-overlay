@@ -19,7 +19,7 @@ IUSE+=" systemd"
 RDEPEND+="
 	acct-user/cosmic-initial-setup
 	~cosmic-base/pop-appstream-data-9999
-	~cosmic-base/cosmic-icons-${PV}
+	=cosmic-base/cosmic-icons-$(ver_cut 1-2)*
 	!systemd? ( >=app-admin/openrc-settingsd-1.4.0-r1 )
 "
 
