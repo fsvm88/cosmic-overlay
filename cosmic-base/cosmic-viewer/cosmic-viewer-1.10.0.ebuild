@@ -15,6 +15,21 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
+# Use the system libheif instead of the one vendored by libheif-sys
+# (embedded-libheif), which auto-links whatever codecs are on the build host.
+# v1_17 (pinned in Cargo.toml) is the minimum libheif API level.
+DEPEND=">=media-libs/libheif-1.17:="
+RDEPEND="${DEPEND}"
+BDEPEND="virtual/pkgconfig"
+
+src_prepare() {
+	sed -i -e '/^  "embedded-libheif",$/d' Cargo.toml || die
+	grep -q embedded-libheif Cargo.toml && die "failed to drop embedded-libheif feature"
+	# Dropping the feature prunes the optional cmake dep from Cargo.lock
+	cargo update --offline --workspace || die
+	cosmic-de-r2_src_prepare
+}
+
 src_configure() {
 	cosmic-de-r2_src_configure --all
 }
