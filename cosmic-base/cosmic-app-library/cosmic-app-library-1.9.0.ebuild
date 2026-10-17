@@ -8,7 +8,8 @@ inherit cosmic-de-r2 desktop
 DESCRIPTION="app library for COSMIC DE"
 HOMEPAGE="https://github.com/pop-os/cosmic-applibrary"
 
-SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
+MY_PN="cosmic-applibrary"
+SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${MY_PN}-${PV}.full.tar.zst"
 
 # use cargo-license for a more accurate license picture
 LICENSE="GPL-3"
