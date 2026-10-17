@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>rosen@aleksandrov.tech</email>
+		<name>Rosen Aleksandrov</name>
+	</maintainer>
+	<longdescription>
+		Native KDE Connect implementation for the COSMIC desktop, written in Rust.
+		Provides a background service and a COSMIC panel applet for pairing with
+		phones, clipboard sync, notifications, file sharing, SMS and more.
+		Conflicts with the official KDE Connect because both use port 1716.
+	</longdescription>
+	<upstream>
+		<remote-id type="github">cosmic-utils/kdeconnect</remote-id>
+		<bugs-to>https://github.com/cosmic-utils/kdeconnect/issues</bugs-to>
+	</upstream>
+</pkgmetadata>
