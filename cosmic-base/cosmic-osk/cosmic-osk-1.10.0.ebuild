@@ -6,7 +6,7 @@ EAPI=8
 inherit cosmic-de-r2
 
 DESCRIPTION="On-Screen Keyboard for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/${PN}"
+HOMEPAGE="https://github.com/pop-os/cosmic-osk"
 
 SRC_URI="https://github.com/fsvm88/cosmic-overlay/releases/download/${PV}/${PN}-${PV}.full.tar.zst"
 
