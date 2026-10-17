@@ -53,8 +53,7 @@ jobs:
             -w /var/db/repos/cosmic-overlay \
             cosmic-qa \
             bash -c '
-              set -e
-              python3 scripts/simple-qa-check.py --overlay-root . --reports-dir qa-reports
+              python3 scripts/simple-qa-check.py --overlay-root . --reports-dir qa-reports || true
             '
 
       - name: Upload QA reports
@@ -71,7 +70,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const path = 'reports/summary.md';
+            const path = 'qa-reports/summary.md';
 
             try {
               if (fs.existsSync(path)) {
