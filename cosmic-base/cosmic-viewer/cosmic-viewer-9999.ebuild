@@ -7,7 +7,7 @@ COSMIC_GIT_UNPACK=1
 inherit cosmic-live desktop
 
 DESCRIPTION="image viewer for COSMIC DE"
-HOMEPAGE="https://github.com/pop-os/${PN}"
+HOMEPAGE="https://github.com/pop-os/cosmic-viewer"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
