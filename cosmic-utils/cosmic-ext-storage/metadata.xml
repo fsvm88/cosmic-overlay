@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>rosen@aleksandrov.tech</email>
+		<name>Rosen Aleksandrov</name>
+	</maintainer>
+	<longdescription>
+		Storage and disk utility for the COSMIC desktop, written in Rust.
+		Manages disks and partitions through UDisks2 (privileged operations go
+		through Polkit), with BTRFS subvolume and snapshot management and rclone
+		network mounts.
+	</longdescription>
+	<use>
+		<flag name="debug-line-tables-only">When building in release or debug mode, only add line tables instead of full debug info.</flag>
+		<flag name="max-opt">Build with the maximum-optimization release profile (codegen-units=1).</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">cosmic-utils/cosmic-ext-storage</remote-id>
+		<bugs-to>https://github.com/cosmic-utils/cosmic-ext-storage/issues</bugs-to>
+	</upstream>
+</pkgmetadata>
