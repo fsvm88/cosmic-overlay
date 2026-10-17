@@ -5,7 +5,7 @@ EAPI=8
 
 inherit cosmic-live desktop optfeature systemd
 
-DESCRIPTION="Native KDE Connect implementation (service + panel applet) for the COSMIC desktop"
+DESCRIPTION="Native KDE Connect implementation for the COSMIC desktop"
 HOMEPAGE="https://github.com/cosmic-utils/kdeconnect"
 
 EGIT_REPO_URI="${HOMEPAGE}"
