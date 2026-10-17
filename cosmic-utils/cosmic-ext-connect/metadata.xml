@@ -11,6 +11,10 @@
 		phones, clipboard sync, notifications, file sharing, SMS and more.
 		Conflicts with the official KDE Connect because both use port 1716.
 	</longdescription>
+	<use>
+		<flag name="debug-line-tables-only">When building in release or debug mode, only add line tables instead of full debug info.</flag>
+		<flag name="max-opt">Build with the maximum-optimization release profile (codegen-units=1).</flag>
+	</use>
 	<upstream>
 		<remote-id type="github">cosmic-utils/kdeconnect</remote-id>
 		<bugs-to>https://github.com/cosmic-utils/kdeconnect/issues</bugs-to>
