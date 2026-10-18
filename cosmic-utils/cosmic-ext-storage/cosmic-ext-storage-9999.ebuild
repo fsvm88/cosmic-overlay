@@ -25,8 +25,17 @@ BDEPEND="
 	virtual/pkgconfig
 "
 
+#src_configure() {
+#	cosmic-live_src_configure --all
+#}
+
 src_configure() {
-	cosmic-live_src_configure --all
+        mkdir -p "${S}/vendor/atspi-common" || die
+
+        ln -s "${WORKDIR}/cargo_home/gentoo/atspi-common/xml" \
+                "${S}/vendor/atspi-common/xml" || die
+
+        cosmic-live_src_configure --all
 }
 
 src_install() {
@@ -37,10 +46,10 @@ src_install() {
 
 	# Desktop entry, metainfo and icon (upstream already names them after the app ID;
 	# upstream installs metainfo to the deprecated /usr/share/appdata)
-	domenu resources/${APPID}.desktop
+	newmenu resources/app.desktop ${APPID}.desktop
 
 	insinto /usr/share/metainfo
-	doins resources/${APPID}.metainfo.xml
+	newins resources/app.metainfo.xml ${APPID}.metainfo.xml
 
 	doicon -s scalable resources/icons/hicolor/scalable/apps/${APPID}.svg
 

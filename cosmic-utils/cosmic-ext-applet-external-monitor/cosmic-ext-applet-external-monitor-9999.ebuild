@@ -30,7 +30,7 @@ src_install() {
 	export APPID="io.github.cosmic_utils.cosmic-ext-applet-external-monitor-brightness"
 
 	exeinto /usr/bin
-	doexe "$(cosmic-common_target_dir)/${PN}"
+	doexe "$(cosmic-common_target_dir)/${PN}-brightness"
 
 	doicon -s symbolic res/icons/display-symbolic.svg
 

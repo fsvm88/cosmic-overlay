@@ -1,3 +1,4 @@
+
 # Copyright 2025 Fabio Scaccabarozzi
 # Distributed under the terms of the GNU General Public License v3
 
@@ -15,55 +16,57 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-RDEPEND+="
+RDEPEND="
 	sys-apps/dbus
 "
-
 DEPEND="${RDEPEND}"
-
 BDEPEND="
 	virtual/pkgconfig
 "
 
 src_configure() {
+	mkdir -p "${S}/vendor/atspi-common" || die
+
+	ln -s "${WORKDIR}/cargo_home/gentoo/atspi-common/xml" \
+		"${S}/vendor/atspi-common/xml" || die
+
 	cosmic-live_src_configure --all
 }
 
 src_install() {
-	export APPID="dev.edfloreshz.Accounts"
+	local appid="dev.edfloreshz.Accounts"
 
-	# Install daemon
+	# Main executables
 	dobin "$(cosmic-common_target_dir)/accounts-daemon"
+	dobin "$(cosmic-common_target_dir)/accounts_ui"
 
-	# Install GUI application
-	dobin "$(cosmic-common_target_dir)/accounts-ui"
+	# D-Bus activation wrappers
+	dobin crates/ui/data/accounts-ui-daemon
+	dobin crates/ui/data/accounts-consent-prompt
 
-	# Install systemd user service
-	systemd_douserunit accounts-daemon/data/cosmic-accounts.service
+	# systemd user service
+	systemd_douserunit crates/ui/data/cosmic-accounts.service
 
-	# Install D-Bus service activation file
-	# Create the D-Bus service file for proper D-Bus activation
+	# D-Bus activation files supplied by upstream
 	insinto /usr/share/dbus-1/services
-	cat > "${T}"/${APPID}.service <<-EOF || die
-		[D-BUS Service]
-		Name=${APPID}
-		Exec=/usr/bin/accounts-daemon
-		SystemdService=cosmic-accounts.service
-	EOF
-	doins "${T}"/${APPID}.service
+	doins crates/ui/data/dev.edfloreshz.Accounts.service
+	doins crates/ui/data/dev.edfloreshz.Accounts.ConsentPrompt.service
 
-	# Install provider configurations
-	insinto /etc/accounts/providers
-	doins accounts-daemon/data/providers/*.toml
+	# OAuth provider configurations
+	insinto /usr/share/accounts/providers
+	doins crates/ui/data/providers/*.toml
 
-	# Install desktop file with proper name
-	newmenu accounts-ui/resources/app.desktop ${APPID}.desktop
+	# Desktop entry
+	newmenu crates/ui/resources/app.desktop "${appid}.desktop"
 
-	# Install metainfo with proper name
+	# AppStream metadata
 	insinto /usr/share/metainfo
-	newins accounts-ui/resources/app.metainfo.xml ${APPID}.metainfo.xml
-	# Install icon with proper name matching the desktop file
-	newicon -s scalable accounts-ui/resources/icons/hicolor/scalable/apps/icon.svg ${APPID}.svg
+	newins crates/ui/resources/app.metainfo.xml "${appid}.metainfo.xml"
+
+	# Application icon
+	newicon -s scalable \
+		crates/ui/resources/icons/hicolor/scalable/apps/icon.svg \
+		"${appid}.svg"
 
 	# Documentation
 	einstalldocs
@@ -72,11 +75,11 @@ src_install() {
 pkg_postinst() {
 	cosmic-live_pkg_postinst
 
-	elog "To use the accounts daemon, you may need to configure OAuth2 credentials"
-	elog "in the provider configuration files at /etc/accounts/providers/"
+	elog "OAuth provider manifests are installed in /usr/share/accounts/providers/."
 	elog ""
-	elog "The daemon can be started with:"
+	elog "The user service can be enabled with:"
 	elog "  systemctl --user enable --now cosmic-accounts.service"
 	elog ""
-	elog "Or it will be launched on-demand via D-Bus activation."
+	elog "D-Bus activation is provided by the installed service files."
 }
+
