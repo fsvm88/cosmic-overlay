@@ -112,6 +112,14 @@ cosmic-live_src_configure() {
 	VERGEN_GIT_SHA="$(git rev-parse HEAD)"
 	export VERGEN_GIT_COMMIT_DATE VERGEN_GIT_SHA
 
+	# AT-SPI XML files: live ebuilds fetch crates into ${WORKDIR}/cargo_home/gentoo/
+	# so vendor/atspi-common (used via LOCKSTEP_XML_PATH in src_compile) is missing.
+	# Tagged ebuilds use a pre-vendored tarball, where the path already exists.
+	if [[ ! -e ${S}/vendor/atspi-common/xml && -d ${WORKDIR}/cargo_home/gentoo/atspi-common/xml ]]; then
+		mkdir -p "${S}/vendor/atspi-common" || die
+		ln -s "${WORKDIR}/cargo_home/gentoo/atspi-common/xml" "${S}/vendor/atspi-common/xml" || die
+	fi
+
 	profile_name="release"
 	use debug && profile_name="dev"
 	use max-opt && profile_name="release-maximum-optimization"

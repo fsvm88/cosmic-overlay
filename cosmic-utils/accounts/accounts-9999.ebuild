@@ -1,4 +1,3 @@
-
 # Copyright 2025 Fabio Scaccabarozzi
 # Distributed under the terms of the GNU General Public License v3
 
@@ -16,7 +15,7 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
-RDEPEND="
+RDEPEND+="
 	sys-apps/dbus
 "
 DEPEND="${RDEPEND}"
@@ -25,11 +24,6 @@ BDEPEND="
 "
 
 src_configure() {
-	mkdir -p "${S}/vendor/atspi-common" || die
-
-	ln -s "${WORKDIR}/cargo_home/gentoo/atspi-common/xml" \
-		"${S}/vendor/atspi-common/xml" || die
-
 	cosmic-live_src_configure --all
 }
 
@@ -82,4 +76,3 @@ pkg_postinst() {
 	elog ""
 	elog "D-Bus activation is provided by the installed service files."
 }
-

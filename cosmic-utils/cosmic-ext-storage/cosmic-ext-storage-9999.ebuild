@@ -12,6 +12,7 @@ EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=main
 
 LICENSE="GPL-3"
+
 SLOT="0"
 KEYWORDS="~amd64"
 
@@ -25,17 +26,8 @@ BDEPEND="
 	virtual/pkgconfig
 "
 
-#src_configure() {
-#	cosmic-live_src_configure --all
-#}
-
 src_configure() {
-        mkdir -p "${S}/vendor/atspi-common" || die
-
-        ln -s "${WORKDIR}/cargo_home/gentoo/atspi-common/xml" \
-                "${S}/vendor/atspi-common/xml" || die
-
-        cosmic-live_src_configure --all
+	cosmic-live_src_configure --all
 }
 
 src_install() {
@@ -44,8 +36,9 @@ src_install() {
 	# Application binary
 	dobin "$(cosmic-common_target_dir)/${PN}"
 
-	# Desktop entry, metainfo and icon (upstream already names them after the app ID;
-	# upstream installs metainfo to the deprecated /usr/share/appdata)
+	# Desktop entry and metainfo are shipped upstream as app.* and renamed
+	# to the app ID here; the icon is already named after the app ID.
+	# Upstream installs metainfo to the deprecated /usr/share/appdata.
 	newmenu resources/app.desktop ${APPID}.desktop
 
 	insinto /usr/share/metainfo
