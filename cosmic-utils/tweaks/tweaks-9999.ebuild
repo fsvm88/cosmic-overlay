@@ -21,6 +21,15 @@ BDEPEND+="
 	virtual/pkgconfig
 "
 
+src_configure() {
+        mkdir -p "${S}/vendor/atspi-common" || die
+
+        ln -s "${WORKDIR}/cargo_home/gentoo/atspi-common/xml" \
+                "${S}/vendor/atspi-common/xml" || die
+
+        cosmic-live_src_configure --all
+}
+
 src_install() {
 	export APPID="dev.edfloreshz.CosmicTweaks"
 

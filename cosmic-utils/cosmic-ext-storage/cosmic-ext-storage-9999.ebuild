@@ -12,6 +12,7 @@ EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=main
 
 LICENSE="GPL-3"
+
 SLOT="0"
 KEYWORDS="~amd64"
 
@@ -35,12 +36,13 @@ src_install() {
 	# Application binary
 	dobin "$(cosmic-common_target_dir)/${PN}"
 
-	# Desktop entry, metainfo and icon (upstream already names them after the app ID;
-	# upstream installs metainfo to the deprecated /usr/share/appdata)
-	domenu resources/${APPID}.desktop
+	# Desktop entry and metainfo are shipped upstream as app.* and renamed
+	# to the app ID here; the icon is already named after the app ID.
+	# Upstream installs metainfo to the deprecated /usr/share/appdata.
+	newmenu resources/app.desktop ${APPID}.desktop
 
 	insinto /usr/share/metainfo
-	doins resources/${APPID}.metainfo.xml
+	newins resources/app.metainfo.xml ${APPID}.metainfo.xml
 
 	doicon -s scalable resources/icons/hicolor/scalable/apps/${APPID}.svg
 
