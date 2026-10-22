@@ -265,6 +265,19 @@ class SimpleQAChecker:
         # All checks passed
         return True
 
+    def _format_issue_list(self, issues: List[Dict[str, Any]]) -> str:
+        order = {"error": 0, "warning": 1, "style": 2, "info": 3}
+        lines = []
+        for r in sorted(
+            issues,
+            key=lambda r: (order.get(r["level"].lower(), 9), r["atom"], r["version"]),
+        ):
+            lines.append(
+                f"- **{r['level'].upper()}** `{r['atom']}-{r['version']}` "
+                f"({r['check']}): {r['message']}"
+            )
+        return "\n".join(lines)
+
     def generate_markdown_report(self) -> None:
         output_path = self.reports_dir / "report.md"
         commit_sha = self._get_commit_sha()
@@ -311,13 +324,25 @@ class SimpleQAChecker:
             or tolerated_style > 0
         ):
             content += f"\n- **Info:** {info} [{ignored_info} ignored, {tolerated_info} tolerated]\n- **Style:** {style} [{ignored_style} ignored, {tolerated_style} tolerated]"
+        active = getattr(self, "active_issues", [])
+        tolerated_list = getattr(self, "tolerated_issues", [])
+        content += "\n\n---\n\n## ❗ Issues needing attention (not ignored)\n\n"
+        content += (
+            self._format_issue_list(active) if active else "_None — all clear._"
+        )
+        content += "\n"
+        if tolerated_list:
+            content += (
+                "\n### Tolerated (listed in `.qatolerate`)\n\n"
+                + self._format_issue_list(tolerated_list)
+                + "\n"
+            )
         content += """
-
 ---
 
 ## 📋 Detailed Results
 
-### QA Scan Output
+### QA Scan Output (unfiltered, includes ignored issues)
 
 ```
 """
@@ -798,6 +823,8 @@ This directory contains automatically generated QA reports for the COSMIC overla
         tolerate_rules: List[Dict[str, Optional[str]]] = self.parse_qatolerate(
             tolerate_path
         )
+        self.active_issues = []
+        self.tolerated_issues = []
         for result in all_results:
             atom, ver, check, level = (
                 result["atom"],
@@ -807,6 +834,10 @@ This directory contains automatically generated QA reports for the COSMIC overla
             )
             ignored: bool = self.should_ignore(atom, ver, check, ignore_rules)
             tolerated: bool = self.should_tolerate(atom, ver, check, tolerate_rules)
+            if not ignored:
+                (self.tolerated_issues if tolerated else self.active_issues).append(
+                    result
+                )
             if level == "error":
                 if ignored:
                     ignored_errors += 1
