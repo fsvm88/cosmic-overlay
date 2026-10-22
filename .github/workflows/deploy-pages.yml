@@ -18,7 +18,8 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Publish on failure too: that is when the report matters most
+    if: ${{ contains(fromJSON('["success","failure"]'), github.event.workflow_run.conclusion) }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
