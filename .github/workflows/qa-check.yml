@@ -13,6 +13,9 @@ on:
 jobs:
   qa-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -58,6 +61,7 @@ jobs:
             '
 
       - name: Upload QA reports
+        id: upload
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -65,27 +69,47 @@ jobs:
           path: qa-reports/
           retention-days: 30
 
+      - name: Publish report to job summary
+        if: always()
+        run: |
+          {
+            echo "## QA report"
+            echo "- Download the full report (open \`index.html\` in a browser): ${{ steps.upload.outputs.artifact-url }}"
+            echo "- Latest main report: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+            echo
+            [ -f qa-reports/report.md ] && cat qa-reports/report.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Comment PR with QA results
-        if: github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
+        env:
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
         with:
           script: |
             const fs = require('fs');
-            const path = 'reports/summary.md';
-
+            const marker = '<!-- cosmic-overlay-qa -->';
+            const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+            let summary = '_No report was generated; check the workflow logs._';
+            if (fs.existsSync('qa-reports/report.md')) {
+              summary = fs.readFileSync('qa-reports/report.md', 'utf8');
+              if (summary.length > 50000) summary = summary.slice(0, 50000) + '\n\n_(truncated)_';
+            }
+            const body = `${marker}\n## 🔍 QA Check Results\n\n` +
+              `📥 [Download full HTML report](${process.env.ARTIFACT_URL || runUrl}) (unzip, open \`index.html\`) · ` +
+              `[Run logs and summary](${runUrl})\n\n` +
+              `<details><summary>Summary</summary>\n\n${summary}\n\n</details>`;
             try {
-              if (fs.existsSync(path)) {
-                const summary = fs.readFileSync(path, 'utf8');
-                
-                await github.rest.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: `## 🔍 QA Check Results\n\n${summary}\n\n📁 Full reports available in [workflow artifacts](${context.payload.repository.html_url}/actions/runs/${context.runId}).`
-                });
+              const { owner, repo } = context.repo;
+              const issue_number = context.issue.number;
+              const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+              const existing = comments.find(c => c.body && c.body.includes(marker));
+              if (existing) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
               } else {
-                console.log('Summary file not found, skipping PR comment');
+                await github.rest.issues.createComment({ owner, repo, issue_number, body });
               }
             } catch (error) {
-              console.log('Error posting PR comment:', error.message);
+              // Fork PRs get a read-only token; the job summary still has the report.
+              console.log('Could not post PR comment:', error.message);
             }
