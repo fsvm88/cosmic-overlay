@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-live desktop
+inherit cosmic-live cosmic-common desktop
 
 DESCRIPTION="Calendar application for the COSMIC desktop"
 HOMEPAGE="https://github.com/cosmic-utils/calendar"

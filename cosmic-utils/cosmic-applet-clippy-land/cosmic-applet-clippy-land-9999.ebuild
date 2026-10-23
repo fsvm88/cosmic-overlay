@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit cosmic-live desktop
+inherit cosmic-live cosmic-common desktop
 
 DESCRIPTION="Clipboard history applet for the COSMIC desktop"
 HOMEPAGE="https://github.com/k33wee/clippy-land"

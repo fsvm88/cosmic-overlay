@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>rosen@aleksandrov.tech</email>
+  </maintainer>
+  <upstream>
+    <remote-id type="github">cosmic-utils/calendar</remote-id>
+  </upstream>
+  <use>
+    <flag name="debug-line-tables-only">Build with line-tables-only debug information</flag>
+    <flag name="max-opt">Enable maximum Rust optimization with a single codegen unit</flag>
+  </use>
+</pkgmetadata>
