@@ -81,6 +81,7 @@ cosmic-live_pkg_setup() {
 # Unpacks the live package using git and cargo.
 cosmic-live_src_unpack() {
 	git-r3_src_unpack
+	cd "${S}" || die
 	cargo_live_src_unpack
 }
 
