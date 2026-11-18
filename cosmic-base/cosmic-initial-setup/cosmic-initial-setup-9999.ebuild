@@ -41,7 +41,4 @@ src_install() {
 
 	insinto /usr/share/cosmic-layouts
 	doins -r res/layouts/*
-
-	insinto /usr/share/cosmic-themes
-	doins res/themes/*
 }
