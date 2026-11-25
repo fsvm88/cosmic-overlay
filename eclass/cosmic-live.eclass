@@ -34,15 +34,15 @@ RUST_MIN_VER="1.93.0"
 
 # @ECLASS_VARIABLE: LLVM_COMPAT
 # @DESCRIPTION:
-# See description in llvm-r1.eclass from main tree.
+# See description in llvm-r2.eclass from main tree.
 # This is set to specify which LLVM versions we support.
 LLVM_COMPAT=({21..23})
 # @ECLASS_VARIABLE: LLVM_OPTIONAL
 # @DESCRIPTION:
-# See description in llvm-r1.eclass from main tree.
+# See description in llvm-r2.eclass from main tree.
 # This is set to allow fine-tuning of which functions we use, and when.
 LLVM_OPTIONAL=1
-inherit llvm-r1
+inherit llvm-r2
 
 # @ECLASS_VARIABLE: CARGO_OPTIONAL
 # @INTERNAL
@@ -73,7 +73,7 @@ inherit git-r3
 # due to libclang dependency
 cosmic-live_pkg_setup() {
 	rust_pkg_setup
-	llvm-r1_pkg_setup
+	llvm-r2_pkg_setup
 }
 
 # @FUNCTION: cosmic-live_src_unpack
