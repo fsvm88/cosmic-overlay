@@ -55,12 +55,12 @@ src_unpack() {
 }
 
 src_configure() {
-        mkdir -p "${S}/vendor/atspi-common" || die
+	mkdir -p "${S}/vendor/atspi-common" || die
 
-        ln -s "${WORKDIR}/cargo_home/gentoo/atspi-common/xml" \
-                "${S}/vendor/atspi-common/xml" || die
+	ln -s "${WORKDIR}/cargo_home/gentoo/atspi-common/xml" \
+		"${S}/vendor/atspi-common/xml" || die
 
-        cosmic-live_src_configure --all
+	cosmic-live_src_configure --all
 }
 
 src_install() {
