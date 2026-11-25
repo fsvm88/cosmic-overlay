@@ -36,7 +36,7 @@ RUST_MIN_VER="1.93.0"
 # @DESCRIPTION:
 # See description in llvm-r1.eclass from main tree.
 # This is set to specify which LLVM versions we support.
-LLVM_COMPAT=({21..22})
+LLVM_COMPAT=({21..23})
 # @ECLASS_VARIABLE: LLVM_OPTIONAL
 # @DESCRIPTION:
 # See description in llvm-r1.eclass from main tree.
