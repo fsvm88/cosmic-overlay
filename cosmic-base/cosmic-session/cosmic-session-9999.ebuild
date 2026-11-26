@@ -12,7 +12,7 @@ LICENSE="GPL-3"
 
 SLOT="0"
 KEYWORDS=""
-IUSE+=" accessibility +greeter cups"
+IUSE+=" accessibility +greeter gtk cups"
 
 EGIT_REPO_URI="${HOMEPAGE}"
 EGIT_BRANCH=master
@@ -44,6 +44,7 @@ RDEPEND+="
 	>=x11-base/xwayland-23.2.6
 	accessibility? ( >=app-accessibility/orca-46.2-r1 )
 	cups? ( >=app-admin/system-config-printer-1.5.18-r2 )
+	gtk? ( >=sys-apps/xdg-desktop-portal-gtk-1.15.3 )
 "
 
 src_prepare() {

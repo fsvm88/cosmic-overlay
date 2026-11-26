@@ -13,7 +13,7 @@ LICENSE="CC-BY-SA-4.0 GPL-3 GPL-3+ MPL-2.0"
 
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="+fonts +gnome-keyring +greeter +monitor store +viewer"
+IUSE="+fonts +gnome-keyring +greeter gtk +monitor store +viewer"
 
 RDEPEND="
 =cosmic-base/cosmic-applets-$(ver_cut 1-2)*
@@ -45,6 +45,7 @@ viewer? ( =cosmic-base/cosmic-viewer-$(ver_cut 1-2)* )
 =cosmic-base/pop-launcher-$(ver_cut 1-2)*
 ~cosmic-base/pop-theme-meta-9999
 =cosmic-base/xdg-desktop-portal-cosmic-$(ver_cut 1-2)*
+gtk? ( >=sys-apps/xdg-desktop-portal-gtk-1.15.3 )
 fonts? (
 	media-fonts/open-sans:0
 	media-fonts/noto:0
