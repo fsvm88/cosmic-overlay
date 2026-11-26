@@ -15,8 +15,11 @@ LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64"
 
+IUSE="gtk"
+
 RDEPEND+="
 	=cosmic-base/xdg-desktop-portal-cosmic-$(ver_cut 1-2)*
+	gtk? ( >=sys-apps/xdg-desktop-portal-gtk-1.15.3 )
 "
 
 src_install() {
