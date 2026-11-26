@@ -9,7 +9,7 @@
 # Fabio Scaccabarozzi
 # @BUGREPORTS: Open an Issue at https://github.com/fsvm88/cosmic-overlay/issues
 # @VCSURL: https://github.com/fsvm88/cosmic-overlay
-# @PROVIDES: cargo llvm-r1 git-r3 xdg
+# @PROVIDES: cargo llvm-r2 git-r3 xdg
 # @SUPPORTED_EAPIS: 8
 # @BLURB: common functions for Cosmic DE packages
 # @DESCRIPTION:
